@@ -1,0 +1,190 @@
+package com.casinocore.core;
+
+import com.casinocore.core.commands.CasinoCommand;
+import com.casinocore.economy.EconomyManager;
+import com.casinocore.games.blackjack.BlackjackGame;
+import com.casinocore.games.blackjack.BlackjackListener;
+import com.casinocore.games.commands.PlayCommand;
+import com.casinocore.games.diceroll.DiceRollGame;
+import com.casinocore.games.GameManager;
+import com.casinocore.games.impl.CoinFlipListener;
+import com.casinocore.games.impl.CoinFlipGame;
+import com.casinocore.games.impl.LotteryGame;
+import com.casinocore.gui.CasinoHubListener;
+import com.casinocore.games.roulette.RouletteGame;
+import com.casinocore.games.roulette.RouletteListener;
+import com.casinocore.games.slots.SlotMachineGame;
+import com.casinocore.games.slots.SlotMachineListener;
+import com.casinocore.integrations.CasinoPlaceholderExpansion;
+import com.casinocore.stats.PlayerStatsManager;
+import com.casinocore.utils.AntiAbuseManager;
+import com.casinocore.utils.ConfigManager;
+import com.casinocore.utils.CooldownManager;
+import com.casinocore.utils.MessageManager;
+import com.casinocore.utils.UxManager;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
+
+    private ConfigManager configManager;
+    private MessageManager messageManager;
+    private EconomyManager economyManager;
+    private CooldownManager cooldownManager;
+    private AntiAbuseManager antiAbuseManager;
+    private PlayerStatsManager playerStatsManager;
+    private UxManager uxManager;
+    private GameManager gameManager;
+    private CoinFlipGame coinFlipGame;
+    private BlackjackGame blackjackGame;
+    private RouletteGame rouletteGame;
+
+    @Override
+    public void onEnable() {
+        if (!initializeManagers()) {
+            getLogger().severe("Failed to initialize CasinoCore. Disabling plugin.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        registerCommands();
+        registerEvents();
+        getLogger().info("CasinoCore enabled.");
+    }
+
+    @Override
+    public void onDisable() {
+        if (gameManager != null) {
+            gameManager.shutdown();
+        }
+        if (cooldownManager != null) {
+            cooldownManager.shutdown();
+        }
+        if (antiAbuseManager != null) {
+            antiAbuseManager.shutdown();
+        }
+        if (playerStatsManager != null) {
+            playerStatsManager.shutdown();
+        }
+        if (economyManager != null) {
+            economyManager.shutdown();
+        }
+
+        Bukkit.getScheduler().cancelTasks(this);
+        getLogger().info("CasinoCore disabled.");
+    }
+
+    private boolean initializeManagers() {
+        try {
+            configManager = new ConfigManager(this);
+            configManager.loadConfig();
+
+            messageManager = new MessageManager(this);
+
+            economyManager = new EconomyManager(this);
+            if (!economyManager.setupEconomy()) {
+                getLogger().warning("Economy system not available.");
+            }
+
+            cooldownManager = new CooldownManager(this);
+            antiAbuseManager = new AntiAbuseManager(this);
+            playerStatsManager = new PlayerStatsManager(this);
+            uxManager = new UxManager(this);
+            gameManager = new GameManager(this);
+            registerCasinoGames();
+            registerIntegrations();
+            return true;
+        } catch (Exception e) {
+            getLogger().severe("Error initializing managers: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private void registerCasinoGames() {
+        coinFlipGame = new CoinFlipGame(this);
+        gameManager.registerCasinoGame(coinFlipGame);
+        gameManager.registerCasinoGame(new DiceRollGame(this));
+        gameManager.registerCasinoGame(new LotteryGame(this));
+        blackjackGame = new BlackjackGame(this);
+        gameManager.registerCasinoGame(blackjackGame);
+        rouletteGame = new RouletteGame(this);
+        gameManager.registerCasinoGame(rouletteGame);
+        gameManager.registerCasinoGame(new SlotMachineGame(this));
+    }
+
+    private void registerCommands() {
+        getCommand("casino").setExecutor(new CasinoCommand(this));
+        getCommand("play").setExecutor(new PlayCommand(this));
+    }
+
+    private void registerIntegrations() {
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new CasinoPlaceholderExpansion(this).register();
+        }
+    }
+
+    private void registerEvents() {
+        getServer().getPluginManager().registerEvents(new CasinoHubListener(), this);
+        getServer().getPluginManager().registerEvents(new SlotMachineListener(), this);
+        if (coinFlipGame != null) {
+            getServer().getPluginManager().registerEvents(new CoinFlipListener(coinFlipGame), this);
+        }
+        if (blackjackGame != null) {
+            getServer().getPluginManager().registerEvents(new BlackjackListener(blackjackGame), this);
+        }
+        if (rouletteGame != null) {
+            getServer().getPluginManager().registerEvents(new RouletteListener(rouletteGame), this);
+        }
+    }
+
+    public void reloadPlugin() {
+        configManager.reloadConfig();
+        messageManager.reload();
+        gameManager.reloadGames();
+    }
+
+    @Override
+    public JavaPlugin getPlugin() {
+        return this;
+    }
+
+    @Override
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
+
+    @Override
+    public MessageManager getMessageManager() {
+        return messageManager;
+    }
+
+    @Override
+    public EconomyManager getEconomyManager() {
+        return economyManager;
+    }
+
+    @Override
+    public CooldownManager getCooldownManager() {
+        return cooldownManager;
+    }
+
+    @Override
+    public AntiAbuseManager getAntiAbuseManager() {
+        return antiAbuseManager;
+    }
+
+    @Override
+    public PlayerStatsManager getPlayerStatsManager() {
+        return playerStatsManager;
+    }
+
+    @Override
+    public UxManager getUxManager() {
+        return uxManager;
+    }
+
+    @Override
+    public GameManager getGameManager() {
+        return gameManager;
+    }
+}
