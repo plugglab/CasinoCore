@@ -7,6 +7,8 @@ import com.casinocore.games.blackjack.BlackjackListener;
 import com.casinocore.games.commands.PlayCommand;
 import com.casinocore.games.diceroll.DiceRollGame;
 import com.casinocore.games.diceroll.DiceRiskListener;
+import com.casinocore.games.highlow.HighLowGame;
+import com.casinocore.games.highlow.HighLowListener;
 import com.casinocore.games.GameManager;
 import com.casinocore.games.horserace.HorseRaceGame;
 import com.casinocore.games.horserace.HorseRaceListener;
@@ -49,6 +51,7 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
     private RouletteGame rouletteGame;
     private HorseRaceGame horseRaceGame;
     private WheelGame wheelGame;
+    private HighLowGame highLowGame;
 
     @Override
     public void onEnable() {
@@ -125,6 +128,8 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
         gameManager.registerCasinoGame(horseRaceGame);
         wheelGame = new WheelGame(this);
         gameManager.registerCasinoGame(wheelGame);
+        highLowGame = new HighLowGame(this);
+        gameManager.registerCasinoGame(highLowGame);
     }
 
     private void registerCommands() {
@@ -160,6 +165,9 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
         }
         if (wheelGame != null) {
             getServer().getPluginManager().registerEvents(new WheelListener(wheelGame), this);
+        }
+        if (highLowGame != null) {
+            getServer().getPluginManager().registerEvents(new HighLowListener(highLowGame), this);
         }
     }
 

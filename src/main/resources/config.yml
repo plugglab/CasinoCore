@@ -165,6 +165,18 @@ games:
       natural-blackjack-reference-percent: 4.83
     house-edge-adjustment-percent: 1.5
 
+  highlow:
+    enabled: true
+    description: "Guess if the next card is higher or lower."
+    limits:
+      min-bet: 10.0
+      max-bet: 3000.0
+    payouts:
+      win: 1.95
+    animation:
+      reveal-steps: 10
+    house-edge-adjustment-percent: 2.5
+
   roulette:
     enabled: true
     description: "Pick a number, color, or parity in the roulette GUI."

@@ -93,6 +93,13 @@ public class BlackjackGame extends BaseCasinoGame {
             sessions.remove(player.getUniqueId());
             player.closeInventory();
             GuiNavigation.openHub(plugin, player);
+            return;
+        }
+
+        if (slot == 51 && state.getPhase() == BlackjackTableState.Phase.ROUND_OVER) {
+            sessions.remove(player.getUniqueId());
+            player.closeInventory();
+            play(player, state.getBaseBet());
         }
     }
 

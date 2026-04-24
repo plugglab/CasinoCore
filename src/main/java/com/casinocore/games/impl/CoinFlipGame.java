@@ -173,7 +173,7 @@ public class CoinFlipGame extends BaseCasinoGame {
         List<CoinFlipOfferView> openOffers = new ArrayList<>();
         for (CoinFlipOffer offer : offersByCreator.values()) {
             if (!offer.isLocked() && !offer.isResolved()) {
-                openOffers.add(new CoinFlipOfferView(offer.getCreatorName(), offer.getBet()));
+                openOffers.add(new CoinFlipOfferView(offer.getCreatorId(), offer.getCreatorName(), offer.getBet()));
             }
         }
         openOffers.sort((left, right) -> left.creatorName().compareToIgnoreCase(right.creatorName()));
@@ -348,7 +348,7 @@ public class CoinFlipGame extends BaseCasinoGame {
         playerOfferIndex.clear();
     }
 
-    public record CoinFlipOfferView(String creatorName, double bet) {
+    public record CoinFlipOfferView(UUID creatorId, String creatorName, double bet) {
     }
 
     private static final class CoinFlipOffer {

@@ -1,0 +1,163 @@
+[CENTER][SIZE=7][COLOR=#f7c948][B]CASINOCORE[/B][/COLOR][/SIZE]
+[SIZE=4][COLOR=#f5f6fa]Premium casino gameplay suite for Paper 1.21+[/COLOR][/SIZE]
+
+[COLOR=#2ed573][B]Now with a redesigned casino hub, custom bet input, horse betting, lucky wheel spins, richer stat placeholders, and a bigger game lineup.[/B][/COLOR]
+[/CENTER]
+
+[HR][/HR]
+
+[CENTER][TABLE]
+[TR]
+[TD][CENTER][SIZE=4][COLOR=#f7c948][B]8 Games[/B][/COLOR][/SIZE][/CENTER][/TD]
+[TD][CENTER][SIZE=4][COLOR=#4cd137][B]Vault[/B][/COLOR][/SIZE][/CENTER][/TD]
+[TD][CENTER][SIZE=4][COLOR=#00a8ff][B]PlaceholderAPI[/B][/COLOR][/SIZE][/CENTER][/TD]
+[TD][CENTER][SIZE=4][COLOR=#e84118][B]Anti-Abuse[/B][/COLOR][/SIZE][/CENTER][/TD]
+[/TR]
+[/TABLE][/CENTER]
+
+[CENTER][SIZE=3][COLOR=#dcdde1]Modern GUI flow • Direct commands • Configurable balancing • Daily rewards • Persistent stats[/COLOR][/SIZE][/CENTER]
+
+[HR][/HR]
+
+[SIZE=5][COLOR=#f7c948][B]What CasinoCore Delivers[/B][/COLOR][/SIZE]
+
+[COLOR=#f5f6fa]CasinoCore is a full casino system for Minecraft servers that want polished gameplay, real economy support, clean menus, and server-safe controls instead of a single gamble command.[/COLOR]
+
+[COLOR=#dcdde1]Players get a proper casino experience with a central hub, multiple betting styles, daily rewards, visible progression, animated games, and fast access to every supported table.[/COLOR]
+
+[COLOR=#f5f6fa]Server owners get balancing control, anti-spam protection, configurable limits, PlaceholderAPI support, and a modular game structure ready for expansion.[/COLOR]
+
+[HR][/HR]
+
+[SIZE=5][COLOR=#f7c948][B]Game Lineup[/B][/COLOR][/SIZE]
+
+[LIST]
+[*][COLOR=#f1c40f][B]Coin Flip[/B][/COLOR] - Create public wager offers and let other players join smooth 50/50 matches.
+[*][COLOR=#2ecc71][B]Dice[/B][/COLOR] - Roll with [B]low[/B], [B]medium[/B], or [B]high[/B] risk profiles.
+[*][COLOR=#9b59b6][B]Lottery[/B][/COLOR] - Hit exact, close, or near matches against the winning number.
+[*][COLOR=#e67e22][B]Blackjack[/B][/COLOR] - GUI blackjack with dealer logic, hit/stand flow, blackjack handling, and pushes.
+[*][COLOR=#e74c3c][B]Roulette[/B][/COLOR] - Number, color, and parity betting in an animated roulette GUI.
+[*][COLOR=#3498db][B]Slots[/B][/COLOR] - Weighted reels, animated spins, and multi-tier payouts.
+[*][COLOR=#ff9f43][B]Horse Race[/B][/COLOR] - Pick a horse, watch the race board animate, and win based on that runner's odds.
+[*][COLOR=#00d2d3][B]Lucky Wheel[/B][/COLOR] - Spin a weighted prize wheel with safe-return slices and jackpot slices.
+[/LIST]
+
+[HR][/HR]
+
+[SIZE=5][COLOR=#f7c948][B]Upgraded Hub GUI[/B][/COLOR][/SIZE]
+
+[LIST]
+[*][COLOR=#f5f6fa][B]Redesigned dashboard layout[/B][/COLOR] with wallet details, win/loss stats, streaks, and selected bet info
+[*][COLOR=#f5f6fa][B]Bigger game grid[/B][/COLOR] with cleaner visual separation and more room for expansion
+[*][COLOR=#f5f6fa][B]Quick bet controls[/B][/COLOR] for `-100`, `-10`, `min`, `max`, `+10`, and `+100`
+[*][COLOR=#f5f6fa][B]Custom bet input[/B][/COLOR] through chat prompt for any allowed amount
+[*][COLOR=#f5f6fa][B]One-click launch flow[/B][/COLOR] for command users and GUI users alike
+[/LIST]
+
+[HR][/HR]
+
+[SIZE=5][COLOR=#f7c948][B]Core Features[/B][/COLOR][/SIZE]
+
+[LIST]
+[*][COLOR=#f5f6fa][B]Vault economy integration[/B][/COLOR] for balance, deposits, withdrawals, and formatting
+[*][COLOR=#f5f6fa][B]PlaceholderAPI integration[/B][/COLOR] for balance, streaks, losses, games played, and more
+[*][COLOR=#f5f6fa][B]Daily reward system[/B][/COLOR] with claim tracking and wallet crediting
+[*][COLOR=#f5f6fa][B]Persistent player stats[/B][/COLOR] including wins, losses, games played, current streak, and best streak
+[*][COLOR=#f5f6fa][B]Big win broadcasts[/B][/COLOR] with configurable threshold and message format
+[*][COLOR=#f5f6fa][B]Per-game limits and payout control[/B][/COLOR]
+[*][COLOR=#f5f6fa][B]Global and per-game cooldowns[/B][/COLOR]
+[*][COLOR=#f5f6fa][B]Anti-abuse protection[/B][/COLOR] for command spam, click spam, repeated starts, and unsafe betting patterns
+[*][COLOR=#f5f6fa][B]Developer hooks[/B][/COLOR] through casino result and big win events
+[/LIST]
+
+[HR][/HR]
+
+[SIZE=5][COLOR=#f7c948][B]Commands[/B][/COLOR][/SIZE]
+
+[COLOR=#f7c948][B]/casino[/B][/COLOR]
+[COLOR=#f5f6fa]Open the casino hub GUI[/COLOR]
+
+[COLOR=#f7c948][B]/casino help[/B][/COLOR]
+[COLOR=#f5f6fa]Show the main command help[/COLOR]
+
+[COLOR=#f7c948][B]/casino menu[/B][/COLOR]
+[COLOR=#f5f6fa]Re-open the casino hub[/COLOR]
+
+[COLOR=#f7c948][B]/casino balance[/B][/COLOR]
+[COLOR=#f5f6fa]View wallet balance, streaks, wins, and reward status[/COLOR]
+
+[COLOR=#f7c948][B]/casino daily[/B][/COLOR]
+[COLOR=#f5f6fa]Claim the daily reward[/COLOR]
+
+[COLOR=#f7c948][B]/casino reload[/B][/COLOR]
+[COLOR=#f5f6fa]Reload the plugin configuration[/COLOR]
+
+[COLOR=#f7c948][B]/play list[/B][/COLOR]
+[COLOR=#f5f6fa]List all enabled games[/COLOR]
+
+[COLOR=#f7c948][B]/play <game> <bet>[/B][/COLOR]
+[COLOR=#f5f6fa]Launch a supported game directly[/COLOR]
+
+[COLOR=#f7c948][B]/play dice <bet> [low|medium|high][/B][/COLOR]
+[COLOR=#f5f6fa]Play dice with a chosen risk level[/COLOR]
+
+[COLOR=#f7c948][B]/play coinflip create <bet>[/B][/COLOR]
+[COLOR=#f5f6fa]Create a public coinflip offer[/COLOR]
+
+[COLOR=#f7c948][B]/play coinflip join <player>[/B][/COLOR]
+[COLOR=#f5f6fa]Join a player's offer[/COLOR]
+
+[COLOR=#f7c948][B]/play coinflip cancel[/B][/COLOR]
+[COLOR=#f5f6fa]Cancel your current coinflip offer[/COLOR]
+
+[COLOR=#f7c948][B]/play coinflip list[/B][/COLOR]
+[COLOR=#f5f6fa]See all open offers[/COLOR]
+
+[HR][/HR]
+
+[SIZE=5][COLOR=#f7c948][B]PlaceholderAPI Placeholders[/B][/COLOR][/SIZE]
+
+[COLOR=#dcdde1]CasinoCore registers the following placeholders when PlaceholderAPI is installed:[/COLOR]
+
+[LIST]
+[*][COLOR=#00a8ff][B]%casino_balance%[/B][/COLOR] - formatted balance
+[*][COLOR=#00a8ff][B]%casino_balance_raw%[/B][/COLOR] - raw numeric balance
+[*][COLOR=#00a8ff][B]%casino_wins%[/B][/COLOR] - total wins
+[*][COLOR=#00a8ff][B]%casino_losses%[/B][/COLOR] - total losses
+[*][COLOR=#00a8ff][B]%casino_games_played%[/B][/COLOR] - total games played
+[*][COLOR=#00a8ff][B]%casino_streak%[/B][/COLOR] - current win streak
+[*][COLOR=#00a8ff][B]%casino_best_streak%[/B][/COLOR] - best win streak
+[*][COLOR=#00a8ff][B]%casino_daily_ready%[/B][/COLOR] - `true` or `false` depending on claim availability
+[*][COLOR=#00a8ff][B]%casino_next_daily%[/B][/COLOR] - next claim time or `ready-now`
+[*][COLOR=#00a8ff][B]%casino_available_games%[/B][/COLOR] - number of enabled casino games
+[*][COLOR=#00a8ff][B]%casino_economy%[/B][/COLOR] - hooked economy provider name
+[/LIST]
+
+[HR][/HR]
+
+[SIZE=5][COLOR=#f7c948][B]Why Server Owners Use It[/B][/COLOR][/SIZE]
+
+[LIST]
+[*][COLOR=#f5f6fa]It feels like a [B]real multi-game casino[/B], not a basic gamble shortcut
+[*][COLOR=#f5f6fa]It supports [B]both GUI-first players and command-first players[/B]
+[*][COLOR=#f5f6fa]It gives strong [B]control over limits, odds, cooldowns, payouts, and house edge[/B]
+[*][COLOR=#f5f6fa]It includes [B]server-safe protection systems[/B] to reduce abuse and spam
+[*][COLOR=#f5f6fa]It keeps players engaged with [B]streaks, daily rewards, and visible stats[/B]
+[*][COLOR=#f5f6fa]It provides [B]developer-facing API events[/B] for deeper integrations
+[/LIST]
+
+[HR][/HR]
+
+[SIZE=5][COLOR=#f7c948][B]Integrations And API[/B][/COLOR][/SIZE]
+
+[LIST]
+[*][COLOR=#4cd137][B]Vault[/B][/COLOR] - economy integration
+[*][COLOR=#00a8ff][B]PlaceholderAPI[/B][/COLOR] - stat and balance placeholders
+[*][COLOR=#ff9f43][B]CasinoGameResultEvent[/B][/COLOR]
+[*][COLOR=#ff9f43][B]CasinoBigWinEvent[/B][/COLOR]
+[/LIST]
+
+[HR][/HR]
+
+[CENTER][SIZE=6][COLOR=#f7c948][B]Bring a full casino floor to your server.[/B][/COLOR][/SIZE]
+[SIZE=4][COLOR=#f5f6fa]Clean menus, custom bets, multiple game styles, persistent progression, and stable economy integration in one plugin.[/COLOR][/SIZE][/CENTER]

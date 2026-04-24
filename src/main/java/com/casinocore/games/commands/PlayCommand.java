@@ -155,6 +155,7 @@ public class PlayCommand implements CommandExecutor, TabCompleter {
         player.sendMessage("/play list");
         player.sendMessage("/play <game> <bet>");
         player.sendMessage("/play dice <bet> [low|medium|high]");
+        player.sendMessage("/play highlow <bet>");
         player.sendMessage("/play coinflip create <bet>");
         player.sendMessage("/play coinflip join <player>");
         player.sendMessage("/play coinflip cancel");

@@ -36,11 +36,12 @@ public class CasinoHubGUI implements InventoryHolder {
     private static final int SLOT_BET_PLUS_10 = 51;
     private static final int SLOT_BET_PLUS_100 = 52;
     private static final int SLOT_REFRESH = 53;
-    private static final int[] GAME_SLOTS = {10, 11, 12, 14, 15, 16, 28, 34};
+    private static final int[] GAME_SLOTS = {10, 11, 12, 14, 15, 16, 28, 30, 32, 34};
     private static final Map<String, Material> GAME_MATERIALS = Map.of(
         "coinflip", Material.SUNFLOWER,
         "dice", Material.TARGET,
         "blackjack", Material.PAPER,
+        "highlow", Material.REDSTONE_TORCH,
         "roulette", Material.CLOCK,
         "slots", Material.DIAMOND,
         "lottery", Material.EMERALD,
@@ -240,6 +241,7 @@ public class CasinoHubGUI implements InventoryHolder {
             case "coinflip" -> "Click to create a coinflip with the selected bet";
             case "dice" -> "Click to roll medium risk instantly";
             case "blackjack" -> "Click to open a blackjack table";
+            case "highlow" -> "Click to guess the next card";
             case "roulette" -> "Click to open roulette";
             case "slots" -> "Click to spin the slot machine";
             case "lottery" -> "Click to draw lottery numbers";

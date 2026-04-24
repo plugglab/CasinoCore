@@ -83,6 +83,13 @@ public class BlackjackGUI implements InventoryHolder {
         inventory.setItem(49, item(Material.BARRIER, "Back", state.getPhase() == BlackjackTableState.Phase.ROUND_OVER
             ? "Return to the casino hub"
             : "Available after the round"));
+        inventory.setItem(51, item(
+            state.getPhase() == BlackjackTableState.Phase.ROUND_OVER ? Material.LIME_CONCRETE : Material.GRAY_CONCRETE,
+            "Play Again",
+            state.getPhase() == BlackjackTableState.Phase.ROUND_OVER
+                ? "Start a new round with the same base bet"
+                : "Available after the round"
+        ));
     }
 
     public Player getPlayer() {
