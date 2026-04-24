@@ -2,6 +2,7 @@ package com.casinocore.games.blackjack;
 
 import com.casinocore.core.CasinoPlugin;
 import com.casinocore.games.BaseCasinoGame;
+import com.casinocore.gui.GuiNavigation;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -11,7 +12,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.logging.Level;
 
 public class BlackjackGame extends BaseCasinoGame {
 
@@ -26,6 +26,7 @@ public class BlackjackGame extends BaseCasinoGame {
 
     @Override
     public boolean play(Player player, double bet) {
+        boolean betWithdrawn = false;
         try {
             if (!preGameValidation(player, bet)) {
                 return false;
@@ -39,6 +40,7 @@ public class BlackjackGame extends BaseCasinoGame {
             if (!withdrawBet(player, bet)) {
                 return false;
             }
+            betWithdrawn = true;
 
             setCooldown(player);
 
@@ -52,7 +54,7 @@ public class BlackjackGame extends BaseCasinoGame {
             });
             return true;
         } catch (Exception e) {
-            handleGameError(player, bet, e);
+            handleGameError(player, bet, e, betWithdrawn);
             return false;
         }
     }
@@ -72,19 +74,25 @@ public class BlackjackGame extends BaseCasinoGame {
         }
 
         BlackjackTableState state = gui.getState();
-        if (slot == 48 && state.getPhase() == BlackjackTableState.Phase.PLAYER_TURN) {
+        if (slot == 47 && state.getPhase() == BlackjackTableState.Phase.PLAYER_TURN) {
             hit(gui);
             return;
         }
 
-        if (slot == 50 && state.getPhase() == BlackjackTableState.Phase.PLAYER_TURN) {
+        if (slot == 48 && state.getPhase() == BlackjackTableState.Phase.PLAYER_TURN) {
             stand(gui);
+            return;
+        }
+
+        if (slot == 50 && state.getPhase() == BlackjackTableState.Phase.PLAYER_TURN) {
+            split(gui);
             return;
         }
 
         if (slot == 49 && state.getPhase() == BlackjackTableState.Phase.ROUND_OVER) {
             sessions.remove(player.getUniqueId());
             player.closeInventory();
+            GuiNavigation.openHub(plugin, player);
         }
     }
 
@@ -112,9 +120,9 @@ public class BlackjackGame extends BaseCasinoGame {
             @Override
             public void run() {
                 switch (step) {
-                    case 0 -> dealToPlayer(gui);
+                    case 0 -> dealToPlayer(gui, state.getCurrentHand(), "Player draws");
                     case 1 -> dealToDealer(gui);
-                    case 2 -> dealToPlayer(gui);
+                    case 2 -> dealToPlayer(gui, state.getCurrentHand(), "Player draws");
                     case 3 -> dealToDealer(gui);
                     default -> {
                         cancel();
@@ -128,24 +136,54 @@ public class BlackjackGame extends BaseCasinoGame {
 
     private void hit(BlackjackGUI gui) {
         BlackjackTableState state = gui.getState();
-        dealToPlayer(gui);
+        BlackjackHand hand = state.getCurrentHand();
+        dealToPlayer(gui, hand, "Player draws");
 
-        if (state.getPlayerHand().isBust()) {
-            finishRound(gui, "Bust", 0.0, false);
-        } else if (state.getPlayerHand().getBestValue() == 21) {
-            stand(gui);
+        if (hand.isBust() || hand.getBestValue() == 21) {
+            advanceAfterHand(gui, hand.isBust() ? "Hand " + (state.getActiveHandIndex() + 1) + " bust" : "Hand " + (state.getActiveHandIndex() + 1) + " stands on 21");
         } else {
-            state.setStatus("Choose Hit or Stand");
+            state.setStatus("Choose Hit, Stand, or Split");
             gui.render();
         }
     }
 
     private void stand(BlackjackGUI gui) {
+        gui.playStandSound();
+        advanceAfterHand(gui, "Hand " + (gui.getState().getActiveHandIndex() + 1) + " stands");
+    }
+
+    private void split(BlackjackGUI gui) {
         BlackjackTableState state = gui.getState();
+        if (!state.canSplitCurrentHand()) {
+            sendMessage(gui.getPlayer(), "<yellow>You can only split matching starting cards.</yellow>");
+            return;
+        }
+
+        if (!checkBalance(gui.getPlayer(), state.getBaseBet()) || !withdrawBet(gui.getPlayer(), state.getBaseBet())) {
+            return;
+        }
+
+        state.splitCurrentHand();
+        dealToPlayer(gui, state.getPlayerHands().get(0), "Split hand 1 receives a card");
+        state.setActiveHandIndex(1);
+        dealToPlayer(gui, state.getCurrentHand(), "Split hand 2 receives a card");
+        state.setActiveHandIndex(0);
+        state.setStatus("Split complete. Play hand 1");
+        gui.render();
+    }
+
+    private void advanceAfterHand(BlackjackGUI gui, String status) {
+        BlackjackTableState state = gui.getState();
+        if (state.hasNextHand()) {
+            state.moveToNextHand();
+            state.setStatus(status + " | Now playing hand " + (state.getActiveHandIndex() + 1));
+            gui.render();
+            return;
+        }
+
         state.setPhase(BlackjackTableState.Phase.DEALER_TURN);
         state.setDealerHidden(false);
         state.setStatus("Dealer turn...");
-        gui.playStandSound();
         gui.render();
         runDealerTurn(gui);
     }
@@ -161,7 +199,7 @@ public class BlackjackGame extends BaseCasinoGame {
                     dealToDealer(gui);
                     if (dealer.isBust()) {
                         cancel();
-                        finishRound(gui, "Dealer bust", getWinPayoutMultiplier(), true);
+                        resolveAgainstDealer(gui);
                     }
                     return;
                 }
@@ -174,7 +212,7 @@ public class BlackjackGame extends BaseCasinoGame {
 
     private void evaluateInitialState(BlackjackGUI gui) {
         BlackjackTableState state = gui.getState();
-        BlackjackHand player = state.getPlayerHand();
+        BlackjackHand player = state.getCurrentHand();
         BlackjackHand dealer = state.getDealerHand();
 
         if (player.isBlackjack() || dealer.isBlackjack()) {
@@ -182,82 +220,126 @@ public class BlackjackGame extends BaseCasinoGame {
             gui.render();
 
             if (player.isBlackjack() && dealer.isBlackjack()) {
-                finishRound(gui, "Push: both have blackjack", getPushPayoutMultiplier(), false);
+                finishRound(gui, "Push: both have blackjack");
             } else if (player.isBlackjack()) {
-                finishRound(gui, "Blackjack", getBlackjackPayoutMultiplier(), true);
+                finishRound(gui, "Blackjack");
             } else {
-                finishRound(gui, "Dealer blackjack", 0.0, false);
+                finishRound(gui, "Dealer blackjack");
             }
             return;
         }
 
-        state.setStatus("Choose Hit or Stand");
+        state.setStatus("Choose Hit, Stand, or Split");
         gui.render();
     }
 
     private void resolveAgainstDealer(BlackjackGUI gui) {
         BlackjackTableState state = gui.getState();
-        int playerScore = state.getPlayerHand().getBestValue();
-        int dealerScore = state.getDealerHand().getBestValue();
-
-        if (dealerScore > 21) {
-            finishRound(gui, "Dealer bust", getWinPayoutMultiplier(), true);
-        } else if (playerScore > dealerScore) {
-            finishRound(gui, "Player wins", getWinPayoutMultiplier(), true);
-        } else if (playerScore == dealerScore) {
-            finishRound(gui, "Push", getPushPayoutMultiplier(), false);
-        } else {
-            finishRound(gui, "Dealer wins", 0.0, false);
-        }
+        finishRound(gui, state.getDealerHand().isBust() ? "Dealer bust" : "Dealer stands");
     }
 
-    private void finishRound(BlackjackGUI gui, String result, double payoutMultiplier, boolean winSound) {
+    private void finishRound(BlackjackGUI gui, String resultLabel) {
         BlackjackTableState state = gui.getState();
         state.setDealerHidden(false);
         state.setPhase(BlackjackTableState.Phase.ROUND_OVER);
-        state.setStatus(result);
+        state.setStatus(resultLabel);
 
-        double payout = state.getBet() * payoutMultiplier;
-        if (payout > 0 && !payWinnings(gui.getPlayer(), payout)) {
-            plugin.getPlugin().getLogger().warning("Failed to pay blackjack winnings to " + gui.getPlayer().getName());
-            payout = 0.0;
+        BlackjackHand dealer = state.getDealerHand();
+        int dealerScore = dealer.getBestValue();
+        int wins = 0;
+        int losses = 0;
+        int pushes = 0;
+        double totalPayout = 0.0;
+        StringBuilder summary = new StringBuilder();
+
+        for (int i = 0; i < state.getPlayerHands().size(); i++) {
+            BlackjackHand hand = state.getPlayerHands().get(i);
+            double handBet = state.getBetForHand(i);
+            double handPayout = resolveHandPayout(hand, dealer, handBet);
+            totalPayout += handPayout;
+
+            String outcome;
+            if (handPayout == 0.0) {
+                outcome = "Loss";
+                losses++;
+            } else if (Double.compare(handPayout, handBet) == 0) {
+                outcome = "Push";
+                pushes++;
+            } else {
+                outcome = hand.isBlackjack() && !dealer.isBlackjack() ? "Blackjack" : "Win";
+                wins++;
+            }
+
+            summary.append("\n<gray>Hand ").append(i + 1).append(":</gray> <white>")
+                .append(hand.getBestValue()).append("</white> <gray>-</gray> <")
+                .append(outcome.equals("Loss") ? "red" : outcome.equals("Push") ? "yellow" : "green")
+                .append(">").append(outcome).append("</")
+                .append(outcome.equals("Loss") ? "red" : outcome.equals("Push") ? "yellow" : "green")
+                .append(">");
         }
 
-        if (payoutMultiplier > getPushPayoutMultiplier()) {
-            handleWin(gui.getPlayer(), state.getBet(), payout);
-        } else if (payout <= 0) {
-            handleLoss(gui.getPlayer(), state.getBet());
+        if (totalPayout > 0 && !payWinnings(gui.getPlayer(), totalPayout)) {
+            plugin.getPlugin().getLogger().warning("Failed to pay blackjack winnings to " + gui.getPlayer().getName());
+            totalPayout = 0.0;
+            wins = 0;
+            pushes = 0;
+            losses = state.getPlayerHands().size();
+        }
+
+        if (wins > 0) {
+            handleWin(gui.getPlayer(), state.getTotalCommittedBet(), totalPayout);
+        } else if (losses > 0 && pushes == 0) {
+            handleLoss(gui.getPlayer(), state.getTotalCommittedBet());
         }
 
         gui.render();
-        gui.playResultSound(winSound || payoutMultiplier == getPushPayoutMultiplier());
-        sendRoundMessage(gui.getPlayer(), state, result, payoutMultiplier, payout);
-        logGame(gui.getPlayer(), state.getBet(), true);
+        gui.playResultSound(wins > 0 || pushes > 0);
+        sendRoundMessage(gui.getPlayer(), state, dealerScore, totalPayout, summary);
+        logGame(gui.getPlayer(), state.getTotalCommittedBet(), true);
     }
 
-    private void sendRoundMessage(Player player, BlackjackTableState state, String result,
-                                  double payoutMultiplier, double payout) {
-        BlackjackHand playerHand = state.getPlayerHand();
-        BlackjackHand dealerHand = state.getDealerHand();
+    private double resolveHandPayout(BlackjackHand hand, BlackjackHand dealer, double handBet) {
+        int dealerScore = dealer.getBestValue();
+        int playerScore = hand.getBestValue();
 
+        if (hand.isBust()) {
+            return 0.0;
+        }
+        if (dealer.isBust()) {
+            return handBet * getWinPayoutMultiplier();
+        }
+        if (hand.isBlackjack() && !dealer.isBlackjack()) {
+            return handBet * getBlackjackPayoutMultiplier();
+        }
+        if (dealer.isBlackjack() && !hand.isBlackjack()) {
+            return 0.0;
+        }
+        if (playerScore > dealerScore) {
+            return handBet * getWinPayoutMultiplier();
+        }
+        if (playerScore == dealerScore) {
+            return handBet * getPushPayoutMultiplier();
+        }
+        return 0.0;
+    }
+
+    private void sendRoundMessage(Player player, BlackjackTableState state, int dealerScore, double payout, StringBuilder handSummary) {
         StringBuilder message = new StringBuilder();
         message.append("<gold><bold>Blackjack</bold></gold>\n");
-        message.append("<gray>Result:</gray> <white>").append(result).append("</white>\n");
-        message.append("<gray>Your Hand:</gray> <white>").append(playerHand.getBestValue()).append("</white>\n");
-        message.append("<gray>Dealer Hand:</gray> <white>").append(dealerHand.getBestValue()).append("</white>\n");
-        message.append("<gray>Bet:</gray> <white>").append(plugin.getEconomyManager().format(state.getBet())).append("</white>");
+        message.append("<gray>Dealer Hand:</gray> <white>").append(dealerScore).append("</white>\n");
+        message.append("<gray>Total Bet:</gray> <white>").append(plugin.getEconomyManager().format(state.getTotalCommittedBet())).append("</white>");
+        message.append(handSummary);
 
         if (payout > 0) {
-            message.append("\n<gray>Payout:</gray> <gold>").append(plugin.getEconomyManager().format(payout)).append("</gold>");
-            message.append("\n<gray>Multiplier:</gray> <gold>").append(payoutMultiplier).append("x</gold>");
+            message.append("\n<gray>Total Payout:</gray> <gold>").append(plugin.getEconomyManager().format(payout)).append("</gold>");
         }
 
         sendMessage(player, message.toString());
     }
 
-    private void dealToPlayer(BlackjackGUI gui) {
-        gui.getState().getPlayerHand().add(drawCard());
-        gui.getState().setStatus("Player draws");
+    private void dealToPlayer(BlackjackGUI gui, BlackjackHand hand, String status) {
+        hand.add(drawCard());
+        gui.getState().setStatus(status);
         gui.playDealSound();
         gui.render();
     }
@@ -287,11 +369,11 @@ public class BlackjackGame extends BaseCasinoGame {
     }
 
     private double getBlackjackPayoutMultiplier() {
-        return plugin.getConfigManager().getConfig().getDouble("games.blackjack.payouts.blackjack", 2.5);
+        return plugin.getConfigManager().getConfig().getDouble("games.blackjack.payouts.blackjack", 2.2);
     }
 
     private double getWinPayoutMultiplier() {
-        return plugin.getConfigManager().getConfig().getDouble("games.blackjack.payouts.win", 2.0);
+        return plugin.getConfigManager().getConfig().getDouble("games.blackjack.payouts.win", 1.9);
     }
 
     private double getPushPayoutMultiplier() {

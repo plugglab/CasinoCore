@@ -2,6 +2,44 @@
 
 All notable changes to `CasinoCore` are documented in this file.
 
+## [1.1.0] - 2026-04-23
+
+Expanded the casino lineup, upgraded the hub GUI, and added richer player stats/placeholders.
+
+### Hub And UX
+
+- Reworked the `Casino Hub` layout into a fuller dashboard with wallet stats, session stats, and a larger game grid.
+- Added quick bet controls for `-100`, `-10`, `min`, `max`, `+10`, and `+100`.
+- Added custom bet entry through chat prompt flow so players can pick any supported amount without extra dependencies.
+- Added menu refresh support and better visual separation between game cards and betting controls.
+
+### Games
+
+- Added `Horse Race` with horse selection, weighted race outcomes, configurable per-horse multipliers, and race animation.
+- Added `Lucky Wheel` with weighted wheel segments and configurable multipliers.
+- Registered both new games in the main game manager, permissions tree, and hub menu.
+
+### Stats And Placeholders
+
+- Expanded persistent player stats to also track `losses` and `games played`.
+- Added PlaceholderAPI placeholders for:
+  - `%casino_balance_raw%`
+  - `%casino_losses%`
+  - `%casino_games_played%`
+  - `%casino_daily_ready%`
+  - `%casino_next_daily%`
+  - `%casino_available_games%`
+  - `%casino_economy%`
+
+### Configuration
+
+- Added config sections for `horserace` and `wheel`, including limits, weights, multipliers, cooldowns, and documented house edge values.
+- Added cooldown entries and permissions for the new games.
+
+### Verification
+
+- Verified the plugin compiles successfully with `mvn -q -DskipTests package`.
+
 ## [1.0.0] - 2026-04-22
 
 Initial public plugin release with the current feature set, UX systems, balancing pass, and stability fixes.

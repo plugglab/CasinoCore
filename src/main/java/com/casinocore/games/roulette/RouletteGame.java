@@ -2,6 +2,7 @@ package com.casinocore.games.roulette;
 
 import com.casinocore.core.CasinoPlugin;
 import com.casinocore.games.BaseCasinoGame;
+import com.casinocore.gui.GuiNavigation;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -25,6 +26,7 @@ public class RouletteGame extends BaseCasinoGame {
 
     @Override
     public boolean play(Player player, double bet) {
+        boolean betWithdrawn = false;
         try {
             if (!preGameValidation(player, bet)) {
                 return false;
@@ -40,7 +42,7 @@ public class RouletteGame extends BaseCasinoGame {
             Bukkit.getScheduler().runTask(bukkitPlugin, gui::open);
             return true;
         } catch (Exception e) {
-            handleGameError(player, bet, e);
+            handleGameError(player, bet, e, betWithdrawn);
             return false;
         }
     }
@@ -72,12 +74,23 @@ public class RouletteGame extends BaseCasinoGame {
         }
 
         switch (slot) {
+            case 0 -> gui.selectSimple(RouletteBetType.LOW);
+            case 1 -> gui.selectSimple(RouletteBetType.FIRST_DOZEN);
+            case 7 -> gui.selectSimple(RouletteBetType.THIRD_DOZEN);
+            case 8 -> gui.selectSimple(RouletteBetType.HIGH);
+            case 45 -> gui.selectSimple(RouletteBetType.EVEN);
             case 47 -> gui.selectSimple(RouletteBetType.ODD);
             case 48 -> gui.clearSelection();
+            case 49 -> gui.selectSimple(RouletteBetType.SECOND_DOZEN);
             case 50 -> startSpin(player, gui);
             case 51 -> gui.selectSimple(RouletteBetType.RED);
             case 52 -> gui.selectSimple(RouletteBetType.BLACK);
-            case 53 -> gui.selectSimple(RouletteBetType.EVEN);
+            case 53 -> {
+                if (!gui.isSpinning()) {
+                    openTables.remove(player.getUniqueId());
+                    gui.back();
+                }
+            }
             default -> {
             }
         }
@@ -93,7 +106,11 @@ public class RouletteGame extends BaseCasinoGame {
     public double getPayoutMultiplier(RouletteBetType type) {
         return plugin.getConfigManager().getConfig().getDouble(
             "games.roulette.payouts." + type.getPayoutKey(),
-            type == RouletteBetType.SINGLE_NUMBER ? 36.0 : 2.0
+            switch (type) {
+                case SINGLE_NUMBER -> 35.0;
+                case FIRST_DOZEN, SECOND_DOZEN, THIRD_DOZEN -> 3.0;
+                default -> 1.9;
+            }
         );
     }
 

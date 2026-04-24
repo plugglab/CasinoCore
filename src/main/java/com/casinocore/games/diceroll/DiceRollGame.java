@@ -33,6 +33,10 @@ public class DiceRollGame extends BaseCasinoGame {
         return playWithRisk(player, bet, RiskLevel.MEDIUM, false);
     }
 
+    public void openRiskSelection(Player player, double bet) {
+        new DiceRiskGUI(plugin, this, player, bet).open();
+    }
+
     public boolean playWithRisk(Player player, double bet, RiskLevel riskLevel) {
         return playWithRisk(player, bet, riskLevel, true);
     }
@@ -185,6 +189,14 @@ public class DiceRollGame extends BaseCasinoGame {
 
     public String getRiskSummary() {
         return "Risk: low, medium, high";
+    }
+
+    public int getThresholdPreview(RiskLevel riskLevel) {
+        return getThreshold(riskLevel);
+    }
+
+    public double getMultiplierPreview(RiskLevel riskLevel) {
+        return getMultiplier(riskLevel);
     }
 
     private int getThreshold(RiskLevel riskLevel) {

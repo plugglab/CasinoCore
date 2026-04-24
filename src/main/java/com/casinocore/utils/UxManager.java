@@ -4,6 +4,7 @@ import com.casinocore.core.CasinoPlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -97,6 +98,26 @@ public class UxManager {
 
         Instant nextClaim = Instant.ofEpochMilli(lastClaim).plus(Duration.ofDays(1));
         return "<yellow>Next free spin: " + DAILY_FORMAT.format(nextClaim.atZone(ZoneId.systemDefault())) + "</yellow>";
+    }
+
+    public String formatNextDailyClaim(Player player) {
+        Long lastClaim = plugin.getPlayerStatsManager().getLastDailyClaim(player.getUniqueId());
+        if (lastClaim == null) {
+            return "ready-now";
+        }
+
+        Instant nextClaim = Instant.ofEpochMilli(lastClaim).plus(Duration.ofDays(1));
+        return DAILY_FORMAT.format(nextClaim.atZone(ZoneId.systemDefault()));
+    }
+
+    public String formatNextDailyClaim(OfflinePlayer player) {
+        Long lastClaim = plugin.getPlayerStatsManager().getLastDailyClaim(player.getUniqueId());
+        if (lastClaim == null) {
+            return "ready-now";
+        }
+
+        Instant nextClaim = Instant.ofEpochMilli(lastClaim).plus(Duration.ofDays(1));
+        return DAILY_FORMAT.format(nextClaim.atZone(ZoneId.systemDefault()));
     }
 
     public void clearBossBar(Player player) {

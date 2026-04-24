@@ -13,6 +13,10 @@ import org.bukkit.inventory.InventoryHolder;
  */
 public class SlotMachineListener implements Listener {
 
+    private static final int LEVER_SLOT = 13;
+    private static final int SPIN_AGAIN_SLOT = 23;
+    private static final int BACK_SLOT = 26;
+
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         InventoryHolder holder = event.getInventory().getHolder();
@@ -22,19 +26,18 @@ public class SlotMachineListener implements Listener {
             event.setCancelled(true);
 
             SlotMachineGUI gui = (SlotMachineGUI) holder;
+            if (!(event.getWhoClicked() instanceof Player player)) {
+                return;
+            }
 
-            // If clicked the barrier (close button), close inventory
-            if (event.getCurrentItem() != null &&
-                event.getCurrentItem().getType() == org.bukkit.Material.BARRIER) {
+            if (event.getRawSlot() == LEVER_SLOT || event.getRawSlot() == SPIN_AGAIN_SLOT) {
+                gui.getGame().pullLever(player, gui);
+                return;
+            }
 
-                if (event.getWhoClicked() instanceof Player) {
-                    Player player = (Player) event.getWhoClicked();
-
-                    // Only allow closing if not spinning
-                    if (!gui.isSpinning()) {
-                        player.closeInventory();
-                    }
-                }
+            if (event.getRawSlot() == BACK_SLOT && !gui.isSpinning()) {
+                gui.getGame().backToHub(player);
+                gui.backToHub();
             }
         }
     }
@@ -56,6 +59,8 @@ public class SlotMachineListener implements Listener {
                     () -> player.openInventory(gui.getInventory()),
                     1L
                 );
+            } else if (event.getPlayer() instanceof Player player) {
+                gui.getGame().backToHub(player);
             }
         }
     }

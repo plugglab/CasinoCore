@@ -306,11 +306,19 @@ public abstract class BaseCasinoGame implements CasinoGame {
      * @param e The exception
      */
     protected void handleGameError(Player player, double bet, Exception e) {
+        handleGameError(player, bet, e, true);
+    }
+
+    protected void handleGameError(Player player, double bet, Exception e, boolean refundBet) {
         plugin.getPlugin().getLogger().log(Level.SEVERE,
             "Error executing game " + name + " for player " + player.getName() +
             " (bet: " + bet + ")", e);
 
         sendMessage(player, "<red>An error occurred during the game. Please contact an administrator.</red>");
+
+        if (!refundBet) {
+            return;
+        }
 
         // Attempt to refund the bet
         try {

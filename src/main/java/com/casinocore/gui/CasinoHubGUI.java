@@ -17,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -24,16 +25,28 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CasinoHubGUI implements InventoryHolder {
 
-    private static final int[] BET_SLOTS = {46, 47, 48, 50, 51, 52};
-    private static final double[] BET_VALUES = {10, 50, 100, 250, 500, 1000};
-
-    private static final int SLOT_COINFLIP = 20;
-    private static final int SLOT_DICE = 21;
-    private static final int SLOT_BLACKJACK = 22;
-    private static final int SLOT_ROULETTE = 23;
-    private static final int SLOT_SLOTS = 24;
-    private static final int SLOT_LOTTERY = 31;
-    private static final int SLOT_INFO = 49;
+    private static final int SLOT_WALLET = 4;
+    private static final int SLOT_STATUS = 13;
+    private static final int SLOT_CUSTOM_BET = 45;
+    private static final int SLOT_BET_MINUS_100 = 46;
+    private static final int SLOT_BET_MINUS_10 = 47;
+    private static final int SLOT_BET_MIN = 48;
+    private static final int SLOT_BET_INFO = 49;
+    private static final int SLOT_BET_MAX = 50;
+    private static final int SLOT_BET_PLUS_10 = 51;
+    private static final int SLOT_BET_PLUS_100 = 52;
+    private static final int SLOT_REFRESH = 53;
+    private static final int[] GAME_SLOTS = {10, 11, 12, 14, 15, 16, 28, 34};
+    private static final Map<String, Material> GAME_MATERIALS = Map.of(
+        "coinflip", Material.SUNFLOWER,
+        "dice", Material.TARGET,
+        "blackjack", Material.PAPER,
+        "roulette", Material.CLOCK,
+        "slots", Material.DIAMOND,
+        "lottery", Material.EMERALD,
+        "horserace", Material.SADDLE,
+        "wheel", Material.NAUTILUS_SHELL
+    );
 
     private static final Map<UUID, Double> SELECTED_BETS = new ConcurrentHashMap<>();
 
@@ -49,6 +62,10 @@ public class CasinoHubGUI implements InventoryHolder {
         render();
     }
 
+    public static void setSelectedBet(UUID playerId, double bet) {
+        SELECTED_BETS.put(playerId, bet);
+    }
+
     public void open() {
         render();
         player.openInventory(inventory);
@@ -61,23 +78,20 @@ public class CasinoHubGUI implements InventoryHolder {
         }
 
         if (slot >= 0 && slot < inventory.getSize()) {
-            for (int i = 0; i < BET_SLOTS.length; i++) {
-                if (BET_SLOTS[i] == slot) {
-                    SELECTED_BETS.put(player.getUniqueId(), BET_VALUES[i]);
-                    render();
-                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.7f, 1.2f);
-                    return;
-                }
-            }
-
             switch (slot) {
-                case SLOT_COINFLIP -> launchGame("coinflip");
-                case SLOT_DICE -> launchGame("dice");
-                case SLOT_BLACKJACK -> launchGame("blackjack");
-                case SLOT_ROULETTE -> launchGame("roulette");
-                case SLOT_SLOTS -> launchGame("slots");
-                case SLOT_LOTTERY -> launchGame("lottery");
+                case SLOT_CUSTOM_BET -> CustomBetManager.prompt(plugin, player);
+                case SLOT_BET_MINUS_100 -> adjustBet(-100.0);
+                case SLOT_BET_MINUS_10 -> adjustBet(-10.0);
+                case SLOT_BET_MIN -> setBet(plugin.getConfigManager().getMinBet());
+                case SLOT_BET_MAX -> setBet(plugin.getConfigManager().getMaxBet());
+                case SLOT_BET_PLUS_10 -> adjustBet(10.0);
+                case SLOT_BET_PLUS_100 -> adjustBet(100.0);
+                case SLOT_REFRESH -> render();
                 default -> {
+                    String gameName = getGameForSlot(slot);
+                    if (gameName != null) {
+                        launchGame(gameName);
+                    }
                 }
             }
         }
@@ -89,33 +103,13 @@ public class CasinoHubGUI implements InventoryHolder {
             inventory.setItem(slot, filler);
         }
 
-        fillAccentRow();
-        setGameItem(SLOT_COINFLIP, "coinflip", Material.SUNFLOWER, "Click to create a coinflip with the selected bet");
-        setGameItem(SLOT_DICE, "dice", Material.TARGET, "Click to roll with medium risk");
-        setGameItem(SLOT_BLACKJACK, "blackjack", Material.PAPER, "Click to open a blackjack table");
-        setGameItem(SLOT_ROULETTE, "roulette", Material.CLOCK, "Click to open roulette");
-        setGameItem(SLOT_SLOTS, "slots", Material.DIAMOND, "Click to spin the slot machine");
-        setGameItem(SLOT_LOTTERY, "lottery", Material.EMERALD, "Click to play lottery");
-
-        inventory.setItem(4, item(Material.NETHER_STAR, "Casino Hub", "Select a bet, then click a game"));
-        inventory.setItem(SLOT_INFO, item(
-            Material.GOLD_INGOT,
-            "Selected Bet",
-            plugin.getEconomyManager().format(getSelectedBet()),
-            "Balance: " + plugin.getEconomyManager().format(plugin.getEconomyManager().getBalance(player))
-        ));
-
-        for (int i = 0; i < BET_SLOTS.length; i++) {
-            boolean selected = Double.compare(getSelectedBet(), BET_VALUES[i]) == 0;
-            inventory.setItem(BET_SLOTS[i], item(
-                selected ? Material.LIME_DYE : Material.YELLOW_DYE,
-                (selected ? "> " : "") + plugin.getEconomyManager().format(BET_VALUES[i]),
-                selected ? "Selected quick bet" : "Click to select"
-            ));
-        }
+        fillAccentRows();
+        renderSummary();
+        renderGameGrid();
+        renderBetControls();
     }
 
-    private void fillAccentRow() {
+    private void fillAccentRows() {
         ItemStack accent = item(Material.BLACK_STAINED_GLASS_PANE, " ");
         for (int slot = 9; slot <= 17; slot++) {
             inventory.setItem(slot, accent);
@@ -125,13 +119,59 @@ public class CasinoHubGUI implements InventoryHolder {
         }
     }
 
-    private void setGameItem(int slot, String gameName, Material material, String clickLine) {
-        CasinoGame game = plugin.getGameManager().getCasinoGameDirect(gameName);
-        if (game == null) {
-            inventory.setItem(slot, item(Material.BARRIER, gameName, "Game unavailable"));
-            return;
-        }
+    private void renderSummary() {
+        double balance = plugin.getEconomyManager().getBalance(player);
+        inventory.setItem(SLOT_WALLET, item(
+            Material.NETHER_STAR,
+            "Casino Hub",
+            "Balance: " + plugin.getEconomyManager().format(balance),
+            "Wins: " + plugin.getPlayerStatsManager().getWins(player.getUniqueId()),
+            "Losses: " + plugin.getPlayerStatsManager().getLosses(player.getUniqueId()),
+            "Daily: " + (plugin.getPlayerStatsManager().canClaimDaily(player.getUniqueId()) ? "Ready" : "Claimed")
+        ));
+        inventory.setItem(SLOT_STATUS, item(
+            Material.GOLD_BLOCK,
+            "Selected Bet",
+            plugin.getEconomyManager().format(getSelectedBet()),
+            "Games Played: " + plugin.getPlayerStatsManager().getGamesPlayed(player.getUniqueId()),
+            "Streak: " + plugin.getPlayerStatsManager().getWinStreak(player.getUniqueId()),
+            "Best Streak: " + plugin.getPlayerStatsManager().getBestWinStreak(player.getUniqueId())
+        ));
+    }
 
+    private void renderGameGrid() {
+        List<CasinoGame> games = new ArrayList<>(plugin.getGameManager().getEnabledCasinoGames().values());
+        games.sort(Comparator.comparing(CasinoGame::getName));
+        for (int i = 0; i < GAME_SLOTS.length; i++) {
+            if (i >= games.size()) {
+                inventory.setItem(GAME_SLOTS[i], item(Material.BARRIER, "Coming Soon", "Reserved for future casino games"));
+                continue;
+            }
+
+            CasinoGame game = games.get(i);
+            Material material = GAME_MATERIALS.getOrDefault(game.getName(), Material.GOLD_INGOT);
+            setGameItem(GAME_SLOTS[i], game, material, getClickHint(game.getName()));
+        }
+    }
+
+    private void renderBetControls() {
+        inventory.setItem(SLOT_CUSTOM_BET, item(Material.WRITABLE_BOOK, "Custom Bet", "Enter any value in chat"));
+        inventory.setItem(SLOT_BET_MINUS_100, item(Material.REDSTONE, "-100", "Lower the selected bet"));
+        inventory.setItem(SLOT_BET_MINUS_10, item(Material.RED_DYE, "-10", "Fine-tune your bet"));
+        inventory.setItem(SLOT_BET_MIN, item(Material.BARRIER, "Set Min", plugin.getEconomyManager().format(plugin.getConfigManager().getMinBet())));
+        inventory.setItem(SLOT_BET_INFO, item(
+            Material.GOLD_INGOT,
+            "Current Bet",
+            plugin.getEconomyManager().format(getSelectedBet()),
+            "Use quick controls or custom chat input"
+        ));
+        inventory.setItem(SLOT_BET_MAX, item(Material.EMERALD_BLOCK, "Set Max", plugin.getEconomyManager().format(plugin.getConfigManager().getMaxBet())));
+        inventory.setItem(SLOT_BET_PLUS_10, item(Material.LIME_DYE, "+10", "Fine-tune your bet"));
+        inventory.setItem(SLOT_BET_PLUS_100, item(Material.EMERALD, "+100", "Raise the selected bet"));
+        inventory.setItem(SLOT_REFRESH, item(Material.COMPASS, "Refresh", "Rebuild the menu and sync your balance"));
+    }
+
+    private void setGameItem(int slot, CasinoGame game, Material material, String clickLine) {
         List<String> lore = new ArrayList<>();
         lore.add(game.getDescription());
         lore.add("Min Bet: " + plugin.getEconomyManager().format(game.getMinBet()));
@@ -156,9 +196,9 @@ public class CasinoHubGUI implements InventoryHolder {
 
         double bet = getSelectedBet();
         if (game instanceof CoinFlipGame coinFlipGame) {
-            coinFlipGame.createOffer(player, bet);
+            coinFlipGame.play(player, bet);
         } else if (game instanceof DiceRollGame diceRollGame) {
-            diceRollGame.playWithRisk(player, bet, RiskLevel.MEDIUM);
+            diceRollGame.openRiskSelection(player, bet);
         } else {
             game.play(player, bet);
         }
@@ -167,8 +207,46 @@ public class CasinoHubGUI implements InventoryHolder {
         player.closeInventory();
     }
 
+    private void adjustBet(double delta) {
+        setBet(getSelectedBet() + delta);
+    }
+
+    private void setBet(double value) {
+        double min = plugin.getConfigManager().getMinBet();
+        double max = plugin.getConfigManager().getMaxBet();
+        double clamped = Math.max(min, Math.min(max, value));
+        SELECTED_BETS.put(player.getUniqueId(), Math.round(clamped * 100.0) / 100.0);
+        render();
+        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.7f, 1.2f);
+    }
+
     private double getSelectedBet() {
         return SELECTED_BETS.getOrDefault(player.getUniqueId(), plugin.getConfigManager().getMinBet());
+    }
+
+    private String getGameForSlot(int slot) {
+        List<CasinoGame> games = new ArrayList<>(plugin.getGameManager().getEnabledCasinoGames().values());
+        games.sort(Comparator.comparing(CasinoGame::getName));
+        for (int i = 0; i < GAME_SLOTS.length && i < games.size(); i++) {
+            if (GAME_SLOTS[i] == slot) {
+                return games.get(i).getName();
+            }
+        }
+        return null;
+    }
+
+    private String getClickHint(String gameName) {
+        return switch (gameName) {
+            case "coinflip" -> "Click to create a coinflip with the selected bet";
+            case "dice" -> "Click to roll medium risk instantly";
+            case "blackjack" -> "Click to open a blackjack table";
+            case "roulette" -> "Click to open roulette";
+            case "slots" -> "Click to spin the slot machine";
+            case "lottery" -> "Click to draw lottery numbers";
+            case "horserace" -> "Click to open the race board";
+            case "wheel" -> "Click to spin the lucky wheel";
+            default -> "Click to play";
+        };
     }
 
     private ItemStack item(Material material, String name, String... lore) {

@@ -40,6 +40,11 @@ public class RouletteBet {
             case BLACK -> RouletteNumbers.isBlack(resultNumber);
             case EVEN -> resultNumber != 0 && resultNumber % 2 == 0;
             case ODD -> resultNumber != 0 && resultNumber % 2 != 0;
+            case LOW -> resultNumber >= 1 && resultNumber <= 18;
+            case HIGH -> resultNumber >= 19 && resultNumber <= 36;
+            case FIRST_DOZEN -> resultNumber >= 1 && resultNumber <= 12;
+            case SECOND_DOZEN -> resultNumber >= 13 && resultNumber <= 24;
+            case THIRD_DOZEN -> resultNumber >= 25 && resultNumber <= 36;
         };
     }
 }

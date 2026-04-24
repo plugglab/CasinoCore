@@ -10,6 +10,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
@@ -18,7 +19,8 @@ import java.util.List;
 public class BlackjackGUI implements InventoryHolder {
 
     private static final int[] DEALER_SLOTS = {10, 11, 12, 13, 14, 15, 16};
-    private static final int[] PLAYER_SLOTS = {28, 29, 30, 31, 32, 33, 34};
+    private static final int[] PLAYER_HAND_ONE_SLOTS = {28, 29, 30};
+    private static final int[] PLAYER_HAND_TWO_SLOTS = {32, 33, 34};
 
     private final CasinoPlugin plugin;
     private final Player player;
@@ -49,32 +51,37 @@ public class BlackjackGUI implements InventoryHolder {
             Material.GOLD_INGOT,
             "Table Status",
             state.getStatus(),
-            "Bet: " + plugin.getEconomyManager().format(state.getBet())
+            "Total Bet: " + plugin.getEconomyManager().format(state.getTotalCommittedBet())
         ));
 
-        inventory.setItem(19, item(
-            Material.ENDER_EYE,
+        inventory.setItem(19, playerHeadItem(
             "Dealer",
+            null,
             handLine(state.getDealerHand(), state.isDealerHidden()),
             scoreLine(state.getDealerHand(), state.isDealerHidden())
         ));
-        inventory.setItem(37, item(
-            Material.PLAYER_HEAD,
-            "Player",
-            handLine(state.getPlayerHand(), false),
-            scoreLine(state.getPlayerHand(), false)
-        ));
 
-        renderHand(DEALER_SLOTS, state.getDealerHand(), state.isDealerHidden());
-        renderHand(PLAYER_SLOTS, state.getPlayerHand(), false);
+        renderHand(DEALER_SLOTS, state.getDealerHand(), state.isDealerHidden(), false);
+
+        renderPlayerHandSection(0, 37, PLAYER_HAND_ONE_SLOTS, "Hand 1");
+        if (state.hasSplitHand()) {
+            renderPlayerHandSection(1, 41, PLAYER_HAND_TWO_SLOTS, "Hand 2");
+        } else {
+            for (int slot : PLAYER_HAND_TWO_SLOTS) {
+                inventory.setItem(slot, item(Material.BLACK_STAINED_GLASS_PANE, " "));
+            }
+            inventory.setItem(41, item(Material.BLACK_STAINED_GLASS_PANE, " "));
+        }
 
         boolean playerTurn = state.getPhase() == BlackjackTableState.Phase.PLAYER_TURN;
-        inventory.setItem(48, item(playerTurn ? Material.LIME_DYE : Material.GRAY_DYE, "Hit",
+        inventory.setItem(47, item(playerTurn ? Material.LIME_DYE : Material.GRAY_DYE, "Hit",
             playerTurn ? "Draw one more card" : "Unavailable"));
-        inventory.setItem(50, item(playerTurn ? Material.YELLOW_DYE : Material.GRAY_DYE, "Stand",
-            playerTurn ? "End your turn" : "Unavailable"));
-        inventory.setItem(49, item(Material.BARRIER, "Close", state.getPhase() == BlackjackTableState.Phase.ROUND_OVER
-            ? "Close the table"
+        inventory.setItem(48, item(playerTurn ? Material.YELLOW_DYE : Material.GRAY_DYE, "Stand",
+            playerTurn ? "End this hand" : "Unavailable"));
+        inventory.setItem(50, item(canSplit() ? Material.DIAMOND : Material.GRAY_DYE, "Split",
+            canSplit() ? "Split into two hands" : "Unavailable"));
+        inventory.setItem(49, item(Material.BARRIER, "Back", state.getPhase() == BlackjackTableState.Phase.ROUND_OVER
+            ? "Return to the casino hub"
             : "Available after the round"));
     }
 
@@ -101,9 +108,26 @@ public class BlackjackGUI implements InventoryHolder {
             win ? 1.0f : 0.8f);
     }
 
-    private void renderHand(int[] slots, BlackjackHand hand, boolean hideSecondCard) {
+    private void renderPlayerHandSection(int handIndex, int infoSlot, int[] cardSlots, String label) {
+        BlackjackHand hand = state.getPlayerHands().get(handIndex);
+        boolean active = state.getActiveHandIndex() == handIndex && state.getPhase() == BlackjackTableState.Phase.PLAYER_TURN;
+        inventory.setItem(infoSlot, playerHeadItem(
+            active ? "Player Hand " + (handIndex + 1) + " (Active)" : "Player Hand " + (handIndex + 1),
+            player,
+            "Bet: " + plugin.getEconomyManager().format(state.getBetForHand(handIndex)),
+            "Cards: " + hand.getCards().size(),
+            "Score: " + hand.getBestValue()
+        ));
+        renderHand(cardSlots, hand, false, active);
+    }
+
+    private boolean canSplit() {
+        return state.getPhase() == BlackjackTableState.Phase.PLAYER_TURN && state.canSplitCurrentHand();
+    }
+
+    private void renderHand(int[] slots, BlackjackHand hand, boolean hideSecondCard, boolean active) {
         for (int i = 0; i < slots.length; i++) {
-            inventory.setItem(slots[i], item(Material.BLACK_STAINED_GLASS_PANE, " "));
+            inventory.setItem(slots[i], item(active ? Material.LIME_STAINED_GLASS_PANE : Material.BLACK_STAINED_GLASS_PANE, " "));
         }
 
         List<BlackjackCard> cards = hand.getCards();
@@ -117,20 +141,14 @@ public class BlackjackGUI implements InventoryHolder {
     }
 
     private ItemStack cardItem(BlackjackCard card) {
-        Material material = switch (card.suit()) {
-            case HEARTS -> Material.RED_DYE;
-            case DIAMONDS -> Material.PINK_DYE;
-            case CLUBS -> Material.LIME_DYE;
-            case SPADES -> Material.GRAY_DYE;
-        };
-
-        return item(material, card.rank().getDisplayName(),
+        return playerHeadItem("Card: " + card.rank().getDisplayName(),
+            null,
             card.suit().getDisplayName(),
             "Value: " + card.value());
     }
 
     private ItemStack hiddenCardItem() {
-        return item(Material.BLACK_DYE, "Hidden Card", "Revealed on dealer turn");
+        return playerHeadItem("Hidden Card", null, "Revealed on dealer turn");
     }
 
     private String handLine(BlackjackHand hand, boolean hidden) {
@@ -148,6 +166,25 @@ public class BlackjackGUI implements InventoryHolder {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
+            meta.displayName(Component.text(name));
+            List<Component> loreLines = new ArrayList<>();
+            for (String line : lore) {
+                loreLines.add(Component.text(line));
+            }
+            meta.lore(loreLines);
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    private ItemStack playerHeadItem(String name, Player headOwner, String... lore) {
+        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
+        ItemMeta rawMeta = item.getItemMeta();
+        if (rawMeta instanceof SkullMeta meta) {
+            if (headOwner != null) {
+                meta.setOwningPlayer(headOwner);
+            }
             meta.displayName(Component.text(name));
             List<Component> loreLines = new ArrayList<>();
             for (String line : lore) {

@@ -25,7 +25,8 @@ public class CoinFlipGame extends BaseCasinoGame {
 
     @Override
     public boolean play(Player player, double bet) {
-        return createOffer(player, bet);
+        Bukkit.getScheduler().runTask(plugin.getPlugin(), () -> new CoinFlipGUI(plugin, this, player, bet).open());
+        return true;
     }
 
     @Override
@@ -34,6 +35,7 @@ public class CoinFlipGame extends BaseCasinoGame {
     }
 
     public boolean createOffer(Player creator, double bet) {
+        boolean betWithdrawn = false;
         try {
             if (!preGameValidation(creator, bet)) {
                 return false;
@@ -47,6 +49,7 @@ public class CoinFlipGame extends BaseCasinoGame {
             if (!withdrawBet(creator, bet)) {
                 return false;
             }
+            betWithdrawn = true;
 
             setCooldown(creator);
 
@@ -64,7 +67,7 @@ public class CoinFlipGame extends BaseCasinoGame {
             );
             return true;
         } catch (Exception e) {
-            handleGameError(creator, bet, e);
+            handleGameError(creator, bet, e, betWithdrawn);
             return false;
         }
     }
@@ -166,6 +169,17 @@ public class CoinFlipGame extends BaseCasinoGame {
         sendMessage(viewer, message.toString());
     }
 
+    public List<CoinFlipOfferView> getOpenOfferViews() {
+        List<CoinFlipOfferView> openOffers = new ArrayList<>();
+        for (CoinFlipOffer offer : offersByCreator.values()) {
+            if (!offer.isLocked() && !offer.isResolved()) {
+                openOffers.add(new CoinFlipOfferView(offer.getCreatorName(), offer.getBet()));
+            }
+        }
+        openOffers.sort((left, right) -> left.creatorName().compareToIgnoreCase(right.creatorName()));
+        return openOffers;
+    }
+
     public void handleQuit(Player player) {
         UUID ownerId = playerOfferIndex.get(player.getUniqueId());
         if (ownerId == null) {
@@ -259,6 +273,10 @@ public class CoinFlipGame extends BaseCasinoGame {
         sendMessage(creator, summary);
         sendMessage(joiner, summary);
         sendMessage(loser, "<red>You lost " + plugin.getEconomyManager().format(offer.getBet()) + "</red>");
+        plugin.getMessageManager().broadcast(
+            "<gold><bold>[CoinFlip]</bold></gold> <white>" + winner.getName() + "</white> won <green>" +
+                plugin.getEconomyManager().format(payout) + "</green> <gray>against</gray> <white>" + loser.getName() + "</white>"
+        );
         clearOfferIndexes(offer);
         logGame(creator, offer.getBet(), true);
         logGame(joiner, offer.getBet(), true);
@@ -328,6 +346,9 @@ public class CoinFlipGame extends BaseCasinoGame {
         }
         offersByCreator.clear();
         playerOfferIndex.clear();
+    }
+
+    public record CoinFlipOfferView(String creatorName, double bet) {
     }
 
     private static final class CoinFlipOffer {

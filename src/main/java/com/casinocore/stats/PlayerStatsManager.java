@@ -29,6 +29,14 @@ public class PlayerStatsManager {
         return getStats(playerId).wins();
     }
 
+    public int getLosses(UUID playerId) {
+        return getStats(playerId).losses();
+    }
+
+    public int getGamesPlayed(UUID playerId) {
+        return getStats(playerId).gamesPlayed();
+    }
+
     public int getWinStreak(UUID playerId) {
         return getStats(playerId).currentStreak();
     }
@@ -42,6 +50,8 @@ public class PlayerStatsManager {
         int streak = current.currentStreak() + 1;
         stats.put(playerId, new PlayerStats(
             current.wins() + 1,
+            current.losses(),
+            current.gamesPlayed() + 1,
             streak,
             Math.max(current.bestStreak(), streak),
             current.lastDailyClaim()
@@ -52,6 +62,8 @@ public class PlayerStatsManager {
         PlayerStats current = getStats(playerId);
         stats.put(playerId, new PlayerStats(
             current.wins(),
+            current.losses() + 1,
+            current.gamesPlayed() + 1,
             0,
             current.bestStreak(),
             current.lastDailyClaim()
@@ -74,6 +86,8 @@ public class PlayerStatsManager {
         PlayerStats current = getStats(playerId);
         stats.put(playerId, new PlayerStats(
             current.wins(),
+            current.losses(),
+            current.gamesPlayed(),
             current.currentStreak(),
             current.bestStreak(),
             System.currentTimeMillis()
@@ -97,6 +111,8 @@ public class PlayerStatsManager {
         String path = "players." + playerId;
         return new PlayerStats(
             data.getInt(path + ".wins", 0),
+            data.getInt(path + ".losses", 0),
+            data.getInt(path + ".games-played", 0),
             data.getInt(path + ".current-streak", 0),
             data.getInt(path + ".best-streak", 0),
             data.contains(path + ".last-daily-claim") ? data.getLong(path + ".last-daily-claim") : null
@@ -115,6 +131,8 @@ public class PlayerStatsManager {
             String path = "players." + entry.getKey();
             PlayerStats value = entry.getValue();
             data.set(path + ".wins", value.wins());
+            data.set(path + ".losses", value.losses());
+            data.set(path + ".games-played", value.gamesPlayed());
             data.set(path + ".current-streak", value.currentStreak());
             data.set(path + ".best-streak", value.bestStreak());
             data.set(path + ".last-daily-claim", value.lastDailyClaim());
@@ -127,6 +145,6 @@ public class PlayerStatsManager {
         }
     }
 
-    private record PlayerStats(int wins, int currentStreak, int bestStreak, Long lastDailyClaim) {
+    private record PlayerStats(int wins, int losses, int gamesPlayed, int currentStreak, int bestStreak, Long lastDailyClaim) {
     }
 }

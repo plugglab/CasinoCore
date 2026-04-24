@@ -37,6 +37,8 @@ cooldowns:
     blackjack: 5
     roulette: 5
     slots: 15
+    horserace: 8
+    wheel: 6
 
 house-edge:
   enabled: true
@@ -49,6 +51,8 @@ house-edge:
     blackjack: 1.5
     roulette: 2.7
     slots: 6.0
+    horserace: 7.0
+    wheel: 5.0
 
 anti-abuse:
   enabled: true
@@ -73,6 +77,8 @@ anti-abuse:
     block-inventory-close-during-round: true
   slots:
     block-inventory-close-during-spin: true
+  horserace:
+    block-inventory-close-during-race: false
 
 games:
   coinflip:
@@ -309,3 +315,61 @@ games:
       reel-3-stop: 80
       update-interval: 2
     house-edge-adjustment-percent: 6.0
+
+  horserace:
+    enabled: true
+    description: "Choose a horse, watch the race, and win if your runner finishes first."
+    limits:
+      min-bet: 25.0
+      max-bet: 4000.0
+    horses:
+      blaze:
+        name: "Blaze"
+        weight: 28.0
+        multiplier: 1.8
+      comet:
+        name: "Comet"
+        weight: 24.0
+        multiplier: 2.1
+      thunder:
+        name: "Thunder"
+        weight: 19.0
+        multiplier: 2.6
+      shadow:
+        name: "Shadow"
+        weight: 16.0
+        multiplier: 3.0
+      storm:
+        name: "Storm"
+        weight: 13.0
+        multiplier: 3.8
+    house-edge-adjustment-percent: 7.0
+
+  wheel:
+    enabled: true
+    description: "Spin a weighted prize wheel with safe slices and jackpot slices."
+    limits:
+      min-bet: 25.0
+      max-bet: 3500.0
+    segments:
+      bust:
+        label: "Bust"
+        multiplier: 0.0
+        weight: 34.0
+      safe_return:
+        label: "Safe Return"
+        multiplier: 1.1
+        weight: 28.0
+      hot_table:
+        label: "Hot Table"
+        multiplier: 1.8
+        weight: 18.0
+      lucky_strike:
+        label: "Lucky Strike"
+        multiplier: 3.0
+        weight: 12.0
+      jackpot_slice:
+        label: "Jackpot Slice"
+        multiplier: 5.0
+        weight: 8.0
+    house-edge-adjustment-percent: 5.0

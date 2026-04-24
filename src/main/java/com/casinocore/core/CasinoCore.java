@@ -6,11 +6,20 @@ import com.casinocore.games.blackjack.BlackjackGame;
 import com.casinocore.games.blackjack.BlackjackListener;
 import com.casinocore.games.commands.PlayCommand;
 import com.casinocore.games.diceroll.DiceRollGame;
+import com.casinocore.games.diceroll.DiceRiskListener;
 import com.casinocore.games.GameManager;
+import com.casinocore.games.horserace.HorseRaceGame;
+import com.casinocore.games.horserace.HorseRaceListener;
 import com.casinocore.games.impl.CoinFlipListener;
 import com.casinocore.games.impl.CoinFlipGame;
+import com.casinocore.games.impl.CoinFlipGuiListener;
+import com.casinocore.games.impl.LotteryDrawListener;
 import com.casinocore.games.impl.LotteryGame;
+import com.casinocore.games.impl.LotteryPromptListener;
+import com.casinocore.games.impl.WheelGame;
+import com.casinocore.games.impl.WheelListener;
 import com.casinocore.gui.CasinoHubListener;
+import com.casinocore.gui.CustomBetListener;
 import com.casinocore.games.roulette.RouletteGame;
 import com.casinocore.games.roulette.RouletteListener;
 import com.casinocore.games.slots.SlotMachineGame;
@@ -38,6 +47,8 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
     private CoinFlipGame coinFlipGame;
     private BlackjackGame blackjackGame;
     private RouletteGame rouletteGame;
+    private HorseRaceGame horseRaceGame;
+    private WheelGame wheelGame;
 
     @Override
     public void onEnable() {
@@ -110,6 +121,10 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
         rouletteGame = new RouletteGame(this);
         gameManager.registerCasinoGame(rouletteGame);
         gameManager.registerCasinoGame(new SlotMachineGame(this));
+        horseRaceGame = new HorseRaceGame(this);
+        gameManager.registerCasinoGame(horseRaceGame);
+        wheelGame = new WheelGame(this);
+        gameManager.registerCasinoGame(wheelGame);
     }
 
     private void registerCommands() {
@@ -125,15 +140,26 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
 
     private void registerEvents() {
         getServer().getPluginManager().registerEvents(new CasinoHubListener(), this);
+        getServer().getPluginManager().registerEvents(new CustomBetListener(this), this);
+        getServer().getPluginManager().registerEvents(new DiceRiskListener(), this);
+        getServer().getPluginManager().registerEvents(new LotteryPromptListener(this), this);
+        getServer().getPluginManager().registerEvents(new LotteryDrawListener(this), this);
         getServer().getPluginManager().registerEvents(new SlotMachineListener(), this);
         if (coinFlipGame != null) {
             getServer().getPluginManager().registerEvents(new CoinFlipListener(coinFlipGame), this);
+            getServer().getPluginManager().registerEvents(new CoinFlipGuiListener(), this);
         }
         if (blackjackGame != null) {
             getServer().getPluginManager().registerEvents(new BlackjackListener(blackjackGame), this);
         }
         if (rouletteGame != null) {
             getServer().getPluginManager().registerEvents(new RouletteListener(rouletteGame), this);
+        }
+        if (horseRaceGame != null) {
+            getServer().getPluginManager().registerEvents(new HorseRaceListener(horseRaceGame), this);
+        }
+        if (wheelGame != null) {
+            getServer().getPluginManager().registerEvents(new WheelListener(wheelGame), this);
         }
     }
 

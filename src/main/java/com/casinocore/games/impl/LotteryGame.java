@@ -2,135 +2,113 @@ package com.casinocore.games.impl;
 
 import com.casinocore.core.CasinoPlugin;
 import com.casinocore.games.BaseCasinoGame;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.Random;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
-/**
- * Lottery Game - Pick a number between 1-100
- * Win chances:
- * - Exact match: 50x bet (1% chance)
- * - Within 5: 10x bet (~10% chance)
- * - Within 10: 3x bet (~20% chance)
- * - Else: Loss
- */
 public class LotteryGame extends BaseCasinoGame {
 
-    private final Random random;
+    private final Map<UUID, LotteryDrawGUI> openDraws;
 
     public LotteryGame(CasinoPlugin plugin) {
-        super(plugin, "lottery", "Lottery", "Pick a number and win big if you're lucky!");
-        this.random = new Random();
+        super(plugin, "lottery", "Lottery", "Pick your number, watch the ball draw, and hit the winning ball.");
+        this.openDraws = new ConcurrentHashMap<>();
     }
 
     @Override
-    protected boolean executeGame(Player player, double bet) {
+    public boolean play(Player player, double bet) {
+        if (!preGameValidation(player, bet)) {
+            return false;
+        }
+
+        if (openDraws.containsKey(player.getUniqueId())) {
+            sendMessage(player, "<yellow>You already have a lottery draw active.</yellow>");
+            return false;
+        }
+
+        LotteryNumberPrompt.prompt(plugin, this, player, bet);
+        return true;
+    }
+
+    public void playPickedNumber(Player player, double bet, int pickedNumber) {
+        boolean betWithdrawn = false;
         try {
-            // Generate winning number (1-100)
-            int winningNumber = random.nextInt(100) + 1;
-
-            // Generate player's number (1-100)
-            int playerNumber = random.nextInt(100) + 1;
-
-            logDebug("Player " + player.getName() + " lottery: player=" + playerNumber +
-                     ", winning=" + winningNumber);
-
-            // Calculate difference
-            int difference = Math.abs(winningNumber - playerNumber);
-
-            // Determine outcome
-            String result;
-            double multiplier = 0;
-            boolean won = false;
-
-            double exactMatchMultiplier = getExactMatchMultiplier();
-            double closeMatchMultiplier = getCloseMatchMultiplier();
-            double nearMatchMultiplier = getNearMatchMultiplier();
-            int closeRange = getCloseRange();
-            int nearRange = getNearRange();
-
-            if (difference == 0) {
-                // Exact match - jackpot!
-                result = "<gold><bold>EXACT MATCH - JACKPOT!</bold></gold>";
-                multiplier = exactMatchMultiplier;
-                won = true;
-            } else if (difference <= closeRange) {
-                // Close match
-                result = "<yellow>Close Match!</yellow>";
-                multiplier = closeMatchMultiplier;
-                won = true;
-            } else if (difference <= nearRange) {
-                // Near match
-                result = "<green>Near Match!</green>";
-                multiplier = nearMatchMultiplier;
-                won = true;
-            } else {
-                // No match
-                result = "<red>No Match</red>";
-                won = false;
+            if (!preGameValidation(player, bet)) {
+                return;
             }
 
-            if (won) {
-                // Player wins
-                double winnings = bet * multiplier;
-                boolean paidOut = payWinnings(player, winnings);
-
-                if (paidOut) {
-                    handleWin(player, bet, winnings);
-                    double profit = winnings - bet;
-                    sendMessage(player,
-                        "<green>╔═══════════════════════════╗</green>\n" +
-                        "<green>║    <gold>LOTTERY - WINNER!</gold>    ║</green>\n" +
-                        "<green>╚═══════════════════════════╝</green>\n" +
-                        "<yellow>Your Number: </yellow><white>" + playerNumber + "</white>\n" +
-                        "<yellow>Winning Number: </yellow><gold>" + winningNumber + "</gold>\n" +
-                        "<yellow>Difference: </yellow><white>" + difference + "</white>\n" +
-                        "<yellow>Result: </yellow>" + result + "\n" +
-                        "<yellow>Bet: </yellow><white>" + plugin.getEconomyManager().format(bet) + "</white>\n" +
-                        "<yellow>Multiplier: </yellow><gold>" + multiplier + "x</gold>\n" +
-                        "<yellow>Winnings: </yellow><gold>" + plugin.getEconomyManager().format(winnings) + "</gold>\n" +
-                        "<yellow>Profit: </yellow><green>+" + plugin.getEconomyManager().format(profit) + "</green>"
-                    );
-
-                    logDebug("Player " + player.getName() + " won lottery (multiplier: " +
-                             multiplier + "x, diff: " + difference + ")");
-                    return true;
-                } else {
-                    sendMessage(player, "<red>Error paying out winnings! Contact an administrator.</red>");
-                    return false;
-                }
-            } else {
-                // Player loses
-                handleLoss(player, bet);
-                sendMessage(player,
-                    "<red>╔═══════════════════════════╗</red>\n" +
-                    "<red>║      <gray>LOTTERY - LOSS</gray>      ║</red>\n" +
-                    "<red>╚═══════════════════════════╝</red>\n" +
-                    "<yellow>Your Number: </yellow><white>" + playerNumber + "</white>\n" +
-                    "<yellow>Winning Number: </yellow><gold>" + winningNumber + "</gold>\n" +
-                    "<yellow>Difference: </yellow><white>" + difference + "</white>\n" +
-                    "<yellow>Result: </yellow>" + result + "\n" +
-                    "<yellow>Bet: </yellow><white>" + plugin.getEconomyManager().format(bet) + "</white>\n" +
-                    "<red>You lost " + plugin.getEconomyManager().format(bet) + "</red>"
-                );
-
-                logDebug("Player " + player.getName() + " lost lottery (diff: " + difference + ")");
-                return true;
+            if (!withdrawBet(player, bet)) {
+                return;
             }
+            betWithdrawn = true;
 
-        } catch (Exception e) {
-            plugin.getPlugin().getLogger().severe(
-                "Error executing lottery game for " + player.getName() + ": " + e.getMessage()
-            );
-            e.printStackTrace();
-            throw e;
+            setCooldown(player);
+            LotteryDrawGUI gui = new LotteryDrawGUI(plugin, player, pickedNumber, bet);
+            openDraws.put(player.getUniqueId(), gui);
+            Bukkit.getScheduler().runTask(plugin.getPlugin(), () -> {
+                gui.open();
+                int winningNumber = ThreadLocalRandom.current().nextInt(1, 101);
+                gui.startDraw(winningNumber, () -> finishDraw(player, gui, pickedNumber, winningNumber, bet));
+            });
+        } catch (Exception exception) {
+            handleGameError(player, bet, exception, betWithdrawn);
         }
     }
 
     @Override
-    public void onEnable() {
-        super.onEnable();
-        logDebug("Lottery game enabled with configured payout table");
+    protected boolean executeGame(Player player, double bet) {
+        return false;
+    }
+
+    private void finishDraw(Player player, LotteryDrawGUI gui, int pickedNumber, int winningNumber, double bet) {
+        int difference = Math.abs(winningNumber - pickedNumber);
+        double multiplier = 0.0;
+        boolean won = false;
+        String result;
+
+        if (difference == 0) {
+            multiplier = getExactMatchMultiplier();
+            won = true;
+            result = "EXACT MATCH";
+        } else if (difference <= getCloseRange()) {
+            multiplier = getCloseMatchMultiplier();
+            won = true;
+            result = "Close Match";
+        } else if (difference <= getNearRange()) {
+            multiplier = getNearMatchMultiplier();
+            won = true;
+            result = "Near Match";
+        } else {
+            result = "No Match";
+        }
+
+        double payout = bet * multiplier;
+        if (won) {
+            if (!payWinnings(player, payout)) {
+                sendMessage(player, "<red>Lottery payout failed. Contact an administrator.</red>");
+                openDraws.remove(player.getUniqueId());
+                return;
+            }
+            handleWin(player, bet, payout);
+        } else {
+            handleLoss(player, bet);
+        }
+
+        gui.showResult(winningNumber, won, multiplier, payout, difference);
+        sendMessage(player,
+            (won ? "<green><bold>Lottery Win</bold></green>" : "<red><bold>Lottery Loss</bold></red>") + "\n" +
+                "<gray>Your Number:</gray> <white>" + pickedNumber + "</white>\n" +
+                "<gray>Winning Ball:</gray> <gold>" + winningNumber + "</gold>\n" +
+                "<gray>Result:</gray> <white>" + result + "</white>\n" +
+                (won
+                    ? "<gray>Payout:</gray> <green>" + plugin.getEconomyManager().format(payout) + "</green>"
+                    : "<gray>Lost:</gray> <red>" + plugin.getEconomyManager().format(bet) + "</red>")
+        );
+        openDraws.remove(player.getUniqueId());
     }
 
     private double getExactMatchMultiplier() {

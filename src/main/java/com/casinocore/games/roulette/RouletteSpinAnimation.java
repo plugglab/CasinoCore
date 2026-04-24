@@ -24,7 +24,7 @@ public class RouletteSpinAnimation extends BukkitRunnable {
         this.onComplete = onComplete;
 
         int finalIndex = RouletteNumbers.WHEEL_ORDER.indexOf(finalNumber);
-        int startIndex = 4;
+        int startIndex = 2;
         int wheelSize = RouletteNumbers.WHEEL_ORDER.size();
         int extraLoops = 3 * wheelSize;
         int delta = (finalIndex - startIndex + wheelSize) % wheelSize;
@@ -57,7 +57,7 @@ public class RouletteSpinAnimation extends BukkitRunnable {
     private void updateWindow() {
         List<Integer> window = new ArrayList<>();
         int wheelSize = RouletteNumbers.WHEEL_ORDER.size();
-        for (int offset = -4; offset <= 4; offset++) {
+        for (int offset = -2; offset <= 2; offset++) {
             int index = (centerIndex + offset + wheelSize) % wheelSize;
             window.add(RouletteNumbers.WHEEL_ORDER.get(index));
         }

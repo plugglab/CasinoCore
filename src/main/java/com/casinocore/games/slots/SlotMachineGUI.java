@@ -1,6 +1,7 @@
 package com.casinocore.games.slots;
 
 import com.casinocore.core.CasinoPlugin;
+import com.casinocore.gui.GuiNavigation;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -19,8 +20,12 @@ public class SlotMachineGUI implements InventoryHolder {
     private static final int RESULT_1 = 19;
     private static final int RESULT_2 = 22;
     private static final int RESULT_3 = 25;
+    private static final int LEVER_SLOT = 13;
+    private static final int SPIN_AGAIN_SLOT = 23;
+    private static final int BACK_SLOT = 26;
 
     private final CasinoPlugin plugin;
+    private final SlotMachineGame game;
     private final Player player;
     private final double bet;
     private final Inventory inventory;
@@ -29,8 +34,9 @@ public class SlotMachineGUI implements InventoryHolder {
     private boolean spinning;
     private SlotSymbol[] finalResults;
 
-    public SlotMachineGUI(CasinoPlugin plugin, Player player, double bet) {
+    public SlotMachineGUI(CasinoPlugin plugin, SlotMachineGame game, Player player, double bet) {
         this.plugin = plugin;
+        this.game = game;
         this.player = player;
         this.bet = bet;
         this.inventory = Bukkit.createInventory(this, 27, Component.text("Slot Machine"));
@@ -52,7 +58,7 @@ public class SlotMachineGUI implements InventoryHolder {
         inventory.setItem(9, border);
         inventory.setItem(17, border);
 
-        ItemStack questionMark = createItem(Material.PAPER, "Spinning", "Reels are warming up");
+        ItemStack questionMark = createItem(Material.PAPER, "Waiting", "Pull the lever");
         inventory.setItem(RESULT_1, questionMark);
         inventory.setItem(RESULT_2, questionMark);
         inventory.setItem(RESULT_3, questionMark);
@@ -61,8 +67,11 @@ public class SlotMachineGUI implements InventoryHolder {
             Material.GOLD_NUGGET,
             "Bet",
             "Amount: " + plugin.getEconomyManager().format(bet),
-            "Watch the reels closely"
+            "Pull the lever to spin"
         ));
+        inventory.setItem(LEVER_SLOT, createItem(Material.LEVER, "Pull Lever", "Start the reels"));
+        inventory.setItem(SPIN_AGAIN_SLOT, createItem(Material.LIME_DYE, "Spin Again", "Available after a spin"));
+        inventory.setItem(BACK_SLOT, createItem(Material.BARRIER, "Back", "Return to the casino hub"));
     }
 
     public void open() {
@@ -76,6 +85,7 @@ public class SlotMachineGUI implements InventoryHolder {
         }
 
         spinning = true;
+        inventory.setItem(LEVER_SLOT, createItem(Material.LEVER, "Lever Locked", "Spin in progress"));
         finalResults = new SlotSymbol[] {
             SlotSymbol.getRandomSymbol(random),
             SlotSymbol.getRandomSymbol(random),
@@ -105,7 +115,7 @@ public class SlotMachineGUI implements InventoryHolder {
 
         String summary = multiplier > 0
             ? "Profit: +" + plugin.getEconomyManager().format(winnings - bet)
-            : "Try another spin";
+            : "Pull again if you want another shot";
         inventory.setItem(4, createItem(
             multiplier > 0 ? Material.EMERALD : Material.REDSTONE,
             multiplier > 0 ? "You Win" : "No Match",
@@ -113,8 +123,15 @@ public class SlotMachineGUI implements InventoryHolder {
             "Bet: " + plugin.getEconomyManager().format(bet),
             summary
         ));
-        inventory.setItem(22, createItem(Material.BARRIER, "Close", "Leave the machine"));
+        inventory.setItem(LEVER_SLOT, createItem(Material.LEVER, "Pull Lever", "Spin another round"));
+        inventory.setItem(SPIN_AGAIN_SLOT, createItem(Material.LIME_DYE, "Spin Again", "Bet the same amount again"));
+        inventory.setItem(BACK_SLOT, createItem(Material.BARRIER, "Back", "Return to the casino hub"));
         spinning = false;
+    }
+
+    public void backToHub() {
+        player.closeInventory();
+        GuiNavigation.openHub(plugin, player);
     }
 
     public void playSound(Sound sound, float pitch) {
@@ -129,8 +146,16 @@ public class SlotMachineGUI implements InventoryHolder {
         return plugin;
     }
 
+    public SlotMachineGame getGame() {
+        return game;
+    }
+
     public boolean isSpinning() {
         return spinning;
+    }
+
+    public double getBet() {
+        return bet;
     }
 
     public SlotSymbol[] getFinalResults() {
@@ -141,9 +166,9 @@ public class SlotMachineGUI implements InventoryHolder {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(name);
+            meta.displayName(Component.text(name));
             if (lore.length > 0) {
-                meta.setLore(Arrays.asList(lore));
+                meta.lore(Arrays.stream(lore).map(Component::text).toList());
             }
             item.setItemMeta(meta);
         }

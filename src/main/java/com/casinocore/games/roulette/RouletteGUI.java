@@ -1,6 +1,7 @@
 package com.casinocore.games.roulette;
 
 import com.casinocore.core.CasinoPlugin;
+import com.casinocore.gui.GuiNavigation;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -53,25 +54,29 @@ public class RouletteGUI implements InventoryHolder {
             inventory.setItem(slot, filler);
         }
 
-        inventory.setItem(4, item(Material.COMPASS, "Roulette Wheel", "Animated result lane above"));
-        inventory.setItem(49, item(Material.GOLD_INGOT, "Bet", plugin.getEconomyManager().format(betAmount)));
-        inventory.setItem(48, item(Material.BARRIER, "Clear Selection", "Remove current bet"));
-        inventory.setItem(50, item(Material.LIME_DYE, "Spin", "Select a bet first"));
+        inventory.setItem(4, item(Material.COMPASS, "Roulette Wheel", "Select a bet, then spin"));
+        inventory.setItem(46, item(Material.PAPER, "Selected Bet", selectedBet == null ? "None" : selectedBet.getDisplayLabel(), "Bet: " + plugin.getEconomyManager().format(betAmount)));
+        inventory.setItem(48, item(Material.BARRIER, "Clear", "Remove current selection"));
+        inventory.setItem(49, createSimpleItem("2nd 12", RouletteBetType.SECOND_DOZEN, Material.LIGHT_BLUE_WOOL));
+        inventory.setItem(50, item(Material.LIME_DYE, "Spin", "Launch the wheel"));
+        inventory.setItem(53, item(Material.BARRIER, "Back", spinning ? "Available after the spin" : "Return to the casino hub"));
 
-        inventory.setItem(51, item(Material.RED_WOOL, "Red", payoutLine(RouletteBetType.RED)));
-        inventory.setItem(52, item(Material.BLACK_WOOL, "Black", payoutLine(RouletteBetType.BLACK)));
-        inventory.setItem(53, item(Material.IRON_INGOT, "Even", payoutLine(RouletteBetType.EVEN), "Odd is on slot 47"));
-        inventory.setItem(47, item(Material.COAL, "Odd", payoutLine(RouletteBetType.ODD)));
+        inventory.setItem(47, createSimpleItem("Odd", RouletteBetType.ODD, Material.COAL));
+        inventory.setItem(51, createSimpleItem("Red", RouletteBetType.RED, Material.RED_WOOL));
+        inventory.setItem(52, createSimpleItem("Black", RouletteBetType.BLACK, Material.BLACK_WOOL));
+        inventory.setItem(45, createSimpleItem("Even", RouletteBetType.EVEN, Material.IRON_INGOT));
+        inventory.setItem(0, createSimpleItem("1-18", RouletteBetType.LOW, Material.LIME_STAINED_GLASS_PANE));
+        inventory.setItem(1, createSimpleItem("1st 12", RouletteBetType.FIRST_DOZEN, Material.WHITE_WOOL));
+        inventory.setItem(7, createSimpleItem("3rd 12", RouletteBetType.THIRD_DOZEN, Material.PURPLE_WOOL));
+        inventory.setItem(8, createSimpleItem("19-36", RouletteBetType.HIGH, Material.ORANGE_STAINED_GLASS_PANE));
 
-        for (int i = 0; i < RouletteNumbers.WHEEL_ORDER.size() && i < 9; i++) {
-            inventory.setItem(i, createWheelItem(RouletteNumbers.WHEEL_ORDER.get(i), i == 4));
+        for (int i = 0; i < 5; i++) {
+            inventory.setItem(i + 2, createWheelItem(RouletteNumbers.WHEEL_ORDER.get(i), i == 2));
         }
 
         for (int number = 0; number <= 36; number++) {
             inventory.setItem(NUMBER_SLOTS[number], createNumberItem(number, isSelectedNumber(number)));
         }
-
-        updateSelectionDisplay();
     }
 
     public Player getPlayer() {
@@ -112,39 +117,28 @@ public class RouletteGUI implements InventoryHolder {
         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.7f, 0.8f);
     }
 
+    public void back() {
+        player.closeInventory();
+        GuiNavigation.openHub(plugin, player);
+    }
+
     public void updateWheelWindow(List<Integer> visibleNumbers) {
-        for (int slot = 0; slot < 9; slot++) {
+        for (int slot = 0; slot < 5; slot++) {
             int value = visibleNumbers.get(slot);
-            inventory.setItem(slot, createWheelItem(value, slot == 4));
+            inventory.setItem(slot + 2, createWheelItem(value, slot == 2));
         }
     }
 
     public void showResult(int resultNumber, boolean won, double multiplier, double winnings) {
-        inventory.setItem(49, item(
-            won ? Material.EMERALD : Material.REDSTONE,
-            won ? "Result: WIN" : "Result: LOSS",
+        inventory.setItem(46, item(
+            won ? Material.EMERALD_BLOCK : Material.REDSTONE_BLOCK,
+            won ? "WIN" : "LOSS",
             "Ball landed on " + resultNumber,
             "Bet: " + (selectedBet == null ? "-" : selectedBet.getDisplayLabel()),
             won ? "Paid " + plugin.getEconomyManager().format(winnings) + " (" + multiplier + "x)" : "No payout"
         ));
-        inventory.setItem(50, item(Material.LIGHT_GRAY_DYE, "Spin Complete", "Close or place another bet"));
-    }
-
-    private void updateSelectionDisplay() {
-        String label = selectedBet == null ? "None" : selectedBet.getDisplayLabel();
-        inventory.setItem(46, item(Material.PAPER, "Selected Bet", label));
-        if (selectedBet != null) {
-            RouletteBetType type = selectedBet.getType();
-            if (type == RouletteBetType.RED) {
-                inventory.setItem(51, item(Material.RED_WOOL, "Red", "Selected", payoutLine(type)));
-            } else if (type == RouletteBetType.BLACK) {
-                inventory.setItem(52, item(Material.BLACK_WOOL, "Black", "Selected", payoutLine(type)));
-            } else if (type == RouletteBetType.EVEN) {
-                inventory.setItem(53, item(Material.IRON_INGOT, "Even", "Selected", payoutLine(type)));
-            } else if (type == RouletteBetType.ODD) {
-                inventory.setItem(47, item(Material.COAL, "Odd", "Selected", payoutLine(type)));
-            }
-        }
+        inventory.setItem(50, item(Material.LIGHT_GRAY_DYE, "Spin Complete", "Pick another bet or go back"));
+        inventory.setItem(53, item(Material.BARRIER, "Back", "Return to the casino hub"));
     }
 
     private boolean isSelectedNumber(int number) {
@@ -154,26 +148,27 @@ public class RouletteGUI implements InventoryHolder {
             && selectedBet.getNumber() == number;
     }
 
+    private ItemStack createSimpleItem(String name, RouletteBetType type, Material baseMaterial) {
+        boolean selected = selectedBet != null && selectedBet.getType() == type;
+        return item(selected ? Material.EMERALD_BLOCK : baseMaterial, name, payoutLine(type), selected ? "Selected" : "Click to bet");
+    }
+
     private ItemStack createNumberItem(int number, boolean selected) {
         Material material;
         String colorName;
 
         if (number == 0) {
-            material = Material.GREEN_WOOL;
+            material = selected ? Material.EMERALD_BLOCK : Material.GREEN_WOOL;
             colorName = "Green";
         } else if (RouletteNumbers.isRed(number)) {
-            material = Material.RED_WOOL;
+            material = selected ? Material.GOLD_BLOCK : Material.RED_WOOL;
             colorName = "Red";
         } else {
-            material = Material.BLACK_WOOL;
+            material = selected ? Material.GOLD_BLOCK : Material.BLACK_WOOL;
             colorName = "Black";
         }
 
-        List<String> lore = new ArrayList<>();
-        lore.add(colorName + " " + number);
-        lore.add(payoutLine(RouletteBetType.SINGLE_NUMBER));
-        lore.add(selected ? "Selected" : "Click to bet");
-        return item(material, String.valueOf(number), lore.toArray(new String[0]));
+        return item(material, String.valueOf(number), colorName + " " + number, payoutLine(RouletteBetType.SINGLE_NUMBER), selected ? "Selected" : "Click to bet");
     }
 
     private ItemStack createWheelItem(int number, boolean center) {

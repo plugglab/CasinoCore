@@ -12,6 +12,10 @@ public class BlackjackHand {
         cards.add(card);
     }
 
+    public BlackjackCard removeLast() {
+        return cards.remove(cards.size() - 1);
+    }
+
     public List<BlackjackCard> getCards() {
         return Collections.unmodifiableList(cards);
     }
@@ -59,5 +63,9 @@ public class BlackjackHand {
 
     public boolean isBust() {
         return getBestValue() > 21;
+    }
+
+    public boolean canSplit() {
+        return cards.size() == 2 && cards.get(0).value() == cards.get(1).value();
     }
 }
