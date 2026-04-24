@@ -177,6 +177,26 @@ games:
       reveal-steps: 10
     house-edge-adjustment-percent: 2.5
 
+  doubleup:
+    enabled: true
+    description: "Cash out now or risk everything to double again."
+    limits:
+      min-bet: 10.0
+      max-bet: 3500.0
+    chance-to-double-percent: 50.0
+    starting-multiplier: 1.6
+    house-edge-adjustment-percent: 4.0
+
+  treasure:
+    enabled: true
+    description: "Pick one chest from the row and hope it holds the treasure."
+    limits:
+      min-bet: 10.0
+      max-bet: 3000.0
+    payouts:
+      win: 4.2
+    house-edge-adjustment-percent: 3.0
+
   roulette:
     enabled: true
     description: "Pick a number, color, or parity in the roulette GUI."

@@ -7,6 +7,8 @@ import com.casinocore.games.blackjack.BlackjackListener;
 import com.casinocore.games.commands.PlayCommand;
 import com.casinocore.games.diceroll.DiceRollGame;
 import com.casinocore.games.diceroll.DiceRiskListener;
+import com.casinocore.games.doubleup.DoubleUpGame;
+import com.casinocore.games.doubleup.DoubleUpListener;
 import com.casinocore.games.highlow.HighLowGame;
 import com.casinocore.games.highlow.HighLowListener;
 import com.casinocore.games.GameManager;
@@ -20,6 +22,8 @@ import com.casinocore.games.impl.LotteryGame;
 import com.casinocore.games.impl.LotteryPromptListener;
 import com.casinocore.games.impl.WheelGame;
 import com.casinocore.games.impl.WheelListener;
+import com.casinocore.games.treasure.TreasureGame;
+import com.casinocore.games.treasure.TreasureListener;
 import com.casinocore.gui.CasinoHubListener;
 import com.casinocore.gui.CustomBetListener;
 import com.casinocore.games.roulette.RouletteGame;
@@ -52,6 +56,8 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
     private HorseRaceGame horseRaceGame;
     private WheelGame wheelGame;
     private HighLowGame highLowGame;
+    private DoubleUpGame doubleUpGame;
+    private TreasureGame treasureGame;
 
     @Override
     public void onEnable() {
@@ -130,6 +136,10 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
         gameManager.registerCasinoGame(wheelGame);
         highLowGame = new HighLowGame(this);
         gameManager.registerCasinoGame(highLowGame);
+        doubleUpGame = new DoubleUpGame(this);
+        gameManager.registerCasinoGame(doubleUpGame);
+        treasureGame = new TreasureGame(this);
+        gameManager.registerCasinoGame(treasureGame);
     }
 
     private void registerCommands() {
@@ -168,6 +178,12 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
         }
         if (highLowGame != null) {
             getServer().getPluginManager().registerEvents(new HighLowListener(highLowGame), this);
+        }
+        if (doubleUpGame != null) {
+            getServer().getPluginManager().registerEvents(new DoubleUpListener(doubleUpGame), this);
+        }
+        if (treasureGame != null) {
+            getServer().getPluginManager().registerEvents(new TreasureListener(treasureGame), this);
         }
     }
 

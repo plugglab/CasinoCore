@@ -73,6 +73,7 @@ public class SlotMachineGame extends BaseCasinoGame {
 
             double multiplier = SlotSymbol.calculateMultiplier(results);
             double winnings = bet * multiplier;
+            boolean jackpot = isJackpot(results);
 
             if (multiplier > 0) {
                 Bukkit.getScheduler().runTask(plugin.getPlugin(), () -> {
@@ -82,19 +83,20 @@ public class SlotMachineGame extends BaseCasinoGame {
                         String winMessage = plugin.getUxManager().formatGameMessage(
                             "green",
                             "Slot Machine Win",
-                            "<white>Symbols:</white> <gold>" + results[0].getDisplayName() + " " +
-                                results[1].getDisplayName() + " " + results[2].getDisplayName() + "</gold>",
+                            "<white>Symbols:</white> " + results[0].getDisplayName() + " " +
+                                results[1].getDisplayName() + " " + results[2].getDisplayName(),
                             "<white>Multiplier:</white> <gold>" + multiplier + "x</gold>",
                             "<white>Winnings:</white> <green>" + plugin.getEconomyManager().format(winnings) + "</green>",
                             "<white>Profit:</white> <green>+" + plugin.getEconomyManager().format(profit) + "</green>"
                         );
                         sendMessage(player, winMessage);
-                        player.sendMessage(" ");
-                        plugin.getMessageManager().broadcast(
-                            "<gold><bold>[Slots]</bold></gold> <white>" + player.getName() + "</white> hit <green>" +
-                                plugin.getEconomyManager().format(winnings) + "</green> <gray>with</gray> <gold>" +
-                                results[0].getDisplayName() + " " + results[1].getDisplayName() + " " + results[2].getDisplayName() + "</gold>"
-                        );
+                        if (jackpot) {
+                            plugin.getMessageManager().broadcast(
+                                "<gold><bold>[Slots Jackpot]</bold></gold> <white>" + player.getName() + "</white> hit <green>" +
+                                    plugin.getEconomyManager().format(winnings) + "</green> <gray>with</gray> " +
+                                    results[0].getDisplayName() + " " + results[1].getDisplayName() + " " + results[2].getDisplayName()
+                            );
+                        }
                     } else {
                         sendMessage(player, "<red>Error processing winnings. Contact an administrator.</red>");
                     }
@@ -124,5 +126,12 @@ public class SlotMachineGame extends BaseCasinoGame {
     public void onDisable() {
         super.onDisable();
         openMachines.clear();
+    }
+
+    private boolean isJackpot(SlotSymbol[] results) {
+        return results.length == 3
+            && results[0] == SlotSymbol.DIAMOND
+            && results[1] == SlotSymbol.DIAMOND
+            && results[2] == SlotSymbol.DIAMOND;
     }
 }

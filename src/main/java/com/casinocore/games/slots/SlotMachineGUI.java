@@ -9,6 +9,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -50,7 +51,7 @@ public class SlotMachineGUI implements InventoryHolder {
             inventory.setItem(i, filler);
         }
 
-        ItemStack border = createItem(Material.YELLOW_STAINED_GLASS_PANE, "Casino", "");
+        ItemStack border = createItem(Material.YELLOW_STAINED_GLASS_PANE, "<gold>Casino</gold>", "");
         for (int i = 0; i < 9; i++) {
             inventory.setItem(i, border);
             inventory.setItem(18 + i, border);
@@ -58,20 +59,20 @@ public class SlotMachineGUI implements InventoryHolder {
         inventory.setItem(9, border);
         inventory.setItem(17, border);
 
-        ItemStack questionMark = createItem(Material.PAPER, "Waiting", "Pull the lever");
+        ItemStack questionMark = createItem(Material.PAPER, "<yellow>Waiting</yellow>", "<gray>Pull the lever</gray>");
         inventory.setItem(RESULT_1, questionMark);
         inventory.setItem(RESULT_2, questionMark);
         inventory.setItem(RESULT_3, questionMark);
 
         inventory.setItem(4, createItem(
             Material.GOLD_NUGGET,
-            "Bet",
-            "Amount: " + plugin.getEconomyManager().format(bet),
-            "Pull the lever to spin"
+            "<gold><bold>Bet</bold></gold>",
+            "<gray>Amount:</gray> <gold>" + plugin.getEconomyManager().format(bet) + "</gold>",
+            "<gray>Pull the lever to spin</gray>"
         ));
-        inventory.setItem(LEVER_SLOT, createItem(Material.LEVER, "Pull Lever", "Start the reels"));
-        inventory.setItem(SPIN_AGAIN_SLOT, createItem(Material.LIME_DYE, "Spin Again", "Available after a spin"));
-        inventory.setItem(BACK_SLOT, createItem(Material.BARRIER, "Back", "Return to the casino hub"));
+        inventory.setItem(LEVER_SLOT, createItem(Material.LEVER, "<green>Pull Lever</green>", "<gray>Start the reels</gray>"));
+        inventory.setItem(SPIN_AGAIN_SLOT, createItem(Material.LIME_DYE, "<aqua>Spin Again</aqua>", "<gray>Available after a spin</gray>"));
+        inventory.setItem(BACK_SLOT, createItem(Material.BARRIER, "<red>Back</red>", "<gray>Return to the casino hub</gray>"));
     }
 
     public void open() {
@@ -85,7 +86,7 @@ public class SlotMachineGUI implements InventoryHolder {
         }
 
         spinning = true;
-        inventory.setItem(LEVER_SLOT, createItem(Material.LEVER, "Lever Locked", "Spin in progress"));
+        inventory.setItem(LEVER_SLOT, createItem(Material.LEVER, "<red>Lever Locked</red>", "<gray>Spin in progress</gray>"));
         finalResults = new SlotSymbol[] {
             SlotSymbol.getRandomSymbol(random),
             SlotSymbol.getRandomSymbol(random),
@@ -113,19 +114,18 @@ public class SlotMachineGUI implements InventoryHolder {
             updateReel(i, results[i]);
         }
 
-        String summary = multiplier > 0
-            ? "Profit: +" + plugin.getEconomyManager().format(winnings - bet)
-            : "Pull again if you want another shot";
         inventory.setItem(4, createItem(
             multiplier > 0 ? Material.EMERALD : Material.REDSTONE,
-            multiplier > 0 ? "You Win" : "No Match",
-            "Outcome: " + SlotSymbol.getOutcomeDescription(results),
-            "Bet: " + plugin.getEconomyManager().format(bet),
-            summary
+            multiplier > 0 ? "<green><bold>You Win</bold></green>" : "<red><bold>No Match</bold></red>",
+            "<gray>Outcome:</gray> " + SlotSymbol.getOutcomeDescription(results),
+            "<gray>Bet:</gray> <gold>" + plugin.getEconomyManager().format(bet) + "</gold>",
+            multiplier > 0
+                ? "<gray>Profit:</gray> <green>+" + plugin.getEconomyManager().format(winnings - bet) + "</green>"
+                : "<gray>Pull again if you want another shot</gray>"
         ));
-        inventory.setItem(LEVER_SLOT, createItem(Material.LEVER, "Pull Lever", "Spin another round"));
-        inventory.setItem(SPIN_AGAIN_SLOT, createItem(Material.LIME_DYE, "Spin Again", "Bet the same amount again"));
-        inventory.setItem(BACK_SLOT, createItem(Material.BARRIER, "Back", "Return to the casino hub"));
+        inventory.setItem(LEVER_SLOT, createItem(Material.LEVER, "<green>Pull Lever</green>", "<gray>Spin another round</gray>"));
+        inventory.setItem(SPIN_AGAIN_SLOT, createItem(Material.LIME_DYE, "<aqua>Spin Again</aqua>", "<gray>Bet the same amount again</gray>"));
+        inventory.setItem(BACK_SLOT, createItem(Material.BARRIER, "<red>Back</red>", "<gray>Return to the casino hub</gray>"));
         spinning = false;
     }
 
@@ -166,10 +166,11 @@ public class SlotMachineGUI implements InventoryHolder {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text(name));
+            meta.displayName(plugin.getMessageManager().parse(name));
             if (lore.length > 0) {
-                meta.lore(Arrays.stream(lore).map(Component::text).toList());
+                meta.lore(Arrays.stream(lore).map(plugin.getMessageManager()::parse).toList());
             }
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             item.setItemMeta(meta);
         }
         return item;

@@ -1,28 +1,32 @@
 package com.casinocore.games.slots;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 public enum SlotSymbol {
-    DIAMOND("§b§lDiamond", Material.DIAMOND, 1, "§b§lJACKPOT SYMBOL"),
-    EMERALD("§a§lEmerald", Material.EMERALD, 5, "§aHigh Value"),
-    GOLD_INGOT("§6§lGold", Material.GOLD_INGOT, 8, "§6High Value"),
-    IRON_INGOT("§7§lIron", Material.IRON_INGOT, 12, "§7Medium Value"),
-    REDSTONE("§c§lRedstone", Material.REDSTONE, 15, "§cMedium Value"),
-    LAPIS("§9§lLapis", Material.LAPIS_LAZULI, 15, "§9Medium Value"),
-    COAL("§8§lCoal", Material.COAL, 20, "§8Low Value"),
-    APPLE("§c§lApple", Material.APPLE, 24, "§cLow Value");
+    DIAMOND("Diamond", "<aqua><bold>Diamond</bold></aqua>", Material.DIAMOND, 1, "Jackpot Symbol"),
+    EMERALD("Emerald", "<green><bold>Emerald</bold></green>", Material.EMERALD, 5, "High Value"),
+    GOLD_INGOT("Gold", "<gold><bold>Gold</bold></gold>", Material.GOLD_INGOT, 8, "High Value"),
+    IRON_INGOT("Iron", "<gray><bold>Iron</bold></gray>", Material.IRON_INGOT, 12, "Medium Value"),
+    REDSTONE("Redstone", "<red><bold>Redstone</bold></red>", Material.REDSTONE, 15, "Medium Value"),
+    LAPIS("Lapis", "<blue><bold>Lapis</bold></blue>", Material.LAPIS_LAZULI, 15, "Medium Value"),
+    COAL("Coal", "<dark_gray><bold>Coal</bold></dark_gray>", Material.COAL, 20, "Low Value"),
+    APPLE("Apple", "<red><bold>Apple</bold></red>", Material.APPLE, 24, "Low Value");
 
+    private final String plainName;
     private final String displayName;
     private final Material material;
     private final int weight;
     private final String lore;
 
-    SlotSymbol(String displayName, Material material, int weight, String lore) {
+    SlotSymbol(String plainName, String displayName, Material material, int weight, String lore) {
+        this.plainName = plainName;
         this.displayName = displayName;
         this.material = material;
         this.weight = weight;
@@ -31,6 +35,10 @@ public enum SlotSymbol {
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    public String getPlainName() {
+        return plainName;
     }
 
     public Material getMaterial() {
@@ -45,8 +53,9 @@ public enum SlotSymbol {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(displayName);
-            meta.setLore(Arrays.asList(lore));
+            meta.displayName(Component.text(plainName));
+            meta.lore(List.of(Component.text(lore)));
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             item.setItemMeta(meta);
         }
         return item;
@@ -114,20 +123,20 @@ public enum SlotSymbol {
 
     public static String getOutcomeDescription(SlotSymbol[] symbols) {
         if (symbols.length != 3) {
-            return "Invalid";
+            return "<red>Invalid</red>";
         }
 
         if (symbols[0] == symbols[1] && symbols[1] == symbols[2]) {
             if (symbols[0] == DIAMOND) {
-                return "§6§lJACKPOT!";
+                return "<gold><bold>JACKPOT!</bold></gold>";
             }
-            return "§a§lTHREE OF A KIND!";
+            return "<green><bold>THREE OF A KIND!</bold></green>";
         }
 
         if (symbols[0] == symbols[1] || symbols[1] == symbols[2] || symbols[0] == symbols[2]) {
-            return "§e§lTWO MATCH!";
+            return "<yellow><bold>TWO MATCH!</bold></yellow>";
         }
 
-        return "§c§lNO MATCH";
+        return "<red><bold>NO MATCH</bold></red>";
     }
 }
