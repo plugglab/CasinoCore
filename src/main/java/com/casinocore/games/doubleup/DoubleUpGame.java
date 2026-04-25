@@ -26,7 +26,7 @@ public class DoubleUpGame extends BaseCasinoGame {
                 return false;
             }
             if (sessions.containsKey(player.getUniqueId())) {
-                sendMessage(player, "<yellow>You already have a Double Up table open.</yellow>");
+                sendMessage(player, t("doubleup.already-open"));
                 return false;
             }
             if (!withdrawBet(player, bet)) {
@@ -77,23 +77,21 @@ public class DoubleUpGame extends BaseCasinoGame {
         sessions.remove(player.getUniqueId());
         if (payWinnings(player, pot)) {
             handleWin(player, baseBet, pot);
-            sendMessage(player,
-                "<gold><bold>Double Up Cashout</bold></gold>\n" +
-                    "<gray>Rounds Survived:</gray> <white>" + streak + "</white>\n" +
-                    "<gray>Payout:</gray> <green>" + plugin.getEconomyManager().format(pot) + "</green>"
-            );
+            sendMessage(player, plugin.getLocaleManager().formatText("doubleup.cashout", Map.of(
+                "streak", String.valueOf(streak),
+                "payout", plugin.getEconomyManager().format(pot)
+            )));
         } else {
-            sendMessage(player, "<red>Failed to pay your Double Up cashout.</red>");
+            sendMessage(player, t("doubleup.cashout-failed"));
         }
     }
 
     public void lose(Player player, double baseBet, double pot) {
         sessions.remove(player.getUniqueId());
         handleLoss(player, baseBet);
-        sendMessage(player,
-            "<red><bold>Double Up Failed</bold></red>\n" +
-                "<gray>Pot Lost:</gray> <red>" + plugin.getEconomyManager().format(pot) + "</red>"
-        );
+        sendMessage(player, plugin.getLocaleManager().formatText("doubleup.failed", Map.of(
+            "amount", plugin.getEconomyManager().format(pot)
+        )));
     }
 
     public void handleClose(DoubleUpGUI gui) {
@@ -106,5 +104,9 @@ public class DoubleUpGame extends BaseCasinoGame {
                 gui.getPlayer().openInventory(gui.getInventory());
             }
         }, 1L);
+    }
+
+    private String t(String key) {
+        return plugin.getLocaleManager().getText(key);
     }
 }

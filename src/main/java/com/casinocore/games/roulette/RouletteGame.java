@@ -33,7 +33,7 @@ public class RouletteGame extends BaseCasinoGame {
             }
 
             if (openTables.containsKey(player.getUniqueId())) {
-                sendMessage(player, "<yellow>You already have a roulette table open.</yellow>");
+                sendLocaleMessage(player, "roulette.already-open");
                 return false;
             }
 
@@ -117,7 +117,7 @@ public class RouletteGame extends BaseCasinoGame {
     private void startSpin(Player player, RouletteGUI gui) {
         RouletteBet bet = gui.getSelectedBet();
         if (bet == null) {
-            sendMessage(player, "<yellow>Select a roulette bet before spinning.</yellow>");
+            sendLocaleMessage(player, "roulette.select-bet");
             return;
         }
 
@@ -143,7 +143,7 @@ public class RouletteGame extends BaseCasinoGame {
             double winnings = gui.getBetAmount() * multiplier;
 
             if (won && !payWinnings(player, winnings)) {
-                sendMessage(player, "<red>Failed to pay roulette winnings. Contact an administrator.</red>");
+                sendLocaleMessage(player, "roulette.payout-failed");
                 winnings = 0.0;
                 won = false;
                 multiplier = 0.0;
@@ -174,19 +174,23 @@ public class RouletteGame extends BaseCasinoGame {
         String color = resultNumber == 0 ? "green" : RouletteNumbers.isRed(resultNumber) ? "red" : "gray";
         if (won) {
             sendMessage(player,
-                "<green><bold>Roulette Win</bold></green>\n" +
-                "<gray>Bet:</gray> <white>" + bet.getDisplayLabel() + "</white>\n" +
-                "<gray>Result:</gray> <" + color + ">" + resultNumber + "</" + color + ">\n" +
-                "<gray>Multiplier:</gray> <gold>" + multiplier + "x</gold>\n" +
-                "<gray>Bet:</gray> <white>" + plugin.getEconomyManager().format(stake) + "</white>\n" +
-                "<gray>Winnings:</gray> <gold>" + plugin.getEconomyManager().format(winnings) + "</gold>"
+                plugin.getLocaleManager().formatText("roulette.win-message", Map.of(
+                    "bet", bet.getDisplayLabel(),
+                    "color", color,
+                    "result", String.valueOf(resultNumber),
+                    "multiplier", multiplier + "x",
+                    "stake", plugin.getEconomyManager().format(stake),
+                    "winnings", plugin.getEconomyManager().format(winnings)
+                ))
             );
         } else {
             sendMessage(player,
-                "<red><bold>Roulette Loss</bold></red>\n" +
-                "<gray>Bet:</gray> <white>" + bet.getDisplayLabel() + "</white>\n" +
-                "<gray>Result:</gray> <" + color + ">" + resultNumber + "</" + color + ">\n" +
-                "<gray>Lost:</gray> <white>" + plugin.getEconomyManager().format(stake) + "</white>"
+                plugin.getLocaleManager().formatText("roulette.loss-message", Map.of(
+                    "bet", bet.getDisplayLabel(),
+                    "color", color,
+                    "result", String.valueOf(resultNumber),
+                    "stake", plugin.getEconomyManager().format(stake)
+                ))
             );
         }
     }

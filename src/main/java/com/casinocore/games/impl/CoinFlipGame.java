@@ -42,7 +42,7 @@ public class CoinFlipGame extends BaseCasinoGame {
             }
 
             if (hasActiveOffer(creator.getUniqueId())) {
-                sendMessage(creator, "<yellow>You already have an active coinflip offer.</yellow>");
+                sendLocaleMessage(creator, "coinflip.already-active");
                 return false;
             }
 
@@ -60,11 +60,10 @@ public class CoinFlipGame extends BaseCasinoGame {
             long expireTicks = getOfferExpirySeconds() * 20L;
             Bukkit.getScheduler().runTaskLater(plugin.getPlugin(), () -> expireOffer(offer.getCreatorId()), expireTicks);
 
-            sendMessage(creator,
-                "<gold><bold>Coinflip Created</bold></gold>\n" +
-                "<gray>Bet:</gray> <white>" + plugin.getEconomyManager().format(bet) + "</white>\n" +
-                "<gray>Join:</gray> <white>/play coinflip join " + creator.getName() + "</white>"
-            );
+            sendLocaleMessage(creator, "coinflip.created", Map.of(
+                "bet", plugin.getEconomyManager().format(bet),
+                "creator", creator.getName()
+            ));
             return true;
         } catch (Exception e) {
             handleGameError(creator, bet, e, betWithdrawn);
@@ -75,23 +74,23 @@ public class CoinFlipGame extends BaseCasinoGame {
     public boolean joinOffer(Player joiner, String creatorName) {
         Player creator = Bukkit.getPlayerExact(creatorName);
         if (creator == null) {
-            sendMessage(joiner, "<red>That player is not online.</red>");
+            sendLocaleMessage(joiner, "coinflip.player-offline");
             return false;
         }
 
         CoinFlipOffer offer = offersByCreator.get(creator.getUniqueId());
         if (offer == null || offer.isLocked()) {
-            sendMessage(joiner, "<red>No joinable coinflip offer found for that player.</red>");
+            sendLocaleMessage(joiner, "coinflip.offer-not-found");
             return false;
         }
 
         if (creator.getUniqueId().equals(joiner.getUniqueId())) {
-            sendMessage(joiner, "<red>You cannot join your own coinflip.</red>");
+            sendLocaleMessage(joiner, "coinflip.cannot-join-own");
             return false;
         }
 
         if (hasActiveOffer(joiner.getUniqueId())) {
-            sendMessage(joiner, "<yellow>You already have a pending coinflip offer.</yellow>");
+            sendLocaleMessage(joiner, "coinflip.pending-offer");
             return false;
         }
 
@@ -105,7 +104,7 @@ public class CoinFlipGame extends BaseCasinoGame {
 
         synchronized (offer) {
             if (offer.isLocked() || offer.isResolved()) {
-                sendMessage(joiner, "<red>That coinflip is no longer available.</red>");
+                sendLocaleMessage(joiner, "coinflip.no-longer-available");
                 return false;
             }
 
@@ -124,13 +123,13 @@ public class CoinFlipGame extends BaseCasinoGame {
     public boolean cancelOffer(Player creator) {
         CoinFlipOffer offer = offersByCreator.get(creator.getUniqueId());
         if (offer == null) {
-            sendMessage(creator, "<red>You do not have an active coinflip offer.</red>");
+            sendLocaleMessage(creator, "coinflip.no-active-offer");
             return false;
         }
 
         synchronized (offer) {
             if (offer.isLocked()) {
-                sendMessage(creator, "<red>This coinflip is already being resolved.</red>");
+                sendLocaleMessage(creator, "coinflip.already-resolving");
                 return false;
             }
 
@@ -139,7 +138,7 @@ public class CoinFlipGame extends BaseCasinoGame {
         }
 
         payWinnings(creator, offer.getBet());
-        sendMessage(creator, "<yellow>Your coinflip offer was cancelled and refunded.</yellow>");
+        sendLocaleMessage(creator, "coinflip.cancelled");
         return true;
     }
 
@@ -152,19 +151,16 @@ public class CoinFlipGame extends BaseCasinoGame {
         }
 
         if (openOffers.isEmpty()) {
-            sendMessage(viewer, "<yellow>No open coinflip offers right now.</yellow>");
+            sendLocaleMessage(viewer, "coinflip.no-open-offers");
             return;
         }
 
-        StringBuilder message = new StringBuilder("<gold><bold>Open Coinflips</bold></gold>");
+        StringBuilder message = new StringBuilder(plugin.getLocaleManager().getText("coinflip.open-title"));
         for (CoinFlipOffer offer : openOffers) {
-            message.append("\n<gray>- </gray><white>")
-                .append(offer.getCreatorName())
-                .append("</white> <gray>for</gray> <white>")
-                .append(plugin.getEconomyManager().format(offer.getBet()))
-                .append("</white> <gray>(/play coinflip join ")
-                .append(offer.getCreatorName())
-                .append(")</gray>");
+            message.append("\n").append(plugin.getLocaleManager().formatText("coinflip.open-entry", Map.of(
+                "creator", offer.getCreatorName(),
+                "bet", plugin.getEconomyManager().format(offer.getBet())
+            )));
         }
         sendMessage(viewer, message.toString());
     }
@@ -214,11 +210,11 @@ public class CoinFlipGame extends BaseCasinoGame {
 
                 if (creator != null) {
                     payWinnings(creator, offer.getBet());
-                    sendMessage(creator, "<yellow>Coinflip refunded because a player left.</yellow>");
+                    sendLocaleMessage(creator, "coinflip.refunded-player-left");
                 }
                 if (joiner != null) {
                     payWinnings(joiner, offer.getBet());
-                    sendMessage(joiner, "<yellow>Coinflip refunded because a player left.</yellow>");
+                    sendLocaleMessage(joiner, "coinflip.refunded-player-left");
                 }
             }
         }
@@ -233,11 +229,11 @@ public class CoinFlipGame extends BaseCasinoGame {
         if (creator == null || joiner == null) {
             if (creator != null) {
                 payWinnings(creator, offer.getBet());
-                sendMessage(creator, "<yellow>Coinflip refunded because the opponent was unavailable.</yellow>");
+                sendLocaleMessage(creator, "coinflip.refunded-opponent-unavailable");
             }
             if (joiner != null) {
                 payWinnings(joiner, offer.getBet());
-                sendMessage(joiner, "<yellow>Coinflip refunded because the opponent was unavailable.</yellow>");
+                sendLocaleMessage(joiner, "coinflip.refunded-opponent-unavailable");
             }
             clearOfferIndexes(offer);
             return;
@@ -252,8 +248,8 @@ public class CoinFlipGame extends BaseCasinoGame {
         if (!paid) {
             payWinnings(creator, offer.getBet());
             payWinnings(joiner, offer.getBet());
-            sendMessage(creator, "<red>Coinflip payout failed. Both bets were refunded.</red>");
-            sendMessage(joiner, "<red>Coinflip payout failed. Both bets were refunded.</red>");
+            sendLocaleMessage(creator, "coinflip.payout-failed");
+            sendLocaleMessage(joiner, "coinflip.payout-failed");
             clearOfferIndexes(offer);
             return;
         }
@@ -261,21 +257,26 @@ public class CoinFlipGame extends BaseCasinoGame {
         handleWin(winner, offer.getBet(), payout);
         handleLoss(loser, offer.getBet());
 
-        String result = creatorWins ? "HEADS" : "TAILS";
-        String summary =
-            "<gold><bold>Coinflip Result</bold></gold>\n" +
-            "<gray>Creator:</gray> <white>" + creator.getName() + "</white>\n" +
-            "<gray>Joiner:</gray> <white>" + joiner.getName() + "</white>\n" +
-            "<gray>Flip:</gray> <white>" + result + "</white>\n" +
-            "<gray>Winner:</gray> <green>" + winner.getName() + "</green>\n" +
-            "<gray>Pot:</gray> <gold>" + plugin.getEconomyManager().format(payout) + "</gold>";
+        String result = creatorWins
+            ? plugin.getLocaleManager().getText("coinflip.result.heads")
+            : plugin.getLocaleManager().getText("coinflip.result.tails");
+        String summary = plugin.getLocaleManager().formatText("coinflip.summary", Map.of(
+            "creator", creator.getName(),
+            "joiner", joiner.getName(),
+            "flip", result,
+            "winner", winner.getName(),
+            "pot", plugin.getEconomyManager().format(payout)
+        ));
 
         sendMessage(creator, summary);
         sendMessage(joiner, summary);
-        sendMessage(loser, "<red>You lost " + plugin.getEconomyManager().format(offer.getBet()) + "</red>");
+        sendLocaleMessage(loser, "coinflip.lost", Map.of("amount", plugin.getEconomyManager().format(offer.getBet())));
         plugin.getMessageManager().broadcast(
-            "<gold><bold>[CoinFlip]</bold></gold> <white>" + winner.getName() + "</white> won <green>" +
-                plugin.getEconomyManager().format(payout) + "</green> <gray>against</gray> <white>" + loser.getName() + "</white>"
+            plugin.getLocaleManager().formatText("coinflip.broadcast-win", Map.of(
+                "winner", winner.getName(),
+                "loser", loser.getName(),
+                "amount", plugin.getEconomyManager().format(payout)
+            ))
         );
         clearOfferIndexes(offer);
         logGame(creator, offer.getBet(), true);
@@ -300,7 +301,7 @@ public class CoinFlipGame extends BaseCasinoGame {
         Player creator = Bukkit.getPlayer(creatorId);
         if (creator != null) {
             payWinnings(creator, offer.getBet());
-            sendMessage(creator, "<yellow>Your coinflip expired and was refunded.</yellow>");
+            sendLocaleMessage(creator, "coinflip.expired");
         }
     }
 

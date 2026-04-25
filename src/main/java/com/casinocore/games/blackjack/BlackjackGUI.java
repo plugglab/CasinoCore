@@ -10,11 +10,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class BlackjackGUI implements InventoryHolder {
 
@@ -31,7 +32,7 @@ public class BlackjackGUI implements InventoryHolder {
         this.plugin = plugin;
         this.player = player;
         this.state = state;
-        this.inventory = Bukkit.createInventory(this, 54, Component.text("Blackjack"));
+        this.inventory = Bukkit.createInventory(this, 54, Component.text(t("blackjack.gui.title-plain")));
         render();
     }
 
@@ -46,16 +47,16 @@ public class BlackjackGUI implements InventoryHolder {
             inventory.setItem(i, filler);
         }
 
-        inventory.setItem(4, item(Material.PAPER, "Blackjack", "Player vs Dealer"));
+        inventory.setItem(4, item(Material.PAPER, t("blackjack.gui.title"), t("blackjack.gui.subtitle")));
         inventory.setItem(22, item(
             Material.GOLD_INGOT,
-            "Table Status",
+            t("blackjack.gui.status"),
             state.getStatus(),
-            "Total Bet: " + plugin.getEconomyManager().format(state.getTotalCommittedBet())
+            f("blackjack.gui.total-bet", "amount", plugin.getEconomyManager().format(state.getTotalCommittedBet()))
         ));
 
         inventory.setItem(19, playerHeadItem(
-            "Dealer",
+            t("blackjack.gui.dealer"),
             null,
             handLine(state.getDealerHand(), state.isDealerHidden()),
             scoreLine(state.getDealerHand(), state.isDealerHidden())
@@ -63,9 +64,9 @@ public class BlackjackGUI implements InventoryHolder {
 
         renderHand(DEALER_SLOTS, state.getDealerHand(), state.isDealerHidden(), false);
 
-        renderPlayerHandSection(0, 37, PLAYER_HAND_ONE_SLOTS, "Hand 1");
+        renderPlayerHandSection(0, 37, PLAYER_HAND_ONE_SLOTS);
         if (state.hasSplitHand()) {
-            renderPlayerHandSection(1, 41, PLAYER_HAND_TWO_SLOTS, "Hand 2");
+            renderPlayerHandSection(1, 41, PLAYER_HAND_TWO_SLOTS);
         } else {
             for (int slot : PLAYER_HAND_TWO_SLOTS) {
                 inventory.setItem(slot, item(Material.BLACK_STAINED_GLASS_PANE, " "));
@@ -74,21 +75,14 @@ public class BlackjackGUI implements InventoryHolder {
         }
 
         boolean playerTurn = state.getPhase() == BlackjackTableState.Phase.PLAYER_TURN;
-        inventory.setItem(47, item(playerTurn ? Material.LIME_DYE : Material.GRAY_DYE, "Hit",
-            playerTurn ? "Draw one more card" : "Unavailable"));
-        inventory.setItem(48, item(playerTurn ? Material.YELLOW_DYE : Material.GRAY_DYE, "Stand",
-            playerTurn ? "End this hand" : "Unavailable"));
-        inventory.setItem(50, item(canSplit() ? Material.DIAMOND : Material.GRAY_DYE, "Split",
-            canSplit() ? "Split into two hands" : "Unavailable"));
-        inventory.setItem(49, item(Material.BARRIER, "Back", state.getPhase() == BlackjackTableState.Phase.ROUND_OVER
-            ? "Return to the casino hub"
-            : "Available after the round"));
+        inventory.setItem(47, item(playerTurn ? Material.LIME_DYE : Material.GRAY_DYE, t("blackjack.gui.hit"), playerTurn ? t("blackjack.gui.hit-lore") : t("blackjack.gui.unavailable")));
+        inventory.setItem(48, item(playerTurn ? Material.YELLOW_DYE : Material.GRAY_DYE, t("blackjack.gui.stand"), playerTurn ? t("blackjack.gui.stand-lore") : t("blackjack.gui.unavailable")));
+        inventory.setItem(50, item(canSplit() ? Material.DIAMOND : Material.GRAY_DYE, t("blackjack.gui.split"), canSplit() ? t("blackjack.gui.split-lore") : t("blackjack.gui.unavailable")));
+        inventory.setItem(49, item(Material.BARRIER, t("blackjack.gui.back"), state.getPhase() == BlackjackTableState.Phase.ROUND_OVER ? t("blackjack.gui.back-ready") : t("blackjack.gui.after-round")));
         inventory.setItem(51, item(
             state.getPhase() == BlackjackTableState.Phase.ROUND_OVER ? Material.LIME_CONCRETE : Material.GRAY_CONCRETE,
-            "Play Again",
-            state.getPhase() == BlackjackTableState.Phase.ROUND_OVER
-                ? "Start a new round with the same base bet"
-                : "Available after the round"
+            t("blackjack.gui.play-again"),
+            state.getPhase() == BlackjackTableState.Phase.ROUND_OVER ? t("blackjack.gui.play-again-ready") : t("blackjack.gui.after-round")
         ));
     }
 
@@ -109,21 +103,18 @@ public class BlackjackGUI implements InventoryHolder {
     }
 
     public void playResultSound(boolean win) {
-        player.playSound(player.getLocation(),
-            win ? Sound.ENTITY_PLAYER_LEVELUP : Sound.ENTITY_VILLAGER_NO,
-            1.0f,
-            win ? 1.0f : 0.8f);
+        player.playSound(player.getLocation(), win ? Sound.ENTITY_PLAYER_LEVELUP : Sound.ENTITY_VILLAGER_NO, 1.0f, win ? 1.0f : 0.8f);
     }
 
-    private void renderPlayerHandSection(int handIndex, int infoSlot, int[] cardSlots, String label) {
+    private void renderPlayerHandSection(int handIndex, int infoSlot, int[] cardSlots) {
         BlackjackHand hand = state.getPlayerHands().get(handIndex);
         boolean active = state.getActiveHandIndex() == handIndex && state.getPhase() == BlackjackTableState.Phase.PLAYER_TURN;
         inventory.setItem(infoSlot, playerHeadItem(
-            active ? "Player Hand " + (handIndex + 1) + " (Active)" : "Player Hand " + (handIndex + 1),
+            active ? f("blackjack.gui.player-hand-active", "index", String.valueOf(handIndex + 1)) : f("blackjack.gui.player-hand", "index", String.valueOf(handIndex + 1)),
             player,
-            "Bet: " + plugin.getEconomyManager().format(state.getBetForHand(handIndex)),
-            "Cards: " + hand.getCards().size(),
-            "Score: " + hand.getBestValue()
+            f("blackjack.gui.bet", "amount", plugin.getEconomyManager().format(state.getBetForHand(handIndex))),
+            f("blackjack.gui.cards", "count", String.valueOf(hand.getCards().size())),
+            f("blackjack.gui.score", "score", String.valueOf(hand.getBestValue()))
         ));
         renderHand(cardSlots, hand, false, active);
     }
@@ -139,34 +130,35 @@ public class BlackjackGUI implements InventoryHolder {
 
         List<BlackjackCard> cards = hand.getCards();
         for (int i = 0; i < cards.size() && i < slots.length; i++) {
-            if (hideSecondCard && i == 1) {
-                inventory.setItem(slots[i], hiddenCardItem());
-            } else {
-                inventory.setItem(slots[i], cardItem(cards.get(i)));
-            }
+            inventory.setItem(slots[i], hideSecondCard && i == 1 ? hiddenCardItem() : cardItem(cards.get(i)));
         }
     }
 
     private ItemStack cardItem(BlackjackCard card) {
-        return playerHeadItem("Card: " + card.rank().getDisplayName(),
-            null,
-            card.suit().getDisplayName(),
-            "Value: " + card.value());
+        return playerHeadItem(f("blackjack.gui.card-name", "rank", card.rank().getDisplayName()), null, card.suit().getDisplayName(), f("blackjack.gui.card-value", "value", String.valueOf(card.value())));
     }
 
     private ItemStack hiddenCardItem() {
-        return playerHeadItem("Hidden Card", null, "Revealed on dealer turn");
+        return playerHeadItem(t("blackjack.gui.hidden-card"), null, t("blackjack.gui.hidden-card-lore"));
     }
 
     private String handLine(BlackjackHand hand, boolean hidden) {
-        return "Cards: " + hand.getCards().size() + (hidden ? " (1 hidden)" : "");
+        return hidden ? plugin.getLocaleManager().formatText("blackjack.gui.dealer-cards-hidden", Map.of("count", String.valueOf(hand.getCards().size()))) : f("blackjack.gui.cards", "count", String.valueOf(hand.getCards().size()));
     }
 
     private String scoreLine(BlackjackHand hand, boolean hidden) {
         if (hidden && hand.getCards().size() > 1) {
-            return "Visible: " + hand.getCards().get(0).value() + "+";
+            return plugin.getLocaleManager().formatText("blackjack.gui.visible-score", Map.of("value", hand.getCards().get(0).value() + "+"));
         }
-        return "Score: " + hand.getBestValue();
+        return f("blackjack.gui.score", "score", String.valueOf(hand.getBestValue()));
+    }
+
+    private String t(String key) {
+        return plugin.getLocaleManager().getText(key);
+    }
+
+    private String f(String key, String placeholder, String value) {
+        return plugin.getLocaleManager().formatText(key, Map.of(placeholder, value));
     }
 
     private ItemStack item(Material material, String name, String... lore) {

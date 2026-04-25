@@ -15,6 +15,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class TreasureGUI implements InventoryHolder {
@@ -34,7 +35,7 @@ public class TreasureGUI implements InventoryHolder {
         this.game = game;
         this.player = player;
         this.bet = bet;
-        this.inventory = Bukkit.createInventory(this, 45, Component.text("Treasure Pick"));
+        this.inventory = Bukkit.createInventory(this, 45, Component.text(t("treasure.gui.title-plain")));
         this.winningIndex = ThreadLocalRandom.current().nextInt(CHEST_SLOTS.length);
         render();
     }
@@ -74,15 +75,15 @@ public class TreasureGUI implements InventoryHolder {
         for (int i = 0; i < inventory.getSize(); i++) {
             inventory.setItem(i, filler);
         }
-        inventory.setItem(4, item(Material.CHEST, "<gold><bold>Treasure Pick</bold></gold>",
-            "<gray>How to play:</gray> <white>Choose one chest.</white>",
-            "<gray>One chest wins 4.2x. The others are empty.</gray>",
-            "<gray>Bet:</gray> <gold>" + plugin.getEconomyManager().format(bet) + "</gold>"
+        inventory.setItem(4, item(Material.CHEST, t("treasure.gui.title"),
+            t("treasure.gui.help-1"),
+            t("treasure.gui.help-2"),
+            f("treasure.gui.bet", "amount", plugin.getEconomyManager().format(bet))
         ));
         for (int slot : CHEST_SLOTS) {
-            inventory.setItem(slot, item(Material.CHEST, "<yellow>Pick Me</yellow>", "<gray>One chest hides the treasure</gray>"));
+            inventory.setItem(slot, item(Material.CHEST, t("treasure.gui.pick"), t("treasure.gui.pick-lore")));
         }
-        inventory.setItem(40, item(Material.BARRIER, "<red>Close</red>", resolved ? "<gray>Close this table</gray>" : "<gray>Available after reveal</gray>"));
+        inventory.setItem(40, item(Material.BARRIER, t("treasure.gui.close"), resolved ? t("treasure.gui.close-lore") : t("treasure.gui.after-reveal")));
     }
 
     private void revealChoice(int selectedIndex) {
@@ -93,7 +94,7 @@ public class TreasureGUI implements InventoryHolder {
             @Override
             public void run() {
                 if (step < CHEST_SLOTS.length) {
-                    inventory.setItem(CHEST_SLOTS[step], item(Material.BARREL, "<gray>Searching...</gray>", "<gray>Checking chest " + (step + 1) + "</gray>"));
+                    inventory.setItem(CHEST_SLOTS[step], item(Material.BARREL, t("treasure.gui.searching"), f("treasure.gui.checking", "index", String.valueOf(step + 1))));
                     player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 0.4f, 0.9f + step * 0.04f);
                     step++;
                     return;
@@ -104,8 +105,8 @@ public class TreasureGUI implements InventoryHolder {
                     boolean winner = i == winningIndex;
                     inventory.setItem(CHEST_SLOTS[i], item(
                         winner ? Material.EMERALD_BLOCK : Material.COAL_BLOCK,
-                        winner ? "<green>Treasure</green>" : "<red>Empty</red>",
-                        winner ? "<gold>Winner chest</gold>" : "<gray>No luck here</gray>"
+                        winner ? t("treasure.gui.reveal-win") : t("treasure.gui.reveal-empty"),
+                        winner ? t("treasure.gui.reveal-win-lore") : t("treasure.gui.reveal-empty-lore")
                     ));
                 }
 
@@ -113,15 +114,23 @@ public class TreasureGUI implements InventoryHolder {
                 double payout = won ? bet * 4.2 : 0.0;
                 inventory.setItem(4, item(
                     won ? Material.EMERALD : Material.REDSTONE,
-                    won ? "<green><bold>You Found It</bold></green>" : "<red><bold>No Treasure</bold></red>",
-                    won ? "<gray>Payout:</gray> <green>" + plugin.getEconomyManager().format(payout) + "</green>"
-                        : "<gray>Better luck next time</gray>"
+                    won ? t("treasure.gui.result-win") : t("treasure.gui.result-loss"),
+                    won ? f("treasure.gui.payout", "amount", plugin.getEconomyManager().format(payout))
+                        : t("treasure.gui.try-again")
                 ));
-                inventory.setItem(40, item(Material.BARRIER, "<red>Close</red>", "<gray>Close this table</gray>"));
+                inventory.setItem(40, item(Material.BARRIER, t("treasure.gui.close"), t("treasure.gui.close-lore")));
                 player.playSound(player.getLocation(), won ? Sound.ENTITY_PLAYER_LEVELUP : Sound.ENTITY_VILLAGER_NO, 1.0f, won ? 1.1f : 0.8f);
                 game.resolve(player, bet, won, payout);
             }
         }.runTaskTimer(plugin.getPlugin(), 0L, 3L);
+    }
+
+    private String t(String key) {
+        return plugin.getLocaleManager().getText(key);
+    }
+
+    private String f(String key, String placeholder, String value) {
+        return plugin.getLocaleManager().formatText(key, Map.of(placeholder, value));
     }
 
     private ItemStack item(Material material, String name, String... lore) {

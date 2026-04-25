@@ -79,7 +79,7 @@ public abstract class BaseCasinoGame implements CasinoGame {
         try {
             // Check if game is enabled
             if (!isEnabled()) {
-                sendMessage(player, "<red>This game is currently disabled!</red>");
+                sendLocaleMessage(player, "game.disabled");
                 logDebug("Player " + player.getName() + " tried to play disabled game: " + name);
                 return false;
             }
@@ -109,7 +109,7 @@ public abstract class BaseCasinoGame implements CasinoGame {
         } catch (Exception e) {
             plugin.getPlugin().getLogger().log(Level.SEVERE,
                 "Error in pre-game validation for " + name + " (player: " + player.getName() + ")", e);
-            sendMessage(player, "<red>An error occurred. Please try again later.</red>");
+            sendLocaleMessage(player, "game.try-again");
             return false;
         }
     }
@@ -126,21 +126,22 @@ public abstract class BaseCasinoGame implements CasinoGame {
                 Map<String, String> placeholders = new HashMap<>();
                 placeholders.put("min", plugin.getEconomyManager().format(getMinBet()));
                 placeholders.put("game", getDisplayName());
-                sendMessage(player, "<red>Minimum bet for " + getDisplayName() + " is " +
-                    plugin.getEconomyManager().format(getMinBet()) + "</red>");
+                sendLocaleMessage(player, "game.min-bet", placeholders);
                 logDebug("Player " + player.getName() + " bet too low: " + bet + " (min: " + getMinBet() + ")");
                 return false;
             }
 
             if (bet > getMaxBet()) {
-                sendMessage(player, "<red>Maximum bet for " + getDisplayName() + " is " +
-                    plugin.getEconomyManager().format(getMaxBet()) + "</red>");
+                sendLocaleMessage(player, "game.max-bet", Map.of(
+                    "max", plugin.getEconomyManager().format(getMaxBet()),
+                    "game", getDisplayName()
+                ));
                 logDebug("Player " + player.getName() + " bet too high: " + bet + " (max: " + getMaxBet() + ")");
                 return false;
             }
 
             if (bet <= 0) {
-                sendMessage(player, "<red>Bet must be greater than zero!</red>");
+                sendLocaleMessage(player, "game.bet-positive");
                 logDebug("Player " + player.getName() + " tried negative/zero bet: " + bet);
                 return false;
             }
@@ -196,7 +197,7 @@ public abstract class BaseCasinoGame implements CasinoGame {
             boolean success = plugin.getEconomyManager().withdraw(player, amount);
 
             if (!success) {
-                sendMessage(player, "<red>Failed to process bet. Please try again.</red>");
+                sendLocaleMessage(player, "game.bet-process-failed");
                 plugin.getPlugin().getLogger().warning(
                     "Failed to withdraw bet from " + player.getName() + " (amount: " + amount + ")");
                 return false;
@@ -208,7 +209,7 @@ public abstract class BaseCasinoGame implements CasinoGame {
         } catch (Exception e) {
             plugin.getPlugin().getLogger().log(Level.SEVERE,
                 "Error withdrawing bet from " + player.getName(), e);
-            sendMessage(player, "<red>An error occurred processing your bet.</red>");
+            sendLocaleMessage(player, "game.bet-processing-error");
             return false;
         }
     }
@@ -314,7 +315,7 @@ public abstract class BaseCasinoGame implements CasinoGame {
             "Error executing game " + name + " for player " + player.getName() +
             " (bet: " + bet + ")", e);
 
-        sendMessage(player, "<red>An error occurred during the game. Please contact an administrator.</red>");
+        sendLocaleMessage(player, "game.runtime-error");
 
         if (!refundBet) {
             return;
@@ -324,7 +325,7 @@ public abstract class BaseCasinoGame implements CasinoGame {
         try {
             boolean refunded = plugin.getEconomyManager().deposit(player, bet);
             if (refunded) {
-                sendMessage(player, "<yellow>Your bet has been refunded.</yellow>");
+                sendLocaleMessage(player, "game.bet-refunded");
                 plugin.getPlugin().getLogger().info(
                     "Refunded bet to " + player.getName() + " (amount: " + bet + ")");
             } else {
@@ -365,6 +366,14 @@ public abstract class BaseCasinoGame implements CasinoGame {
             // Fallback to plain message
             player.sendMessage(message);
         }
+    }
+
+    protected void sendLocaleMessage(Player player, String key) {
+        sendLocaleMessage(player, key, Map.of());
+    }
+
+    protected void sendLocaleMessage(Player player, String key, Map<String, String> placeholders) {
+        sendMessage(player, plugin.getLocaleManager().formatText(key, placeholders));
     }
 
     /**

@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class RouletteGUI implements InventoryHolder {
 
@@ -39,7 +40,7 @@ public class RouletteGUI implements InventoryHolder {
         this.game = game;
         this.player = player;
         this.betAmount = betAmount;
-        this.inventory = Bukkit.createInventory(this, 54, Component.text("Roulette"));
+        this.inventory = Bukkit.createInventory(this, 54, Component.text(t("roulette.gui.title-plain")));
         renderBase();
     }
 
@@ -54,21 +55,21 @@ public class RouletteGUI implements InventoryHolder {
             inventory.setItem(slot, filler);
         }
 
-        inventory.setItem(4, item(Material.COMPASS, "Roulette Wheel", "Select a bet, then spin"));
-        inventory.setItem(46, item(Material.PAPER, "Selected Bet", selectedBet == null ? "None" : selectedBet.getDisplayLabel(), "Bet: " + plugin.getEconomyManager().format(betAmount)));
-        inventory.setItem(48, item(Material.BARRIER, "Clear", "Remove current selection"));
-        inventory.setItem(49, createSimpleItem("2nd 12", RouletteBetType.SECOND_DOZEN, Material.LIGHT_BLUE_WOOL));
-        inventory.setItem(50, item(Material.LIME_DYE, "Spin", "Launch the wheel"));
-        inventory.setItem(53, item(Material.BARRIER, "Back", spinning ? "Available after the spin" : "Return to the casino hub"));
+        inventory.setItem(4, item(Material.COMPASS, t("roulette.gui.wheel-title"), t("roulette.gui.wheel-subtitle")));
+        inventory.setItem(46, item(Material.PAPER, t("roulette.gui.selected-bet"), selectedBet == null ? t("roulette.gui.none") : selectedBet.getDisplayLabel(), f("roulette.gui.bet", "amount", plugin.getEconomyManager().format(betAmount))));
+        inventory.setItem(48, item(Material.BARRIER, t("roulette.gui.clear"), t("roulette.gui.clear-lore")));
+        inventory.setItem(49, createSimpleItem(t("roulette.gui.second-dozen"), RouletteBetType.SECOND_DOZEN, Material.LIGHT_BLUE_WOOL));
+        inventory.setItem(50, item(Material.LIME_DYE, t("roulette.gui.spin"), t("roulette.gui.spin-lore")));
+        inventory.setItem(53, item(Material.BARRIER, t("roulette.gui.back"), spinning ? t("roulette.gui.after-spin") : t("roulette.gui.back-lore")));
 
-        inventory.setItem(47, createSimpleItem("Odd", RouletteBetType.ODD, Material.COAL));
-        inventory.setItem(51, createSimpleItem("Red", RouletteBetType.RED, Material.RED_WOOL));
-        inventory.setItem(52, createSimpleItem("Black", RouletteBetType.BLACK, Material.BLACK_WOOL));
-        inventory.setItem(45, createSimpleItem("Even", RouletteBetType.EVEN, Material.IRON_INGOT));
-        inventory.setItem(0, createSimpleItem("1-18", RouletteBetType.LOW, Material.LIME_STAINED_GLASS_PANE));
-        inventory.setItem(1, createSimpleItem("1st 12", RouletteBetType.FIRST_DOZEN, Material.WHITE_WOOL));
-        inventory.setItem(7, createSimpleItem("3rd 12", RouletteBetType.THIRD_DOZEN, Material.PURPLE_WOOL));
-        inventory.setItem(8, createSimpleItem("19-36", RouletteBetType.HIGH, Material.ORANGE_STAINED_GLASS_PANE));
+        inventory.setItem(47, createSimpleItem(t("roulette.gui.odd"), RouletteBetType.ODD, Material.COAL));
+        inventory.setItem(51, createSimpleItem(t("roulette.gui.red"), RouletteBetType.RED, Material.RED_WOOL));
+        inventory.setItem(52, createSimpleItem(t("roulette.gui.black"), RouletteBetType.BLACK, Material.BLACK_WOOL));
+        inventory.setItem(45, createSimpleItem(t("roulette.gui.even"), RouletteBetType.EVEN, Material.IRON_INGOT));
+        inventory.setItem(0, createSimpleItem(t("roulette.gui.low"), RouletteBetType.LOW, Material.LIME_STAINED_GLASS_PANE));
+        inventory.setItem(1, createSimpleItem(t("roulette.gui.first-dozen"), RouletteBetType.FIRST_DOZEN, Material.WHITE_WOOL));
+        inventory.setItem(7, createSimpleItem(t("roulette.gui.third-dozen"), RouletteBetType.THIRD_DOZEN, Material.PURPLE_WOOL));
+        inventory.setItem(8, createSimpleItem(t("roulette.gui.high"), RouletteBetType.HIGH, Material.ORANGE_STAINED_GLASS_PANE));
 
         for (int i = 0; i < 5; i++) {
             inventory.setItem(i + 2, createWheelItem(RouletteNumbers.WHEEL_ORDER.get(i), i == 2));
@@ -132,25 +133,22 @@ public class RouletteGUI implements InventoryHolder {
     public void showResult(int resultNumber, boolean won, double multiplier, double winnings) {
         inventory.setItem(46, item(
             won ? Material.EMERALD_BLOCK : Material.REDSTONE_BLOCK,
-            won ? "WIN" : "LOSS",
-            "Ball landed on " + resultNumber,
-            "Bet: " + (selectedBet == null ? "-" : selectedBet.getDisplayLabel()),
-            won ? "Paid " + plugin.getEconomyManager().format(winnings) + " (" + multiplier + "x)" : "No payout"
+            won ? t("roulette.gui.win") : t("roulette.gui.loss"),
+            f("roulette.gui.ball-landed", "number", String.valueOf(resultNumber)),
+            f("roulette.gui.bet-selection", "bet", selectedBet == null ? "-" : selectedBet.getDisplayLabel()),
+            won ? f("roulette.gui.paid", "amount", plugin.getEconomyManager().format(winnings)) + " (" + multiplier + "x)" : t("roulette.gui.no-payout")
         ));
-        inventory.setItem(50, item(Material.LIGHT_GRAY_DYE, "Spin Complete", "Pick another bet or go back"));
-        inventory.setItem(53, item(Material.BARRIER, "Back", "Return to the casino hub"));
+        inventory.setItem(50, item(Material.LIGHT_GRAY_DYE, t("roulette.gui.spin-complete"), t("roulette.gui.spin-complete-lore")));
+        inventory.setItem(53, item(Material.BARRIER, t("roulette.gui.back"), t("roulette.gui.back-lore")));
     }
 
     private boolean isSelectedNumber(int number) {
-        return selectedBet != null
-            && selectedBet.getType() == RouletteBetType.SINGLE_NUMBER
-            && selectedBet.getNumber() != null
-            && selectedBet.getNumber() == number;
+        return selectedBet != null && selectedBet.getType() == RouletteBetType.SINGLE_NUMBER && selectedBet.getNumber() != null && selectedBet.getNumber() == number;
     }
 
     private ItemStack createSimpleItem(String name, RouletteBetType type, Material baseMaterial) {
         boolean selected = selectedBet != null && selectedBet.getType() == type;
-        return item(selected ? Material.EMERALD_BLOCK : baseMaterial, name, payoutLine(type), selected ? "Selected" : "Click to bet");
+        return item(selected ? Material.EMERALD_BLOCK : baseMaterial, name, payoutLine(type), selected ? t("roulette.gui.selected") : t("roulette.gui.click-to-bet"));
     }
 
     private ItemStack createNumberItem(int number, boolean selected) {
@@ -159,26 +157,33 @@ public class RouletteGUI implements InventoryHolder {
 
         if (number == 0) {
             material = selected ? Material.EMERALD_BLOCK : Material.GREEN_WOOL;
-            colorName = "Green";
+            colorName = t("roulette.gui.green");
         } else if (RouletteNumbers.isRed(number)) {
             material = selected ? Material.GOLD_BLOCK : Material.RED_WOOL;
-            colorName = "Red";
+            colorName = t("roulette.gui.red");
         } else {
             material = selected ? Material.GOLD_BLOCK : Material.BLACK_WOOL;
-            colorName = "Black";
+            colorName = t("roulette.gui.black");
         }
 
-        return item(material, String.valueOf(number), colorName + " " + number, payoutLine(RouletteBetType.SINGLE_NUMBER), selected ? "Selected" : "Click to bet");
+        return item(material, String.valueOf(number), colorName + " " + number, payoutLine(RouletteBetType.SINGLE_NUMBER), selected ? t("roulette.gui.selected") : t("roulette.gui.click-to-bet"));
     }
 
     private ItemStack createWheelItem(int number, boolean center) {
-        Material material = number == 0 ? Material.GREEN_STAINED_GLASS_PANE
-            : RouletteNumbers.isRed(number) ? Material.RED_STAINED_GLASS_PANE : Material.BLACK_STAINED_GLASS_PANE;
+        Material material = number == 0 ? Material.GREEN_STAINED_GLASS_PANE : RouletteNumbers.isRed(number) ? Material.RED_STAINED_GLASS_PANE : Material.BLACK_STAINED_GLASS_PANE;
         return item(material, (center ? "> " : "") + number + (center ? " <" : ""));
     }
 
     private String payoutLine(RouletteBetType type) {
-        return "Payout: " + game.getPayoutMultiplier(type) + "x";
+        return f("roulette.gui.payout", "value", game.getPayoutMultiplier(type) + "x");
+    }
+
+    private String t(String key) {
+        return plugin.getLocaleManager().getText(key);
+    }
+
+    private String f(String key, String placeholder, String value) {
+        return plugin.getLocaleManager().formatText(key, Map.of(placeholder, value));
     }
 
     private ItemStack item(Material material, String name, String... lore) {

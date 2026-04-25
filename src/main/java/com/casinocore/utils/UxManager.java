@@ -56,8 +56,13 @@ public class UxManager {
 
     public void playWinPresentation(Player player, String gameName, double payout, double profit, int streak) {
         Title title = Title.title(
-            Component.text(streak >= 3 ? "WIN STREAK x" + streak : "YOU WIN"),
-            Component.text(gameName + " +" + plugin.getEconomyManager().format(profit)),
+            Component.text(streak >= 3
+                ? plugin.getLocaleManager().formatText("ux.win-streak-title", Map.of("streak", String.valueOf(streak)))
+                : plugin.getLocaleManager().getText("ux.win-title")),
+            Component.text(plugin.getLocaleManager().formatText("ux.win-subtitle", Map.of(
+                "game", gameName,
+                "profit", plugin.getEconomyManager().format(profit)
+            ))),
             Title.Times.times(Duration.ofMillis(150), Duration.ofMillis(1300), Duration.ofMillis(350))
         );
         player.showTitle(title);
@@ -65,7 +70,10 @@ public class UxManager {
         player.playSound(player.getLocation(), Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.8f, 1.4f);
         showBossBarSequence(
             player,
-            "Hot streak: " + streak + " | Payout " + plugin.getEconomyManager().format(payout),
+            plugin.getLocaleManager().formatText("ux.win-bossbar", Map.of(
+                "streak", String.valueOf(streak),
+                "payout", plugin.getEconomyManager().format(payout)
+            )),
             streak >= 5 ? BarColor.PURPLE : BarColor.GREEN,
             60L
         );
@@ -73,12 +81,12 @@ public class UxManager {
 
     public void playLossPresentation(Player player, String gameName) {
         player.showTitle(Title.title(
-            Component.text("MISS"),
-            Component.text(gameName + " better luck next round"),
+            Component.text(plugin.getLocaleManager().getText("ux.loss-title")),
+            Component.text(plugin.getLocaleManager().formatText("ux.loss-subtitle", Map.of("game", gameName))),
             Title.Times.times(Duration.ofMillis(100), Duration.ofMillis(800), Duration.ofMillis(250))
         ));
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.7f, 0.7f);
-        showBossBarSequence(player, "Round ended", BarColor.RED, 30L);
+        showBossBarSequence(player, plugin.getLocaleManager().getText("ux.round-ended"), BarColor.RED, 30L);
     }
 
     public String formatGameMessage(String accent, String heading, String... bodyLines) {
@@ -93,17 +101,19 @@ public class UxManager {
     public String formatDailyRewardStatus(Player player) {
         Long lastClaim = plugin.getPlayerStatsManager().getLastDailyClaim(player.getUniqueId());
         if (lastClaim == null) {
-            return "<green>Daily free spin is ready.</green>";
+            return plugin.getLocaleManager().getText("ux.daily-ready");
         }
 
         Instant nextClaim = Instant.ofEpochMilli(lastClaim).plus(Duration.ofDays(1));
-        return "<yellow>Next free spin: " + DAILY_FORMAT.format(nextClaim.atZone(ZoneId.systemDefault())) + "</yellow>";
+        return plugin.getLocaleManager().formatText("ux.daily-next", Map.of(
+            "time", DAILY_FORMAT.format(nextClaim.atZone(ZoneId.systemDefault()))
+        ));
     }
 
     public String formatNextDailyClaim(Player player) {
         Long lastClaim = plugin.getPlayerStatsManager().getLastDailyClaim(player.getUniqueId());
         if (lastClaim == null) {
-            return "ready-now";
+            return plugin.getLocaleManager().getText("ux.ready-now");
         }
 
         Instant nextClaim = Instant.ofEpochMilli(lastClaim).plus(Duration.ofDays(1));
@@ -113,7 +123,7 @@ public class UxManager {
     public String formatNextDailyClaim(OfflinePlayer player) {
         Long lastClaim = plugin.getPlayerStatsManager().getLastDailyClaim(player.getUniqueId());
         if (lastClaim == null) {
-            return "ready-now";
+            return plugin.getLocaleManager().getText("ux.ready-now");
         }
 
         Instant nextClaim = Instant.ofEpochMilli(lastClaim).plus(Duration.ofDays(1));

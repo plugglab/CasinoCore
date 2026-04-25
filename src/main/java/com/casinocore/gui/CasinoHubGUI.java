@@ -61,7 +61,7 @@ public class CasinoHubGUI implements InventoryHolder {
     public CasinoHubGUI(CasinoPlugin plugin, Player player) {
         this.plugin = plugin;
         this.player = player;
-        this.inventory = Bukkit.createInventory(this, 54, Component.text("Casino Hub"));
+        this.inventory = Bukkit.createInventory(this, 54, Component.text(t("hub.title-plain")));
         SELECTED_BETS.putIfAbsent(player.getUniqueId(), plugin.getConfigManager().getMinBet());
         render();
     }
@@ -127,19 +127,19 @@ public class CasinoHubGUI implements InventoryHolder {
         double balance = plugin.getEconomyManager().getBalance(player);
         inventory.setItem(SLOT_WALLET, item(
             Material.NETHER_STAR,
-            "<gold><bold>Casino Hub</bold></gold>",
-            "<gray>Balance:</gray> <green>" + plugin.getEconomyManager().format(balance) + "</green>",
-            "<gray>Wins:</gray> <white>" + plugin.getPlayerStatsManager().getWins(player.getUniqueId()) + "</white>",
-            "<gray>Losses:</gray> <white>" + plugin.getPlayerStatsManager().getLosses(player.getUniqueId()) + "</white>",
-            "<gray>Daily:</gray> <yellow>" + (plugin.getPlayerStatsManager().canClaimDaily(player.getUniqueId()) ? "Ready" : "Claimed") + "</yellow>"
+            t("hub.wallet-title"),
+            fmt("hub.wallet-balance", "amount", plugin.getEconomyManager().format(balance)),
+            fmt("hub.wallet-wins", "value", String.valueOf(plugin.getPlayerStatsManager().getWins(player.getUniqueId()))),
+            fmt("hub.wallet-losses", "value", String.valueOf(plugin.getPlayerStatsManager().getLosses(player.getUniqueId()))),
+            fmt("hub.wallet-daily", "value", plugin.getPlayerStatsManager().canClaimDaily(player.getUniqueId()) ? t("hub.daily-ready-short") : t("hub.daily-claimed-short"))
         ));
         inventory.setItem(SLOT_STATUS, item(
             Material.GOLD_BLOCK,
-            "<gold><bold>Selected Bet</bold></gold>",
+            t("hub.selected-bet-title"),
             "<yellow>" + plugin.getEconomyManager().format(getSelectedBet()) + "</yellow>",
-            "<gray>Games Played:</gray> <white>" + plugin.getPlayerStatsManager().getGamesPlayed(player.getUniqueId()) + "</white>",
-            "<gray>Streak:</gray> <white>" + plugin.getPlayerStatsManager().getWinStreak(player.getUniqueId()) + "</white>",
-            "<gray>Best Streak:</gray> <white>" + plugin.getPlayerStatsManager().getBestWinStreak(player.getUniqueId()) + "</white>"
+            fmt("hub.games-played", "value", String.valueOf(plugin.getPlayerStatsManager().getGamesPlayed(player.getUniqueId()))),
+            fmt("hub.streak", "value", String.valueOf(plugin.getPlayerStatsManager().getWinStreak(player.getUniqueId()))),
+            fmt("hub.best-streak", "value", String.valueOf(plugin.getPlayerStatsManager().getBestWinStreak(player.getUniqueId())))
         ));
     }
 
@@ -148,69 +148,57 @@ public class CasinoHubGUI implements InventoryHolder {
         games.sort(Comparator.comparing(CasinoGame::getName));
         for (int i = 0; i < GAME_SLOTS.length; i++) {
             if (i >= games.size()) {
-                inventory.setItem(GAME_SLOTS[i], item(Material.BARRIER, "<gray>Coming Soon</gray>", "<dark_gray>Reserved for future casino games</dark_gray>"));
+                inventory.setItem(GAME_SLOTS[i], item(Material.BARRIER, t("hub.coming-soon-title"), t("hub.coming-soon-lore")));
                 continue;
             }
 
             CasinoGame game = games.get(i);
             Material material = GAME_MATERIALS.getOrDefault(game.getName(), Material.GOLD_INGOT);
-            setGameItem(GAME_SLOTS[i], game, material, getClickHint(game.getName()));
+            setGameItem(GAME_SLOTS[i], game, material, t("hub.click." + game.getName()));
         }
 
-        inventory.setItem(SLOT_HELP, item(
-            Material.BOOK,
-            "<aqua><bold>How To Play</bold></aqua>",
-            "<gray>1.</gray> <white>Set your bet in the bottom row.</white>",
-            "<gray>2.</gray> <white>Hover a game to read the rules.</white>",
-            "<gray>3.</gray> <white>Click to open that game's GUI.</white>"
-        ));
-        inventory.setItem(SLOT_FOOTER, item(
-            Material.AMETHYST_SHARD,
-            "<light_purple>Hub Tips</light_purple>",
-            "<gray>Games are color-coded by style and risk.</gray>",
-            "<gray>Use Custom Bet if the quick buttons are too coarse.</gray>"
-        ));
+        inventory.setItem(SLOT_HELP, item(Material.BOOK, t("hub.help-title"), t("hub.help-1"), t("hub.help-2"), t("hub.help-3")));
+        inventory.setItem(SLOT_FOOTER, item(Material.AMETHYST_SHARD, t("hub.tips-title"), t("hub.tips-1"), t("hub.tips-2")));
     }
 
     private void renderBetControls() {
-        inventory.setItem(SLOT_CUSTOM_BET, item(Material.WRITABLE_BOOK, "<aqua>Custom Bet</aqua>", "<gray>Enter any value in chat</gray>"));
-        inventory.setItem(SLOT_BET_MINUS_100, item(Material.REDSTONE, "<red>-100</red>", "<gray>Lower the selected bet</gray>"));
-        inventory.setItem(SLOT_BET_MINUS_10, item(Material.RED_DYE, "<red>-10</red>", "<gray>Fine-tune your bet</gray>"));
-        inventory.setItem(SLOT_BET_MIN, item(Material.BARRIER, "<gray>Set Min</gray>", "<white>" + plugin.getEconomyManager().format(plugin.getConfigManager().getMinBet()) + "</white>"));
-        inventory.setItem(SLOT_BET_INFO, item(
-            Material.GOLD_INGOT,
-            "<gold><bold>Current Bet</bold></gold>",
-            "<yellow>" + plugin.getEconomyManager().format(getSelectedBet()) + "</yellow>",
-            "<gray>Use quick controls or custom chat input</gray>"
-        ));
-        inventory.setItem(SLOT_BET_MAX, item(Material.EMERALD_BLOCK, "<green>Set Max</green>", "<white>" + plugin.getEconomyManager().format(plugin.getConfigManager().getMaxBet()) + "</white>"));
-        inventory.setItem(SLOT_BET_PLUS_10, item(Material.LIME_DYE, "<green>+10</green>", "<gray>Fine-tune your bet</gray>"));
-        inventory.setItem(SLOT_BET_PLUS_100, item(Material.EMERALD, "<green>+100</green>", "<gray>Raise the selected bet</gray>"));
-        inventory.setItem(SLOT_REFRESH, item(Material.COMPASS, "<aqua>Refresh</aqua>", "<gray>Rebuild the menu and sync your balance</gray>"));
+        inventory.setItem(SLOT_CUSTOM_BET, item(Material.WRITABLE_BOOK, t("hub.custom-bet-title"), t("hub.custom-bet-lore")));
+        inventory.setItem(SLOT_BET_MINUS_100, item(Material.REDSTONE, "<red>-100</red>", t("hub.lower-bet")));
+        inventory.setItem(SLOT_BET_MINUS_10, item(Material.RED_DYE, "<red>-10</red>", t("hub.fine-tune-bet")));
+        inventory.setItem(SLOT_BET_MIN, item(Material.BARRIER, t("hub.set-min"), "<white>" + plugin.getEconomyManager().format(plugin.getConfigManager().getMinBet()) + "</white>"));
+        inventory.setItem(SLOT_BET_INFO, item(Material.GOLD_INGOT, t("hub.current-bet-title"), "<yellow>" + plugin.getEconomyManager().format(getSelectedBet()) + "</yellow>", t("hub.current-bet-lore")));
+        inventory.setItem(SLOT_BET_MAX, item(Material.EMERALD_BLOCK, t("hub.set-max"), "<white>" + plugin.getEconomyManager().format(plugin.getConfigManager().getMaxBet()) + "</white>"));
+        inventory.setItem(SLOT_BET_PLUS_10, item(Material.LIME_DYE, "<green>+10</green>", t("hub.fine-tune-bet")));
+        inventory.setItem(SLOT_BET_PLUS_100, item(Material.EMERALD, "<green>+100</green>", t("hub.raise-bet")));
+        inventory.setItem(SLOT_REFRESH, item(Material.COMPASS, t("hub.refresh-title"), t("hub.refresh-lore")));
     }
 
     private void setGameItem(int slot, CasinoGame game, Material material, String clickLine) {
         List<String> lore = new ArrayList<>();
-        lore.add(getThemeLine(game.getName()));
+        lore.add(t("hub.theme." + game.getName()));
         lore.add("<gray>" + game.getDescription() + "</gray>");
-        lore.add(getHowToPlay(game.getName()));
-        lore.add("<gray>Min Bet:</gray> <green>" + plugin.getEconomyManager().format(game.getMinBet()) + "</green>");
-        lore.add("<gray>Max Bet:</gray> <red>" + plugin.getEconomyManager().format(game.getMaxBet()) + "</red>");
+        lore.add(t("hub.how." + game.getName()));
+        lore.add(fmt("hub.min-bet", "amount", plugin.getEconomyManager().format(game.getMinBet())));
+        lore.add(fmt("hub.max-bet", "amount", plugin.getEconomyManager().format(game.getMaxBet())));
         lore.add("<yellow>" + clickLine + "</yellow>");
 
         if (game instanceof DiceRollGame) {
-            lore.add("<aqua>Default from hub: medium risk</aqua>");
+            lore.add(t("hub.dice-default"));
         } else if (game instanceof CoinFlipGame) {
-            lore.add("<gold>Creates a public wager offer</gold>");
+            lore.add(t("hub.coinflip-extra"));
         }
 
-        inventory.setItem(slot, item(material, getGameTitle(game.getName(), game.getDisplayName()), lore.toArray(new String[0])));
+        String title = t("hub.game-title." + game.getName());
+        if (title.equals("hub.game-title." + game.getName())) {
+            title = "<gold><bold>" + game.getDisplayName() + "</bold></gold>";
+        }
+        inventory.setItem(slot, item(material, title, lore.toArray(new String[0])));
     }
 
     private void launchGame(String gameName) {
         CasinoGame game = plugin.getGameManager().getCasinoGameDirect(gameName);
         if (game == null) {
-            player.sendMessage("Game unavailable.");
+            player.sendMessage(t("hub.game-unavailable"));
             return;
         }
 
@@ -255,72 +243,12 @@ public class CasinoHubGUI implements InventoryHolder {
         return null;
     }
 
-    private String getClickHint(String gameName) {
-        return switch (gameName) {
-            case "coinflip" -> "Click to create a coinflip with the selected bet";
-            case "dice" -> "Click to open risk selection";
-            case "blackjack" -> "Click to open a blackjack table";
-            case "highlow" -> "Click to guess the next card";
-            case "doubleup" -> "Click to risk your pot for a bigger payout";
-            case "treasure" -> "Click to pick from hidden treasure chests";
-            case "roulette" -> "Click to open roulette";
-            case "slots" -> "Click to spin the slot machine";
-            case "lottery" -> "Click to draw lottery numbers";
-            case "horserace" -> "Click to open the race board";
-            case "wheel" -> "Click to spin the lucky wheel";
-            default -> "Click to play";
-        };
+    private String t(String key) {
+        return plugin.getLocaleManager().getText(key);
     }
 
-    private String getGameTitle(String gameName, String fallback) {
-        return switch (gameName) {
-            case "coinflip" -> "<yellow><bold>Coin Flip</bold></yellow>";
-            case "dice" -> "<gold><bold>Dice</bold></gold>";
-            case "blackjack" -> "<dark_green><bold>Blackjack</bold></dark_green>";
-            case "highlow" -> "<red><bold>High Low</bold></red>";
-            case "doubleup" -> "<gold><bold>Double Up</bold></gold>";
-            case "treasure" -> "<aqua><bold>Treasure Pick</bold></aqua>";
-            case "roulette" -> "<red><bold>Roulette</bold></red>";
-            case "slots" -> "<light_purple><bold>Slots</bold></light_purple>";
-            case "lottery" -> "<green><bold>Lottery</bold></green>";
-            case "horserace" -> "<yellow><bold>Horse Race</bold></yellow>";
-            case "wheel" -> "<aqua><bold>Lucky Wheel</bold></aqua>";
-            default -> "<gold><bold>" + fallback + "</bold></gold>";
-        };
-    }
-
-    private String getThemeLine(String gameName) {
-        return switch (gameName) {
-            case "coinflip" -> "<yellow>Theme:</yellow> <white>Player vs player coin toss</white>";
-            case "dice" -> "<gold>Theme:</gold> <white>Risk tiers and thresholds</white>";
-            case "blackjack" -> "<green>Theme:</green> <white>Beat the dealer without busting</white>";
-            case "highlow" -> "<red>Theme:</red> <white>Predict the next card</white>";
-            case "doubleup" -> "<gold>Theme:</gold> <white>Press your luck for bigger pots</white>";
-            case "treasure" -> "<aqua>Theme:</aqua> <white>One chest hides the win</white>";
-            case "roulette" -> "<red>Theme:</red> <white>Table bets and wheel results</white>";
-            case "slots" -> "<light_purple>Theme:</light_purple> <white>Line up matching symbols</white>";
-            case "lottery" -> "<green>Theme:</green> <white>Chase the winning number</white>";
-            case "horserace" -> "<yellow>Theme:</yellow> <white>Shared betting pool and live race</white>";
-            case "wheel" -> "<aqua>Theme:</aqua> <white>Weighted prize slices</white>";
-            default -> "<gray>Theme:</gray> <white>Casino table</white>";
-        };
-    }
-
-    private String getHowToPlay(String gameName) {
-        return switch (gameName) {
-            case "coinflip" -> "<gray>How:</gray> <white>Create an offer, then wait for another player to join.</white>";
-            case "dice" -> "<gray>How:</gray> <white>Pick a risk tier. Higher risk means lower odds and higher payout.</white>";
-            case "blackjack" -> "<gray>How:</gray> <white>Hit, stand, and split to beat the dealer's hand.</white>";
-            case "highlow" -> "<gray>How:</gray> <white>Guess whether the next card will be higher or lower.</white>";
-            case "doubleup" -> "<gray>How:</gray> <white>Cash out safely or double again on a 50/50 chance.</white>";
-            case "treasure" -> "<gray>How:</gray> <white>Choose one chest. Only one contains the treasure.</white>";
-            case "roulette" -> "<gray>How:</gray> <white>Pick number, color, or parity and watch the wheel.</white>";
-            case "slots" -> "<gray>How:</gray> <white>Pull the lever and line up matching symbols across the reels.</white>";
-            case "lottery" -> "<gray>How:</gray> <white>Choose your number and try to land on the winning roll.</white>";
-            case "horserace" -> "<gray>How:</gray> <white>Back one horse before the shared countdown ends.</white>";
-            case "wheel" -> "<gray>How:</gray> <white>Spin the weighted wheel and hope it lands on a hot slice.</white>";
-            default -> "<gray>How:</gray> <white>Click to play.</white>";
-        };
+    private String fmt(String key, String placeholder, String value) {
+        return plugin.getLocaleManager().formatText(key, Map.of(placeholder, value));
     }
 
     private ItemStack item(Material material, String name, String... lore) {

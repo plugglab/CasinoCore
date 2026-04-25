@@ -6,6 +6,7 @@ com\casinocore\games\treasure\TreasureGUI.class
 com\casinocore\games\blackjack\BlackjackTableState.class
 com\casinocore\games\roulette\RouletteBetType.class
 com\casinocore\gui\AbstractGUI.class
+com\casinocore\utils\ProtectionManager.class
 com\casinocore\games\highlow\HighLowGame.class
 com\casinocore\games\horserace\HorseRaceGUI$1.class
 com\casinocore\games\slots\SlotMachineListener.class
@@ -49,6 +50,7 @@ com\casinocore\games\blackjack\BlackjackGame$2.class
 com\casinocore\games\blackjack\BlackjackGUI.class
 com\casinocore\games\commands\PlayCommand.class
 com\casinocore\games\BaseCasinoGame.class
+com\casinocore\utils\ProtectionManager$LicensePayload.class
 com\casinocore\games\impl\WheelGame$WheelSegment.class
 com\casinocore\games\roulette\RouletteGame.class
 com\casinocore\utils\AntiAbuseManager$BetRecord.class
@@ -68,6 +70,7 @@ com\casinocore\games\impl\LotteryNumberPrompt$PendingLotteryEntry.class
 com\casinocore\games\roulette\RouletteSpinAnimation.class
 com\casinocore\gui\GuiNavigation.class
 com\casinocore\games\blackjack\BlackjackHand.class
+com\casinocore\utils\LocaleManager.class
 com\casinocore\games\impl\WheelGame$1.class
 com\casinocore\games\impl\WheelGame.class
 com\casinocore\games\impl\WheelGUI.class
@@ -106,4 +109,5 @@ com\casinocore\games\roulette\RouletteBet.class
 com\casinocore\games\horserace\HorseRaceGame.class
 com\casinocore\simulation\CasinoEconomySimulator$SlotRoll.class
 com\casinocore\utils\UxManager.class
+com\casinocore\core\PluginVariant.class
 com\casinocore\simulation\CasinoEconomySimulator.class

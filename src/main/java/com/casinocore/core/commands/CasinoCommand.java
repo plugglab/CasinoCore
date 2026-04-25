@@ -12,8 +12,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
 public class CasinoCommand implements CommandExecutor, TabCompleter {
 
     private final CasinoPlugin plugin;
@@ -27,12 +25,12 @@ public class CasinoCommand implements CommandExecutor, TabCompleter {
                              @NotNull String label, @NotNull String[] args) {
 
         if (args.length == 0) {
-            if (sender instanceof Player player) {
-                if (!plugin.getAntiAbuseManager().tryRecordCommand(player)) {
-                    player.sendMessage("You're sending commands too quickly.");
-                    return true;
-                }
-                new CasinoHubGUI(plugin, player).open();
+                if (sender instanceof Player player) {
+                    if (!plugin.getAntiAbuseManager().tryRecordCommand(player)) {
+                        player.sendMessage(plugin.getLocaleManager().getText("command.too-fast"));
+                        return true;
+                    }
+                    new CasinoHubGUI(plugin, player).open();
             } else {
                 sendHelp(sender);
             }
@@ -50,7 +48,7 @@ public class CasinoCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
                 if (!plugin.getAntiAbuseManager().tryRecordCommand(player)) {
-                    player.sendMessage("You're sending commands too quickly.");
+                    player.sendMessage(plugin.getLocaleManager().getText("command.too-fast"));
                     return true;
                 }
                 new CasinoHubGUI(plugin, player).open();
@@ -72,7 +70,7 @@ public class CasinoCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
                 if (!plugin.getAntiAbuseManager().tryRecordCommand(player)) {
-                    player.sendMessage("You're sending commands too quickly.");
+                    player.sendMessage(plugin.getLocaleManager().getText("command.too-fast"));
                     return true;
                 }
 

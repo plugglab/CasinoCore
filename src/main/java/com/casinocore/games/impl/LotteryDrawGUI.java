@@ -16,6 +16,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class LotteryDrawGUI implements InventoryHolder {
@@ -36,7 +37,7 @@ public class LotteryDrawGUI implements InventoryHolder {
         this.player = player;
         this.chosenNumber = chosenNumber;
         this.bet = bet;
-        this.inventory = Bukkit.createInventory(this, 27, Component.text("Lottery Draw"));
+        this.inventory = Bukkit.createInventory(this, 27, Component.text(t("lottery.gui.title-plain")));
         this.random = new Random();
         renderBase();
     }
@@ -72,13 +73,13 @@ public class LotteryDrawGUI implements InventoryHolder {
     public void showResult(int winningNumber, boolean won, double multiplier, double payout, int difference) {
         inventory.setItem(22, item(
             won ? Material.EMERALD_BLOCK : Material.REDSTONE_BLOCK,
-            won ? "Winner" : "Miss",
-            "Your pick: " + chosenNumber,
-            "Winning ball: " + winningNumber,
-            won ? "Paid: " + plugin.getEconomyManager().format(payout) : "Lost: " + plugin.getEconomyManager().format(bet),
-            "Difference: " + difference
+            won ? t("lottery.gui.winner") : t("lottery.gui.miss"),
+            f("lottery.gui.your-pick", "value", String.valueOf(chosenNumber)),
+            f("lottery.gui.winning-ball", "value", String.valueOf(winningNumber)),
+            won ? f("lottery.gui.paid", "amount", plugin.getEconomyManager().format(payout)) : f("lottery.gui.lost", "amount", plugin.getEconomyManager().format(bet)),
+            f("lottery.gui.difference", "value", String.valueOf(difference))
         ));
-        inventory.setItem(26, item(Material.BARRIER, "Back", "Return to the casino hub"));
+        inventory.setItem(26, item(Material.BARRIER, t("lottery.gui.back"), t("lottery.gui.back-lore")));
     }
 
     public boolean isDrawing() {
@@ -95,9 +96,9 @@ public class LotteryDrawGUI implements InventoryHolder {
         for (int i = 0; i < inventory.getSize(); i++) {
             inventory.setItem(i, filler);
         }
-        inventory.setItem(4, item(Material.EMERALD, "Lottery Machine", "Bet: " + plugin.getEconomyManager().format(bet), "Your pick: " + chosenNumber));
-        inventory.setItem(22, item(Material.GOLD_INGOT, "Drawing", "Lottery balls are spinning"));
-        inventory.setItem(26, item(Material.BARRIER, "Back", "Available after the draw"));
+        inventory.setItem(4, item(Material.EMERALD, t("lottery.gui.machine"), f("lottery.gui.bet", "amount", plugin.getEconomyManager().format(bet)), f("lottery.gui.pick", "value", String.valueOf(chosenNumber))));
+        inventory.setItem(22, item(Material.GOLD_INGOT, t("lottery.gui.drawing"), t("lottery.gui.drawing-lore")));
+        inventory.setItem(26, item(Material.BARRIER, t("lottery.gui.back"), t("lottery.gui.back-after")));
     }
 
     private void renderWinningBall(int winningNumber) {
@@ -106,7 +107,15 @@ public class LotteryDrawGUI implements InventoryHolder {
     }
 
     private ItemStack ball(int number, Material material) {
-        return item(material, "Ball " + number, "Winning candidate");
+        return item(material, f("lottery.gui.ball", "value", String.valueOf(number)), t("lottery.gui.ball-lore"));
+    }
+
+    private String t(String key) {
+        return plugin.getLocaleManager().getText(key);
+    }
+
+    private String f(String key, String placeholder, String value) {
+        return plugin.getLocaleManager().formatText(key, Map.of(placeholder, value));
     }
 
     private ItemStack item(Material material, String name, String... lore) {

@@ -23,7 +23,7 @@ public class SlotMachineGame extends BaseCasinoGame {
     protected boolean executeGame(Player player, double bet) {
         try {
             if (openMachines.containsKey(player.getUniqueId())) {
-                sendMessage(player, "<yellow>Please finish your current slot machine session first.</yellow>");
+                sendLocaleMessage(player, "slots.finish-session");
                 return false;
             }
 
@@ -45,7 +45,7 @@ public class SlotMachineGame extends BaseCasinoGame {
 
         double bet = gui.getBet();
         if (!isEnabled()) {
-            sendMessage(player, "<red>This game is currently disabled!</red>");
+            sendLocaleMessage(player, "game.disabled");
             return;
         }
         if (!validateBet(player, bet) || !checkBalance(player, bet)) {
@@ -56,7 +56,7 @@ public class SlotMachineGame extends BaseCasinoGame {
         }
 
         setCooldown(player);
-        plugin.getUxManager().showBossBarSequence(player, "Reels spinning...", org.bukkit.boss.BarColor.YELLOW, 90L);
+        plugin.getUxManager().showBossBarSequence(player, plugin.getLocaleManager().getText("slots.spinning"), org.bukkit.boss.BarColor.YELLOW, 90L);
         gui.spin(() -> handleSpinComplete(player, gui, bet));
     }
 
@@ -82,34 +82,34 @@ public class SlotMachineGame extends BaseCasinoGame {
                         handleWin(player, bet, winnings);
                         String winMessage = plugin.getUxManager().formatGameMessage(
                             "green",
-                            "Slot Machine Win",
-                            "<white>Symbols:</white> " + results[0].getDisplayName() + " " +
-                                results[1].getDisplayName() + " " + results[2].getDisplayName(),
-                            "<white>Multiplier:</white> <gold>" + multiplier + "x</gold>",
-                            "<white>Winnings:</white> <green>" + plugin.getEconomyManager().format(winnings) + "</green>",
-                            "<white>Profit:</white> <green>+" + plugin.getEconomyManager().format(profit) + "</green>"
+                            plugin.getLocaleManager().getText("slots.win-title"),
+                            plugin.getLocaleManager().formatText("slots.symbols", Map.of("symbols", results[0].getDisplayName() + " " + results[1].getDisplayName() + " " + results[2].getDisplayName())),
+                            plugin.getLocaleManager().formatText("slots.multiplier", Map.of("value", multiplier + "x")),
+                            plugin.getLocaleManager().formatText("slots.winnings", Map.of("amount", plugin.getEconomyManager().format(winnings))),
+                            plugin.getLocaleManager().formatText("slots.profit", Map.of("amount", plugin.getEconomyManager().format(profit)))
                         );
                         sendMessage(player, winMessage);
                         if (jackpot) {
                             plugin.getMessageManager().broadcast(
-                                "<gold><bold>[Slots Jackpot]</bold></gold> <white>" + player.getName() + "</white> hit <green>" +
-                                    plugin.getEconomyManager().format(winnings) + "</green> <gray>with</gray> " +
-                                    results[0].getDisplayName() + " " + results[1].getDisplayName() + " " + results[2].getDisplayName()
+                                plugin.getLocaleManager().formatText("slots.broadcast-jackpot", Map.of(
+                                    "player", player.getName(),
+                                    "amount", plugin.getEconomyManager().format(winnings),
+                                    "symbols", results[0].getDisplayName() + " " + results[1].getDisplayName() + " " + results[2].getDisplayName()
+                                ))
                             );
                         }
                     } else {
-                        sendMessage(player, "<red>Error processing winnings. Contact an administrator.</red>");
+                        sendLocaleMessage(player, "slots.winnings-error");
                     }
                 });
             } else {
                 handleLoss(player, bet);
                 sendMessage(player, plugin.getUxManager().formatGameMessage(
                     "red",
-                    "Slot Machine Loss",
-                    "<white>Symbols:</white> <gray>" + results[0].getDisplayName() + " " +
-                        results[1].getDisplayName() + " " + results[2].getDisplayName() + "</gray>",
-                    "<white>Bet:</white> <red>" + plugin.getEconomyManager().format(bet) + "</red>",
-                    "<gray>Pull the lever again if you want another round.</gray>"
+                    plugin.getLocaleManager().getText("slots.loss-title"),
+                    plugin.getLocaleManager().formatText("slots.symbols-loss", Map.of("symbols", results[0].getDisplayName() + " " + results[1].getDisplayName() + " " + results[2].getDisplayName())),
+                    plugin.getLocaleManager().formatText("slots.bet", Map.of("amount", plugin.getEconomyManager().format(bet))),
+                    plugin.getLocaleManager().getText("slots.try-again")
                 ));
             }
         } catch (Exception e) {

@@ -1,0 +1,18 @@
+messages:
+  prefix: "<gold>[Casino]</gold> "
+  no-permission: "<red>Du hast keine Berechtigung dafuer.</red>"
+  player-only: "<red>Dieser Befehl kann nur von Spielern benutzt werden.</red>"
+  reload-success: "<green>CasinoCore wurde erfolgreich neu geladen.</green>"
+  economy-unavailable: "<red>Das Wirtschaftssystem ist nicht verfuegbar.</red>"
+  insufficient-funds: "<red>Du hast nicht genug Geld. Benoetigt: {amount}</red>"
+  cooldown-active: "<yellow>Warte {time} Sekunden, bevor du wieder spielst.</yellow>"
+
+texts:
+  command.too-fast: "Du sendest Befehle zu schnell."
+  command.game-not-found: "Spiel '{game}' wurde nicht gefunden. Nutze /play list."
+  command.invalid-bet: "Ungueltiger Einsatz."
+  command.error: "Beim Verarbeiten des Befehls ist ein Fehler aufgetreten."
+  command.usage-header: "Verwendung:"
+  command.no-games: "Zurzeit sind keine Spiele verfuegbar."
+  command.games-header: "Verfuegbare Casinospiele:"
+  demo.blocked-feature: "Diese Funktion ist in der Demo-Version nicht verfuegbar."

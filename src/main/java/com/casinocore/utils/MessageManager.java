@@ -43,7 +43,7 @@ public class MessageManager {
      * @param placeholders Map of placeholders to replace
      */
     public void sendMessage(CommandSender sender, String messageKey, Map<String, String> placeholders) {
-        String message = plugin.getConfigManager().getMessage(messageKey);
+        String message = plugin.getLocaleManager().formatMessage(messageKey, placeholders);
 
         if (message == null || message.isEmpty()) {
             plugin.getPlugin().getLogger().warning("Message key not found: " + messageKey);
@@ -53,11 +53,6 @@ public class MessageManager {
         // Add prefix if not already present
         if (!message.contains(plugin.getConfigManager().getPrefix())) {
             message = plugin.getConfigManager().getPrefix() + message;
-        }
-
-        // Replace placeholders
-        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
-            message = message.replace("{" + entry.getKey() + "}", entry.getValue());
         }
 
         send(sender, message);
@@ -131,7 +126,7 @@ public class MessageManager {
      * Reload messages (called when config is reloaded)
      */
     public void reload() {
-        // Refresh any cached messages if needed
+        plugin.getLocaleManager().load();
         plugin.getPlugin().getLogger().info("Messages reloaded");
     }
 

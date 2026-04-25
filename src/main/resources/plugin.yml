@@ -1,5 +1,5 @@
 name: CasinoCore
-version: '${project.version}'
+version: '${project.version}-${build.variant}'
 main: com.casinocore.core.CasinoCore
 api-version: '1.21'
 description: A production-ready casino plugin for Minecraft
@@ -8,7 +8,6 @@ website: https://github.com/casinocore
 
 softdepend:
   - Vault
-  - PlaceholderAPI
 
 commands:
   casino:

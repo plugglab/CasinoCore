@@ -1,0 +1,81 @@
+name: CasinoCore
+version: '1.0.0-protected'
+main: com.casinocore.core.CasinoCore
+api-version: '1.21'
+description: A production-ready casino plugin for Minecraft
+author: CasinoCore Team
+website: https://github.com/casinocore
+
+softdepend:
+  - Vault
+
+commands:
+  casino:
+    description: Main casino command
+    usage: /casino [help|reload|balance|daily]
+    permission: casinocore.use
+    aliases: [cas, gamble]
+  play:
+    description: Play casino games
+    usage: /play <game> <bet>, /play dice <bet> [low|medium|high], /play coinflip <create|join|cancel|list>, or /play list
+    permission: casinocore.play
+    aliases: [bet, gamble]
+
+permissions:
+  casinocore.*:
+    description: Grants all CasinoCore permissions
+    default: op
+    children:
+      casinocore.use: true
+      casinocore.play: true
+      casinocore.reload: true
+      casinocore.admin: true
+      casinocore.game.*: true
+  casinocore.use:
+    description: Allows using the casino
+    default: true
+  casinocore.play:
+    description: Allows playing casino games
+    default: true
+  casinocore.reload:
+    description: Allows reloading the plugin
+    default: op
+  casinocore.admin:
+    description: Grants admin access to all casino features
+    default: op
+  casinocore.game.*:
+    description: Grants access to all games
+    default: true
+    children:
+      casinocore.game.coinflip: true
+      casinocore.game.dice: true
+      casinocore.game.lottery: true
+      casinocore.game.blackjack: true
+      casinocore.game.roulette: true
+      casinocore.game.slots: true
+      casinocore.game.horserace: true
+      casinocore.game.wheel: true
+  casinocore.game.coinflip:
+    description: Allows playing Coin Flip
+    default: true
+  casinocore.game.dice:
+    description: Allows playing Dice
+    default: true
+  casinocore.game.lottery:
+    description: Allows playing Lottery
+    default: true
+  casinocore.game.blackjack:
+    description: Allows playing Blackjack
+    default: true
+  casinocore.game.roulette:
+    description: Allows playing Roulette
+    default: true
+  casinocore.game.slots:
+    description: Allows playing Slot Machine
+    default: true
+  casinocore.game.horserace:
+    description: Allows playing Horse Race
+    default: true
+  casinocore.game.wheel:
+    description: Allows playing Lucky Wheel
+    default: true

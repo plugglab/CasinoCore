@@ -1,12 +1,14 @@
 C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\games\impl\WheelGame.java
 C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\gui\CasinoHubListener.java
 C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\utils\AntiAbuseManager.java
+C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\utils\ProtectionManager.java
 C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\games\horserace\HorseRaceGame.java
 C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\gui\GUIManager.java
 C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\games\slots\SlotMachineGame.java
 C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\games\horserace\HorseRaceGUI.java
 C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\economy\EconomyManager.java
 C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\integrations\CasinoPlaceholderExpansion.java
+C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\core\PluginVariant.java
 C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\games\AbstractGame.java
 C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\games\GameManager.java
 C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\games\horserace\HorseRaceRound.java
@@ -41,6 +43,7 @@ C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\gui\Abstra
 C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\stats\PlayerStatsManager.java
 C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\games\roulette\RouletteSpinAnimation.java
 C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\games\treasure\TreasureGame.java
+C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\utils\LocaleManager.java
 C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\gui\CustomBetManager.java
 C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\core\commands\CasinoCommand.java
 C:\Users\Gabri\Desktop\plugin\CasinoCore\src\main\java\com\casinocore\games\impl\CoinFlipGame.java

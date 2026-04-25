@@ -36,7 +36,7 @@ public class PlayCommand implements CommandExecutor, TabCompleter {
             }
 
             if (!plugin.getAntiAbuseManager().tryRecordCommand(player)) {
-                player.sendMessage("You're sending commands too quickly.");
+                player.sendMessage(plugin.getLocaleManager().getText("command.too-fast"));
                 return true;
             }
 
@@ -53,7 +53,10 @@ public class PlayCommand implements CommandExecutor, TabCompleter {
             String gameName = args[0].toLowerCase();
             CasinoGame game = plugin.getGameManager().getCasinoGameDirect(gameName);
             if (game == null) {
-                player.sendMessage("Game '" + gameName + "' not found. Use /play list.");
+                player.sendMessage(plugin.getLocaleManager().formatText(
+                    "command.game-not-found",
+                    plugin.getLocaleManager().placeholders("game", gameName)
+                ));
                 return true;
             }
 
@@ -75,7 +78,7 @@ public class PlayCommand implements CommandExecutor, TabCompleter {
             try {
                 bet = Double.parseDouble(args[1]);
             } catch (NumberFormatException e) {
-                player.sendMessage("Invalid bet amount.");
+                player.sendMessage(plugin.getLocaleManager().getText("command.invalid-bet"));
                 return true;
             }
 
@@ -87,7 +90,7 @@ public class PlayCommand implements CommandExecutor, TabCompleter {
             return true;
         } catch (Exception e) {
             plugin.getPlugin().getLogger().log(Level.SEVERE, "Error handling /play", e);
-            sender.sendMessage("An error occurred processing your command.");
+            sender.sendMessage(plugin.getLocaleManager().getText("command.error"));
             return true;
         }
     }
@@ -110,7 +113,7 @@ public class PlayCommand implements CommandExecutor, TabCompleter {
                 try {
                     bet = Double.parseDouble(args[2]);
                 } catch (NumberFormatException e) {
-                    player.sendMessage("Invalid bet amount.");
+                    player.sendMessage(plugin.getLocaleManager().getText("command.invalid-bet"));
                     return true;
                 }
                 return game.createOffer(player, bet);
@@ -151,7 +154,7 @@ public class PlayCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendUsage(Player player) {
-        player.sendMessage("Usage:");
+        player.sendMessage(plugin.getLocaleManager().getText("command.usage-header"));
         player.sendMessage("/play list");
         player.sendMessage("/play <game> <bet>");
         player.sendMessage("/play dice <bet> [low|medium|high]");
@@ -168,11 +171,11 @@ public class PlayCommand implements CommandExecutor, TabCompleter {
         try {
             Map<String, CasinoGame> games = plugin.getGameManager().getEnabledCasinoGames();
             if (games.isEmpty()) {
-                player.sendMessage("No games are currently available.");
+                player.sendMessage(plugin.getLocaleManager().getText("command.no-games"));
                 return;
             }
 
-            player.sendMessage("Available Casino Games:");
+            player.sendMessage(plugin.getLocaleManager().getText("command.games-header"));
             for (CasinoGame game : games.values()) {
                 player.sendMessage("- " + game.getDisplayName() + ": " + game.getDescription());
                 if (game instanceof CoinFlipGame) {
@@ -189,7 +192,7 @@ public class PlayCommand implements CommandExecutor, TabCompleter {
         } catch (Exception e) {
             plugin.getPlugin().getLogger().log(Level.SEVERE,
                 "Error listing games for " + player.getName(), e);
-            player.sendMessage("Error listing games.");
+            player.sendMessage(plugin.getLocaleManager().getText("command.error"));
         }
     }
 

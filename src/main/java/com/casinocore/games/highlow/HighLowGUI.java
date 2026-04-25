@@ -15,6 +15,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class HighLowGUI implements InventoryHolder {
@@ -35,8 +36,8 @@ public class HighLowGUI implements InventoryHolder {
         this.player = player;
         this.bet = bet;
         this.currentCard = drawCard();
-        this.inventory = Bukkit.createInventory(this, 54, Component.text("High Low"));
-        render("Pick higher or lower");
+        this.inventory = Bukkit.createInventory(this, 54, Component.text(t("highlow.gui.title-plain")));
+        render(t("highlow.gui.status.pick"));
     }
 
     public void open() {
@@ -78,19 +79,19 @@ public class HighLowGUI implements InventoryHolder {
                 double payout = won ? bet * game.getWinMultiplier() : 0.0;
                 roundOver = true;
                 resolving = false;
-                render(won ? "You won" : "You lost");
+                render(won ? t("highlow.gui.status.won") : t("highlow.gui.status.lost"));
                 player.playSound(player.getLocation(), won ? Sound.ENTITY_PLAYER_LEVELUP : Sound.ENTITY_VILLAGER_NO, 1.0f, won ? 1.1f : 0.8f);
                 game.resolveRound(
                     player,
                     bet,
                     won,
                     payout,
-                    "<gold><bold>High Low</bold></gold>\n" +
-                        "<gray>Current:</gray> <white>" + currentCard + "</white>\n" +
-                        "<gray>Next:</gray> <white>" + nextCard + "</white>\n" +
-                        (won
-                            ? "<gray>Payout:</gray> <green>" + plugin.getEconomyManager().format(payout) + "</green>"
-                            : "<gray>Lost:</gray> <red>" + plugin.getEconomyManager().format(bet) + "</red>")
+                    plugin.getLocaleManager().formatText(won ? "highlow.result.win" : "highlow.result.loss", Map.of(
+                        "current", String.valueOf(currentCard),
+                        "next", String.valueOf(nextCard),
+                        "payout", plugin.getEconomyManager().format(payout),
+                        "amount", plugin.getEconomyManager().format(bet)
+                    ))
                 );
             }
         }.runTaskTimer(plugin.getPlugin(), 0L, 2L);
@@ -102,13 +103,13 @@ public class HighLowGUI implements InventoryHolder {
             inventory.setItem(i, filler);
         }
 
-        inventory.setItem(4, item(Material.PAPER, "High Low", "Bet: " + plugin.getEconomyManager().format(bet), status));
-        inventory.setItem(22, cardItem(currentCard, "Current card"));
-        inventory.setItem(31, roundOver ? cardItem(nextCard, "Next card") : item(Material.BLACK_STAINED_GLASS_PANE, "Hidden", "Revealed after your guess"));
-        inventory.setItem(47, item(roundOver ? Material.GRAY_DYE : Material.BLUE_DYE, "Lower", roundOver ? "Round finished" : "Guess the next card is lower"));
-        inventory.setItem(49, item(roundOver ? Material.BARRIER : Material.GRAY_DYE, "Close", roundOver ? "Close this table" : "Available after result"));
-        inventory.setItem(51, item(roundOver ? Material.GRAY_DYE : Material.RED_DYE, "Higher", roundOver ? "Round finished" : "Guess the next card is higher"));
-        inventory.setItem(53, item(roundOver ? Material.LIME_DYE : Material.GRAY_DYE, "Play Again", roundOver ? "Play another round with same bet" : "Available after result"));
+        inventory.setItem(4, item(Material.PAPER, t("highlow.gui.title"), f("highlow.gui.bet", "amount", plugin.getEconomyManager().format(bet)), status));
+        inventory.setItem(22, cardItem(currentCard, t("highlow.gui.current-card")));
+        inventory.setItem(31, roundOver ? cardItem(nextCard, t("highlow.gui.next-card")) : item(Material.BLACK_STAINED_GLASS_PANE, t("highlow.gui.hidden"), t("highlow.gui.hidden-lore")));
+        inventory.setItem(47, item(roundOver ? Material.GRAY_DYE : Material.BLUE_DYE, t("highlow.gui.lower"), roundOver ? t("highlow.gui.round-finished") : t("highlow.gui.lower-lore")));
+        inventory.setItem(49, item(roundOver ? Material.BARRIER : Material.GRAY_DYE, t("highlow.gui.close"), roundOver ? t("highlow.gui.close-lore") : t("highlow.gui.after-result")));
+        inventory.setItem(51, item(roundOver ? Material.GRAY_DYE : Material.RED_DYE, t("highlow.gui.higher"), roundOver ? t("highlow.gui.round-finished") : t("highlow.gui.higher-lore")));
+        inventory.setItem(53, item(roundOver ? Material.LIME_DYE : Material.GRAY_DYE, t("highlow.gui.play-again"), roundOver ? t("highlow.gui.play-again-lore") : t("highlow.gui.after-result")));
     }
 
     private int drawCard() {
@@ -116,7 +117,15 @@ public class HighLowGUI implements InventoryHolder {
     }
 
     private ItemStack cardItem(int value, String subtitle) {
-        return item(Material.PAPER, "Card " + value, subtitle);
+        return item(Material.PAPER, f("highlow.gui.card", "value", String.valueOf(value)), subtitle);
+    }
+
+    private String t(String key) {
+        return plugin.getLocaleManager().getText(key);
+    }
+
+    private String f(String key, String placeholder, String value) {
+        return plugin.getLocaleManager().formatText(key, Map.of(placeholder, value));
     }
 
     private ItemStack item(Material material, String name, String... lore) {

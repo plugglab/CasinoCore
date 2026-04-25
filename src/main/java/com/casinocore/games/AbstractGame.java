@@ -52,7 +52,6 @@ public abstract class AbstractGame implements Game {
 
     @Override
     public boolean canPlay(Player player) {
-        // Basic checks
         if (!isEnabled()) {
             return false;
         }
@@ -61,7 +60,6 @@ public abstract class AbstractGame implements Game {
             return false;
         }
 
-        // Check economy
         if (!plugin.getEconomyManager().isAvailable()) {
             plugin.getMessageManager().sendMessage(player, "economy-unavailable");
             return false;
@@ -95,39 +93,37 @@ public abstract class AbstractGame implements Game {
         plugin.getPlugin().getLogger().info("Unloaded game: " + name);
     }
 
-    /**
-     * Validate bet amount
-     * @param player The player
-     * @param amount The bet amount
-     * @return true if bet is valid
-     */
     protected boolean validateBet(Player player, double amount) {
         if (amount < getMinBet()) {
-            player.sendMessage("§cMinimum bet is " + plugin.getEconomyManager().format(getMinBet()));
+            plugin.getMessageManager().send(
+                player,
+                plugin.getLocaleManager().formatText("game.min-bet-generic", Map.of(
+                    "min", plugin.getEconomyManager().format(getMinBet())
+                ))
+            );
             return false;
         }
 
         if (amount > getMaxBet()) {
-            player.sendMessage("§cMaximum bet is " + plugin.getEconomyManager().format(getMaxBet()));
+            plugin.getMessageManager().send(
+                player,
+                plugin.getLocaleManager().formatText("game.max-bet-generic", Map.of(
+                    "max", plugin.getEconomyManager().format(getMaxBet())
+                ))
+            );
             return false;
         }
 
         if (!plugin.getEconomyManager().hasBalance(player, amount)) {
             Map<String, String> placeholders = plugin.getMessageManager().createPlaceholderMap();
             placeholders.put("amount", plugin.getEconomyManager().format(amount));
-            plugin.getMessageManager().sendMessage(player, "insufficient-funds",
-                placeholders);
+            plugin.getMessageManager().sendMessage(player, "insufficient-funds", placeholders);
             return false;
         }
 
         return true;
     }
 
-    /**
-     * Check cooldown and set if available
-     * @param player The player
-     * @return true if player can play (not on cooldown)
-     */
     protected boolean checkCooldown(Player player) {
         return plugin.getCooldownManager().checkAndSetCooldown(player, id);
     }

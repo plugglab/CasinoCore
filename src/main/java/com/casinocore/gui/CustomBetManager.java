@@ -22,10 +22,10 @@ public final class CustomBetManager {
             player,
             plugin.getUxManager().formatGameMessage(
                 "gold",
-                "Custom Bet",
-                "<white>Type your bet in chat.</white>",
-                "<gray>Type <yellow>cancel</yellow> to abort.</gray>",
-                "<gray>Allowed range depends on the selected game.</gray>"
+                plugin.getLocaleManager().getText("custom-bet.title"),
+                plugin.getLocaleManager().getText("custom-bet.prompt"),
+                plugin.getLocaleManager().getText("custom-bet.cancel-hint"),
+                plugin.getLocaleManager().getText("custom-bet.range-hint")
             )
         );
     }
@@ -45,7 +45,7 @@ public final class CustomBetManager {
         }
 
         if (message.equalsIgnoreCase("cancel")) {
-            plugin.getMessageManager().send(player, "<yellow>Custom bet entry cancelled.</yellow>");
+            plugin.getMessageManager().send(player, plugin.getLocaleManager().getText("custom-bet.cancelled"));
             Bukkit.getScheduler().runTask(plugin.getPlugin(), () -> new CasinoHubGUI(plugin, player).open());
             return;
         }
@@ -54,7 +54,7 @@ public final class CustomBetManager {
         try {
             bet = Double.parseDouble(message);
         } catch (NumberFormatException exception) {
-            plugin.getMessageManager().send(player, "<red>That is not a valid number.</red>");
+            plugin.getMessageManager().send(player, plugin.getLocaleManager().getText("custom-bet.invalid-number"));
             Bukkit.getScheduler().runTask(plugin.getPlugin(), () -> new CasinoHubGUI(plugin, player).open());
             return;
         }
@@ -62,11 +62,10 @@ public final class CustomBetManager {
         double min = plugin.getConfigManager().getMinBet();
         double max = plugin.getConfigManager().getMaxBet();
         if (bet < min || bet > max) {
-            plugin.getMessageManager().send(
-                player,
-                "<red>Custom bet must be between " + plugin.getEconomyManager().format(min) +
-                    " and " + plugin.getEconomyManager().format(max) + ".</red>"
-            );
+            plugin.getMessageManager().send(player, plugin.getLocaleManager().formatText("custom-bet.out-of-range", Map.of(
+                "min", plugin.getEconomyManager().format(min),
+                "max", plugin.getEconomyManager().format(max)
+            )));
             Bukkit.getScheduler().runTask(plugin.getPlugin(), () -> new CasinoHubGUI(plugin, player).open());
             return;
         }
@@ -76,7 +75,9 @@ public final class CustomBetManager {
             CasinoHubGUI.setSelectedBet(player.getUniqueId(), normalizedBet);
             plugin.getMessageManager().send(
                 player,
-                "<green>Selected custom bet: " + plugin.getEconomyManager().format(normalizedBet) + "</green>"
+                plugin.getLocaleManager().formatText("custom-bet.selected", Map.of(
+                    "amount", plugin.getEconomyManager().format(normalizedBet)
+                ))
             );
             new CasinoHubGUI(plugin, player).open();
         });

@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class HorseRaceGUI implements InventoryHolder {
 
@@ -43,7 +44,7 @@ public class HorseRaceGUI implements InventoryHolder {
         this.player = player;
         this.betAmount = betAmount;
         this.horseKeys = horseKeys;
-        this.inventory = Bukkit.createInventory(this, 54, Component.text("Horse Race"));
+        this.inventory = Bukkit.createInventory(this, 54, Component.text(t("horserace.gui.title-plain")));
         render();
     }
 
@@ -69,22 +70,22 @@ public class HorseRaceGUI implements InventoryHolder {
         }
 
         inventory.setItem(5, item(statusMaterial(round), statusName(round), statusLore(round)));
-        inventory.setItem(6, item(Material.SADDLE, "Horse Race",
-            "Bet: " + plugin.getEconomyManager().format(betAmount),
-            selectedHorse == null ? "Select your runner" : "Selected: " + game.getDisplayHorseName(selectedHorse),
-            "Pool: " + plugin.getEconomyManager().format(round.getTotalPool())
+        inventory.setItem(6, item(Material.SADDLE, t("horserace.gui.title"),
+            f("horserace.gui.bet", "amount", plugin.getEconomyManager().format(betAmount)),
+            selectedHorse == null ? t("horserace.gui.select-runner") : f("horserace.gui.selected", "horse", game.getDisplayHorseName(selectedHorse)),
+            f("horserace.gui.pool", "amount", plugin.getEconomyManager().format(round.getTotalPool()))
         ));
         inventory.setItem(7, item(Material.LIME_DYE, actionName(round), actionLore(round)));
-        inventory.setItem(8, item(Material.BARRIER, "Back", "Return to the casino hub"));
+        inventory.setItem(8, item(Material.BARRIER, t("horserace.gui.back"), t("horserace.gui.back-lore")));
 
         for (int i = 0; i < horseKeys.length; i++) {
             boolean selected = horseKeys[i].equals(selectedHorse);
             inventory.setItem(SELECT_SLOTS[i], item(
                 selected ? Material.EMERALD_BLOCK : HORSE_ARMORS[i],
                 game.getDisplayHorseName(horseKeys[i]),
-                "Pool on horse: " + plugin.getEconomyManager().format(game.getPlayerBetForHorse(horseKeys[i])),
-                "Live payout: " + String.format("%.2f", game.getHorseMultiplier(horseKeys[i])) + "x",
-                selected ? "Selected runner" : "Click to back this horse"
+                f("horserace.gui.pool-on-horse", "amount", plugin.getEconomyManager().format(game.getPlayerBetForHorse(horseKeys[i]))),
+                f("horserace.gui.live-payout", "value", String.format("%.2f", game.getHorseMultiplier(horseKeys[i]))),
+                selected ? t("horserace.gui.selected-runner") : t("horserace.gui.click-horse")
             ));
         }
 
@@ -102,37 +103,37 @@ public class HorseRaceGUI implements InventoryHolder {
 
     private String statusName(HorseRaceRound round) {
         return switch (round.getState()) {
-            case OPEN -> "Race Lobby";
-            case COUNTDOWN -> "Countdown";
-            case RACING -> "Race Live";
-            case FINISHED -> "Race Finished";
+            case OPEN -> t("horserace.gui.status.open");
+            case COUNTDOWN -> t("horserace.gui.status.countdown");
+            case RACING -> t("horserace.gui.status.racing");
+            case FINISHED -> t("horserace.gui.status.finished");
         };
     }
 
     private String statusLore(HorseRaceRound round) {
         return switch (round.getState()) {
-            case OPEN -> "Place a bet to start the shared countdown";
-            case COUNTDOWN -> "Starts in " + round.getCountdownSeconds() + "s";
-            case RACING -> "All open race GUIs are showing the same race";
-            case FINISHED -> "Winner: " + game.getDisplayHorseName(round.getWinner());
+            case OPEN -> t("horserace.gui.status-lore.open");
+            case COUNTDOWN -> f("horserace.gui.status-lore.countdown", "seconds", String.valueOf(round.getCountdownSeconds()));
+            case RACING -> t("horserace.gui.status-lore.racing");
+            case FINISHED -> f("horserace.gui.status-lore.finished", "winner", game.getDisplayHorseName(round.getWinner()));
         };
     }
 
     private String actionName(HorseRaceRound round) {
         return switch (round.getState()) {
-            case OPEN -> "Join And Start";
-            case COUNTDOWN -> "Join Race";
-            case RACING -> "Race Running";
-            case FINISHED -> "Next Race Soon";
+            case OPEN -> t("horserace.gui.action.open");
+            case COUNTDOWN -> t("horserace.gui.action.countdown");
+            case RACING -> t("horserace.gui.action.racing");
+            case FINISHED -> t("horserace.gui.action.finished");
         };
     }
 
     private String actionLore(HorseRaceRound round) {
         return switch (round.getState()) {
-            case OPEN -> "Locks in your horse and starts countdown";
-            case COUNTDOWN -> "Join before the countdown reaches zero";
-            case RACING -> "Wait for this race to finish";
-            case FINISHED -> "Open a new board or wait for the reset";
+            case OPEN -> t("horserace.gui.action-lore.open");
+            case COUNTDOWN -> t("horserace.gui.action-lore.countdown");
+            case RACING -> t("horserace.gui.action-lore.racing");
+            case FINISHED -> t("horserace.gui.action-lore.finished");
         };
     }
 
@@ -141,10 +142,10 @@ public class HorseRaceGUI implements InventoryHolder {
         for (int i = 0; i < horseKeys.length; i++) {
             int rowSlot = START_ROWS[i];
             for (int col = 1; col <= 8; col++) {
-                inventory.setItem(rowSlot + col, item(col == 8 ? Material.GOLD_BLOCK : Material.WHITE_STAINED_GLASS_PANE, col == 8 ? "Finish" : "Track"));
+                inventory.setItem(rowSlot + col, item(col == 8 ? Material.GOLD_BLOCK : Material.WHITE_STAINED_GLASS_PANE, col == 8 ? t("horserace.gui.finish") : t("horserace.gui.track")));
             }
             int lanePosition = Math.max(0, Math.min(8, positions[i]));
-            inventory.setItem(rowSlot + lanePosition, item(HORSE_ARMORS[i], game.getDisplayHorseName(horseKeys[i]), "Lane " + (i + 1)));
+            inventory.setItem(rowSlot + lanePosition, item(HORSE_ARMORS[i], game.getDisplayHorseName(horseKeys[i]), f("horserace.gui.lane", "index", String.valueOf(i + 1))));
         }
     }
 
@@ -165,18 +166,19 @@ public class HorseRaceGUI implements InventoryHolder {
 
     public void showResult(String winner, boolean won, double payout, double multiplier) {
         inventory.setItem(5, item(won ? Material.EMERALD_BLOCK : Material.REDSTONE_BLOCK,
-            won ? "Photo Finish Win" : "Race Lost",
-            "Winner: " + game.getDisplayHorseName(winner),
-            won ? "Payout: " + plugin.getEconomyManager().format(payout) : "Lost: " + plugin.getEconomyManager().format(betAmount)
+            won ? t("horserace.gui.result-win") : t("horserace.gui.result-loss"),
+            f("horserace.gui.result-winner", "winner", game.getDisplayHorseName(winner)),
+            won ? f("horserace.gui.result-payout", "amount", plugin.getEconomyManager().format(payout)) : f("horserace.gui.result-lost", "amount", plugin.getEconomyManager().format(betAmount))
         ));
         plugin.getMessageManager().send(
             player,
-            (won ? "<green><bold>Photo Finish Win</bold></green>" : "<red><bold>Race Lost</bold></red>") + "\n" +
-                "<gray>Your Horse:</gray> <white>" + game.getDisplayHorseName(selectedHorse) + "</white>\n" +
-                "<gray>Winner:</gray> <gold>" + game.getDisplayHorseName(winner) + "</gold>\n" +
-                (won ? "<gray>Pool Odds:</gray> <gold>" + String.format("%.2f", multiplier) + "x</gold>\n<gray>Payout:</gray> <green>" +
-                    plugin.getEconomyManager().format(payout) + "</green>" :
-                    "<gray>Lost:</gray> <red>" + plugin.getEconomyManager().format(betAmount) + "</red>")
+            plugin.getLocaleManager().formatText(won ? "horserace.result.win" : "horserace.result.loss", Map.of(
+                "selected", game.getDisplayHorseName(selectedHorse),
+                "winner", game.getDisplayHorseName(winner),
+                "odds", String.format("%.2f", multiplier),
+                "payout", plugin.getEconomyManager().format(payout),
+                "amount", plugin.getEconomyManager().format(betAmount)
+            ))
         );
     }
 
@@ -195,6 +197,14 @@ public class HorseRaceGUI implements InventoryHolder {
 
     public String getSelectedHorse() {
         return selectedHorse;
+    }
+
+    private String t(String key) {
+        return plugin.getLocaleManager().getText(key);
+    }
+
+    private String f(String key, String placeholder, String value) {
+        return plugin.getLocaleManager().formatText(key, Map.of(placeholder, value));
     }
 
     private ItemStack item(Material material, String name, String... lore) {

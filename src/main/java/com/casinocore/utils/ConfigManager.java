@@ -55,6 +55,10 @@ public class ConfigManager {
         return config.getString("settings.currency-symbol", "$");
     }
 
+    public String getConfiguredLocale() {
+        return config.getString("settings.language", "en");
+    }
+
     /**
      * Check if Vault integration is enabled
      * @return true if Vault should be used
@@ -134,7 +138,7 @@ public class ConfigManager {
      * @return The message, or empty string if not found
      */
     public String getMessage(String key) {
-        return config.getString("messages." + key, "");
+        return plugin.getLocaleManager().getMessage(key);
     }
 
     /**

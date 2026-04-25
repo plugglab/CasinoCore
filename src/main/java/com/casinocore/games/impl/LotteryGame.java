@@ -26,7 +26,7 @@ public class LotteryGame extends BaseCasinoGame {
         }
 
         if (openDraws.containsKey(player.getUniqueId())) {
-            sendMessage(player, "<yellow>You already have a lottery draw active.</yellow>");
+            sendLocaleMessage(player, "lottery.already-open");
             return false;
         }
 
@@ -89,7 +89,7 @@ public class LotteryGame extends BaseCasinoGame {
         double payout = bet * multiplier;
         if (won) {
             if (!payWinnings(player, payout)) {
-                sendMessage(player, "<red>Lottery payout failed. Contact an administrator.</red>");
+                sendLocaleMessage(player, "lottery.payout-failed");
                 openDraws.remove(player.getUniqueId());
                 return;
             }
@@ -99,15 +99,13 @@ public class LotteryGame extends BaseCasinoGame {
         }
 
         gui.showResult(winningNumber, won, multiplier, payout, difference);
-        sendMessage(player,
-            (won ? "<green><bold>Lottery Win</bold></green>" : "<red><bold>Lottery Loss</bold></red>") + "\n" +
-                "<gray>Your Number:</gray> <white>" + pickedNumber + "</white>\n" +
-                "<gray>Winning Ball:</gray> <gold>" + winningNumber + "</gold>\n" +
-                "<gray>Result:</gray> <white>" + result + "</white>\n" +
-                (won
-                    ? "<gray>Payout:</gray> <green>" + plugin.getEconomyManager().format(payout) + "</green>"
-                    : "<gray>Lost:</gray> <red>" + plugin.getEconomyManager().format(bet) + "</red>")
-        );
+        sendMessage(player, plugin.getLocaleManager().formatText(won ? "lottery.win-message" : "lottery.loss-message", Map.of(
+            "picked", String.valueOf(pickedNumber),
+            "winning", String.valueOf(winningNumber),
+            "result", result,
+            "payout", plugin.getEconomyManager().format(payout),
+            "bet", plugin.getEconomyManager().format(bet)
+        )));
         openDraws.remove(player.getUniqueId());
     }
 

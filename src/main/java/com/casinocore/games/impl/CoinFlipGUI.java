@@ -16,6 +16,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class CoinFlipGUI implements InventoryHolder {
 
@@ -40,7 +41,7 @@ public class CoinFlipGUI implements InventoryHolder {
         this.game = game;
         this.player = player;
         this.selectedBet = startingBet;
-        this.inventory = Bukkit.createInventory(this, 54, Component.text("Coin Flip"));
+        this.inventory = Bukkit.createInventory(this, 54, Component.text(t("coinflip.gui.title-plain")));
         this.visibleOffers = List.of();
         render();
     }
@@ -86,18 +87,26 @@ public class CoinFlipGUI implements InventoryHolder {
         }
 
         visibleOffers = game.getOpenOfferViews();
-        inventory.setItem(4, item(Material.SUNFLOWER, "Coin Flip", "Create or join a public wager", "Open offers: " + visibleOffers.size()));
-        inventory.setItem(SLOT_CREATE, item(Material.LIME_DYE, "Create Offer", "Bet: " + plugin.getEconomyManager().format(selectedBet)));
-        inventory.setItem(SLOT_MINUS_100, item(Material.REDSTONE, "-100", "Lower selected bet"));
-        inventory.setItem(SLOT_MINUS_10, item(Material.RED_DYE, "-10", "Lower selected bet"));
-        inventory.setItem(SLOT_INFO, item(Material.GOLD_INGOT, "Selected Bet", plugin.getEconomyManager().format(selectedBet), "Balance: " + plugin.getEconomyManager().format(plugin.getEconomyManager().getBalance(player))));
-        inventory.setItem(SLOT_PLUS_10, item(Material.LIME_DYE, "+10", "Raise selected bet"));
-        inventory.setItem(SLOT_PLUS_100, item(Material.EMERALD, "+100", "Raise selected bet"));
-        inventory.setItem(SLOT_BACK, item(Material.BARRIER, "Back", "Return to the casino hub"));
+        inventory.setItem(4, item(Material.SUNFLOWER,
+            t("coinflip.gui.header-title"),
+            t("coinflip.gui.header-subtitle"),
+            f("coinflip.gui.open-offers", "count", String.valueOf(visibleOffers.size()))
+        ));
+        inventory.setItem(SLOT_CREATE, item(Material.LIME_DYE, t("coinflip.gui.create"), f("coinflip.gui.bet", "amount", plugin.getEconomyManager().format(selectedBet))));
+        inventory.setItem(SLOT_MINUS_100, item(Material.REDSTONE, "-100", t("coinflip.gui.lower-bet")));
+        inventory.setItem(SLOT_MINUS_10, item(Material.RED_DYE, "-10", t("coinflip.gui.lower-bet")));
+        inventory.setItem(SLOT_INFO, item(Material.GOLD_INGOT,
+            t("coinflip.gui.selected-bet"),
+            plugin.getEconomyManager().format(selectedBet),
+            f("coinflip.gui.balance", "amount", plugin.getEconomyManager().format(plugin.getEconomyManager().getBalance(player)))
+        ));
+        inventory.setItem(SLOT_PLUS_10, item(Material.LIME_DYE, "+10", t("coinflip.gui.raise-bet")));
+        inventory.setItem(SLOT_PLUS_100, item(Material.EMERALD, "+100", t("coinflip.gui.raise-bet")));
+        inventory.setItem(SLOT_BACK, item(Material.BARRIER, t("coinflip.gui.back"), t("coinflip.gui.back-lore")));
 
         for (int i = 0; i < OFFER_SLOTS.length; i++) {
             if (i >= visibleOffers.size()) {
-                inventory.setItem(OFFER_SLOTS[i], item(Material.BLACK_STAINED_GLASS_PANE, "No Offer", "Waiting for players"));
+                inventory.setItem(OFFER_SLOTS[i], item(Material.BLACK_STAINED_GLASS_PANE, t("coinflip.gui.no-offer"), t("coinflip.gui.waiting")));
                 continue;
             }
 
@@ -106,8 +115,8 @@ public class CoinFlipGUI implements InventoryHolder {
                 offer.creatorId(),
                 offer.creatorName(),
                 offer.creatorName(),
-                "Bet: " + plugin.getEconomyManager().format(offer.bet()),
-                "Click to join"
+                f("coinflip.gui.bet", "amount", plugin.getEconomyManager().format(offer.bet())),
+                t("coinflip.gui.click-join")
             ));
         }
     }
@@ -127,6 +136,14 @@ public class CoinFlipGUI implements InventoryHolder {
             }
         }
         return -1;
+    }
+
+    private String t(String key) {
+        return plugin.getLocaleManager().getText(key);
+    }
+
+    private String f(String key, String placeholder, String value) {
+        return plugin.getLocaleManager().formatText(key, Map.of(placeholder, value));
     }
 
     private ItemStack item(Material material, String name, String... lore) {

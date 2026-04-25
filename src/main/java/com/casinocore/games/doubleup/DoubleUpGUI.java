@@ -15,6 +15,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class DoubleUpGUI implements InventoryHolder {
@@ -35,8 +36,8 @@ public class DoubleUpGUI implements InventoryHolder {
         this.player = player;
         this.baseBet = baseBet;
         this.currentPot = baseBet * plugin.getConfigManager().getConfig().getDouble("games.doubleup.starting-multiplier", 1.6);
-        this.inventory = Bukkit.createInventory(this, 54, Component.text("Double Up"));
-        render("<yellow>Choose cash out or double</yellow>");
+        this.inventory = Bukkit.createInventory(this, 54, Component.text(t("doubleup.gui.title-plain")));
+        render(t("doubleup.gui.status.choose"));
     }
 
     public void open() {
@@ -61,7 +62,7 @@ public class DoubleUpGUI implements InventoryHolder {
             return;
         }
         roundOver = true;
-        render("<green>Cash out locked in</green>");
+        render(t("doubleup.gui.status.cashout"));
         game.payCashout(player, baseBet, currentPot, streak);
     }
 
@@ -76,7 +77,7 @@ public class DoubleUpGUI implements InventoryHolder {
             @Override
             public void run() {
                 if (ticks++ < 12) {
-                    inventory.setItem(22, item(Material.GLOWSTONE_DUST, "<gold>Risk Meter</gold>", "<yellow>Rolling...</yellow>"));
+                    inventory.setItem(22, item(Material.GLOWSTONE_DUST, t("doubleup.gui.risk-meter"), t("doubleup.gui.rolling")));
                     player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_HAT, 0.4f, 0.9f + ticks * 0.03f);
                     return;
                 }
@@ -86,12 +87,12 @@ public class DoubleUpGUI implements InventoryHolder {
                     currentPot *= 2.0;
                     streak++;
                     resolving = false;
-                    render("<green>Success. Pot doubled.</green>");
+                    render(t("doubleup.gui.status.success"));
                     player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
                 } else {
                     roundOver = true;
                     resolving = false;
-                    render("<red>Bust. Pot lost.</red>");
+                    render(t("doubleup.gui.status.bust"));
                     player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 0.8f);
                     game.lose(player, baseBet, currentPot);
                 }
@@ -105,24 +106,32 @@ public class DoubleUpGUI implements InventoryHolder {
             inventory.setItem(i, filler);
         }
 
-        inventory.setItem(4, item(Material.BLAZE_POWDER, "<gold><bold>Double Up</bold></gold>",
-            "<gray>How to play:</gray> <white>Cash out safely or try to double your pot.</white>",
-            "<gray>Every double is a 50/50 risk.</gray>"
+        inventory.setItem(4, item(Material.BLAZE_POWDER, t("doubleup.gui.title"),
+            t("doubleup.gui.help-1"),
+            t("doubleup.gui.help-2")
         ));
-        inventory.setItem(22, item(Material.SUNFLOWER, "<yellow>Current Pot</yellow>",
-            "<gray>Starting Bet:</gray> <white>" + plugin.getEconomyManager().format(baseBet) + "</white>",
-            "<gray>Current Pot:</gray> <gold>" + plugin.getEconomyManager().format(currentPot) + "</gold>",
-            "<gray>Win Streak:</gray> <white>" + streak + "</white>",
+        inventory.setItem(22, item(Material.SUNFLOWER, t("doubleup.gui.current-pot"),
+            f("doubleup.gui.starting-bet", "amount", plugin.getEconomyManager().format(baseBet)),
+            f("doubleup.gui.pot", "amount", plugin.getEconomyManager().format(currentPot)),
+            f("doubleup.gui.streak", "value", String.valueOf(streak)),
             status
         ));
-        inventory.setItem(47, item(roundOver ? Material.GRAY_DYE : Material.LIME_DYE, "<green>Cash Out</green>",
-            roundOver ? "<gray>Round finished</gray>" : "<gray>Take the current pot now</gray>"));
-        inventory.setItem(49, item(roundOver ? Material.BARRIER : Material.GRAY_DYE, "<red>Close</red>",
-            roundOver ? "<gray>Close this table</gray>" : "<gray>Available after the round</gray>"));
-        inventory.setItem(51, item(roundOver ? Material.GRAY_DYE : Material.RED_DYE, "<red>Double</red>",
-            roundOver ? "<gray>Round finished</gray>" : "<gray>50/50 chance to double the pot</gray>"));
-        inventory.setItem(53, item(roundOver ? Material.LIGHT_BLUE_DYE : Material.GRAY_DYE, "<aqua>Play Again</aqua>",
-            roundOver ? "<gray>Start a new table with the same bet</gray>" : "<gray>Available after the round</gray>"));
+        inventory.setItem(47, item(roundOver ? Material.GRAY_DYE : Material.LIME_DYE, t("doubleup.gui.cashout"),
+            roundOver ? t("doubleup.gui.round-finished") : t("doubleup.gui.cashout-lore")));
+        inventory.setItem(49, item(roundOver ? Material.BARRIER : Material.GRAY_DYE, t("doubleup.gui.close"),
+            roundOver ? t("doubleup.gui.close-lore") : t("doubleup.gui.after-round")));
+        inventory.setItem(51, item(roundOver ? Material.GRAY_DYE : Material.RED_DYE, t("doubleup.gui.double"),
+            roundOver ? t("doubleup.gui.round-finished") : t("doubleup.gui.double-lore")));
+        inventory.setItem(53, item(roundOver ? Material.LIGHT_BLUE_DYE : Material.GRAY_DYE, t("doubleup.gui.play-again"),
+            roundOver ? t("doubleup.gui.play-again-lore") : t("doubleup.gui.after-round")));
+    }
+
+    private String t(String key) {
+        return plugin.getLocaleManager().getText(key);
+    }
+
+    private String f(String key, String placeholder, String value) {
+        return plugin.getLocaleManager().formatText(key, Map.of(placeholder, value));
     }
 
     private ItemStack item(Material material, String name, String... lore) {

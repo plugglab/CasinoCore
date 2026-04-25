@@ -33,7 +33,7 @@ public class BlackjackGame extends BaseCasinoGame {
             }
 
             if (sessions.containsKey(player.getUniqueId())) {
-                sendMessage(player, "<yellow>You already have a blackjack table open.</yellow>");
+                sendLocaleMessage(player, "blackjack.already-open");
                 return false;
             }
 
@@ -162,7 +162,7 @@ public class BlackjackGame extends BaseCasinoGame {
     private void split(BlackjackGUI gui) {
         BlackjackTableState state = gui.getState();
         if (!state.canSplitCurrentHand()) {
-            sendMessage(gui.getPlayer(), "<yellow>You can only split matching starting cards.</yellow>");
+            sendLocaleMessage(gui.getPlayer(), "blackjack.split-invalid");
             return;
         }
 
@@ -332,13 +332,13 @@ public class BlackjackGame extends BaseCasinoGame {
 
     private void sendRoundMessage(Player player, BlackjackTableState state, int dealerScore, double payout, StringBuilder handSummary) {
         StringBuilder message = new StringBuilder();
-        message.append("<gold><bold>Blackjack</bold></gold>\n");
-        message.append("<gray>Dealer Hand:</gray> <white>").append(dealerScore).append("</white>\n");
-        message.append("<gray>Total Bet:</gray> <white>").append(plugin.getEconomyManager().format(state.getTotalCommittedBet())).append("</white>");
+        message.append(plugin.getLocaleManager().getText("blackjack.result-title")).append("\n");
+        message.append(plugin.getLocaleManager().formatText("blackjack.dealer-hand", Map.of("score", String.valueOf(dealerScore)))).append("\n");
+        message.append(plugin.getLocaleManager().formatText("blackjack.total-bet", Map.of("amount", plugin.getEconomyManager().format(state.getTotalCommittedBet()))));
         message.append(handSummary);
 
         if (payout > 0) {
-            message.append("\n<gray>Total Payout:</gray> <gold>").append(plugin.getEconomyManager().format(payout)).append("</gold>");
+            message.append("\n").append(plugin.getLocaleManager().formatText("blackjack.total-payout", Map.of("amount", plugin.getEconomyManager().format(payout))));
         }
 
         sendMessage(player, message.toString());
