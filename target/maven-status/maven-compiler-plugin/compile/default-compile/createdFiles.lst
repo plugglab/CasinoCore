@@ -45,12 +45,12 @@ com\casinocore\games\roulette\RouletteBet$1.class
 com\casinocore\games\slots\SlotSymbol.class
 com\casinocore\games\diceroll\RiskLevel.class
 com\casinocore\games\AbstractGame.class
+com\casinocore\utils\ProtectionManager$ValidationRequest.class
 com\casinocore\gui\CasinoHubListener.class
 com\casinocore\games\blackjack\BlackjackGame$2.class
 com\casinocore\games\blackjack\BlackjackGUI.class
 com\casinocore\games\commands\PlayCommand.class
 com\casinocore\games\BaseCasinoGame.class
-com\casinocore\utils\ProtectionManager$LicensePayload.class
 com\casinocore\games\impl\WheelGame$WheelSegment.class
 com\casinocore\games\roulette\RouletteGame.class
 com\casinocore\utils\AntiAbuseManager$BetRecord.class
@@ -93,6 +93,7 @@ com\casinocore\games\doubleup\DoubleUpGUI.class
 com\casinocore\games\roulette\RouletteGame$1.class
 com\casinocore\games\horserace\HorseRaceGame$1.class
 com\casinocore\games\impl\LotteryDrawGUI.class
+com\casinocore\utils\ProtectionManager$ValidationToken.class
 com\casinocore\games\doubleup\DoubleUpGUI$1.class
 com\casinocore\games\impl\LotteryNumberPrompt.class
 com\casinocore\gui\GUIManager.class

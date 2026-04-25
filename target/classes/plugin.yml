@@ -1,5 +1,5 @@
 name: CasinoCore
-version: '1.0.0-clear'
+version: '1.0.0-protected'
 main: com.casinocore.core.CasinoCore
 api-version: '1.21'
 description: A production-ready casino plugin for Minecraft

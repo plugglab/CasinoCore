@@ -40,7 +40,12 @@ import com.casinocore.utils.MessageManager;
 import com.casinocore.utils.ProtectionManager;
 import com.casinocore.utils.UxManager;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
 
@@ -103,7 +108,7 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
         try {
             configManager = new ConfigManager(this);
             configManager.loadConfig();
-            variant = PluginVariant.fromConfig(configManager.getConfig().getString("build.variant", "protected"));
+            variant = resolveBuildVariant();
             localeManager = new LocaleManager(this);
             localeManager.load();
 
@@ -130,6 +135,26 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
         } catch (Exception e) {
             getLogger().severe("Error initializing managers: " + e.getMessage());
             return false;
+        }
+    }
+
+    private PluginVariant resolveBuildVariant() {
+        PluginVariant configuredVariant = PluginVariant.fromConfig(configManager.getConfig().getString("build.variant", "protected"));
+        try (InputStream stream = getResource("config.yml")) {
+            if (stream == null) {
+                getLogger().warning("Bundled config.yml is missing. Falling back to configured build variant: " + configuredVariant.name().toLowerCase());
+                return configuredVariant;
+            }
+
+            YamlConfiguration bundledConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(stream, StandardCharsets.UTF_8));
+            PluginVariant bundledVariant = PluginVariant.fromConfig(bundledConfig.getString("build.variant", configuredVariant.name()));
+            if (bundledVariant != configuredVariant) {
+                getLogger().warning("Config build.variant (" + configuredVariant.name().toLowerCase() + ") does not match bundled build variant (" + bundledVariant.name().toLowerCase() + "). Using bundled variant.");
+            }
+            return bundledVariant;
+        } catch (Exception exception) {
+            getLogger().warning("Failed to read bundled build variant. Falling back to configured variant: " + configuredVariant.name().toLowerCase());
+            return configuredVariant;
         }
     }
 

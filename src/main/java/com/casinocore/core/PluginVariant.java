@@ -4,6 +4,7 @@ import java.util.Locale;
 
 public enum PluginVariant {
     PROTECTED(true, false),
+    NORMAL(false, false),
     CLEAR(false, false),
     DEMO(false, true);
 
@@ -28,8 +29,16 @@ public enum PluginVariant {
             return PROTECTED;
         }
 
+        String normalized = raw.trim().toUpperCase(Locale.ROOT);
+        if ("STANDARD".equals(normalized) || "RELEASE".equals(normalized)) {
+            return NORMAL;
+        }
+        if ("DEMO".equals(normalized)) {
+            return DEMO;
+        }
+
         try {
-            return PluginVariant.valueOf(raw.trim().toUpperCase(Locale.ROOT));
+            return PluginVariant.valueOf(normalized);
         } catch (IllegalArgumentException ignored) {
             return PROTECTED;
         }

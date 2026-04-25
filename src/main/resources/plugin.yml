@@ -1,6 +1,6 @@
 name: CasinoCore
 version: '${project.version}-${build.variant}'
-main: com.casinocore.core.CasinoCore
+main: ${build.main.class}
 api-version: '1.21'
 description: A production-ready casino plugin for Minecraft
 author: CasinoCore Team
@@ -17,7 +17,7 @@ commands:
     aliases: [cas, gamble]
   play:
     description: Play casino games
-    usage: /play <game> <bet>, /play dice <bet> [low|medium|high], /play coinflip <create|join|cancel|list>, or /play list
+    usage: ${build.play.usage}
     permission: casinocore.play
     aliases: [bet, gamble]
 

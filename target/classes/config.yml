@@ -7,13 +7,22 @@ settings:
   language: "en"
 
 build:
-  variant: "clear"
-  protection-enabled: false
+  variant: "protected"
+  protection-enabled: true
   demo-enabled: false
 
 license:
+  key: "replace-with-license-key"
   owner: ""
-  server-id: ""
+  server-id: "replace-with-server-id"
+  api:
+    validate-url: "https://your-domain.example/api/casinocore/validate"
+    timeout-ms: 10000
+    refresh-interval-minutes: 15
+    offline-grace-minutes: 1440
+    user-agent: "CasinoCore-License/1.0"
+  cache:
+    file: "license-cache.yml"
   public-key:
     lines:
       - "-----BEGIN PUBLIC KEY-----"
