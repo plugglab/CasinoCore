@@ -16,10 +16,6 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <build.variant>normal</build.variant>
-        <build.protection.enabled>false</build.protection.enabled>
-        <build.demo.enabled>false</build.demo.enabled>
-        <build.classifier>normal</build.classifier>
         <build.main.class>com.casinocore.core.CasinoCore</build.main.class>
         <build.play.usage>/play &lt;game&gt; &lt;bet&gt;, /play dice &lt;bet&gt; [low|medium|high], /play coinflip &lt;create|join|cancel|list&gt;, or /play list</build.play.usage>
     </properties>
@@ -65,7 +61,7 @@
     </dependencies>
 
     <build>
-        <finalName>${project.name}-${project.version}-${build.classifier}</finalName>
+        <finalName>${project.name}-${project.version}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -87,7 +83,7 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.5.0</version>
                 <configuration>
-                    <finalName>${project.name}-${project.version}-${build.classifier}</finalName>
+                    <finalName>${project.name}-${project.version}</finalName>
                     <shadedArtifactAttached>false</shadedArtifactAttached>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                 </configuration>
@@ -102,51 +98,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>protected</id>
-            <properties>
-                <build.variant>protected</build.variant>
-                <build.protection.enabled>true</build.protection.enabled>
-                <build.demo.enabled>false</build.demo.enabled>
-                <build.classifier>protected</build.classifier>
-                <build.main.class>com.casinocore.core.CasinoCore</build.main.class>
-                <build.play.usage>/play &lt;game&gt; &lt;bet&gt;, /play dice &lt;bet&gt; [low|medium|high], /play coinflip &lt;create|join|cancel|list&gt;, or /play list</build.play.usage>
-            </properties>
-        </profile>
-        <profile>
-            <id>normal</id>
-            <properties>
-                <build.variant>normal</build.variant>
-                <build.protection.enabled>false</build.protection.enabled>
-                <build.demo.enabled>false</build.demo.enabled>
-                <build.classifier>normal</build.classifier>
-                <build.main.class>com.casinocore.core.CasinoCore</build.main.class>
-                <build.play.usage>/play &lt;game&gt; &lt;bet&gt;, /play dice &lt;bet&gt; [low|medium|high], /play coinflip &lt;create|join|cancel|list&gt;, or /play list</build.play.usage>
-            </properties>
-        </profile>
-        <profile>
-            <id>clear</id>
-            <properties>
-                <build.variant>clear</build.variant>
-                <build.protection.enabled>false</build.protection.enabled>
-                <build.demo.enabled>false</build.demo.enabled>
-                <build.classifier>clear</build.classifier>
-                <build.main.class>com.casinocore.core.CasinoCore</build.main.class>
-                <build.play.usage>/play &lt;game&gt; &lt;bet&gt;, /play dice &lt;bet&gt; [low|medium|high], /play coinflip &lt;create|join|cancel|list&gt;, or /play list</build.play.usage>
-            </properties>
-        </profile>
-        <profile>
-            <id>demo</id>
-            <properties>
-                <build.variant>demo</build.variant>
-                <build.protection.enabled>false</build.protection.enabled>
-                <build.demo.enabled>true</build.demo.enabled>
-                <build.classifier>demo</build.classifier>
-                <build.main.class>com.casinocore.core.CasinoCoreDemo</build.main.class>
-                <build.play.usage>/play slots &lt;bet&gt;, /play coinflip &lt;create|join|cancel|list&gt;, or /play list</build.play.usage>
-            </properties>
-        </profile>
-    </profiles>
 </project>

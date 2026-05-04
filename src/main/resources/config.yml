@@ -6,37 +6,6 @@ settings:
   use-vault: true
   language: "en"
 
-build:
-  variant: "${build.variant}"
-  protection-enabled: ${build.protection.enabled}
-  demo-enabled: ${build.demo.enabled}
-
-license:
-  key: "replace-with-license-key"
-  owner: ""
-  server-id: "replace-with-server-id"
-  instance:
-    file: "instance-id.txt"
-  api:
-    validate-url: "https://your-domain.example/api/casinocore/validate"
-    timeout-ms: 10000
-    refresh-interval-minutes: 15
-    offline-grace-minutes: 1440
-    user-agent: "CasinoCore-License/1.0"
-  cache:
-    file: "license-cache.yml"
-  public-key:
-    lines:
-      - "-----BEGIN PUBLIC KEY-----"
-      - "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwCIIN+UWqyW1pWj77YbG"
-      - "fhKzXIIEcQDMHFIkTwesP3iiwLH2lmIsA21WeBy4/SnaNk2EMhyoqBL8ekBRPvlC"
-      - "f1eCUyeR9W+r9XKH48A4jC0e9W11ufDusCTx+cBJLidCqYN2KEicrseuvG1A1+UZ"
-      - "AH9q25z4y9BjlVM83HWQ3EUtZHXq4TNOg0mSh0eCz9IDtHiO8YBgfdx1LiCn+Rch"
-      - "J5ggdGWsMkN+n4Y6JfWGf4JrnyftBFuuaLm245f4jSH6XkZ0kLfvOCOMwFjXRAYF"
-      - "Sg3fnnkfLOCOCeuAnSg+7VYm1WDCb2TF0bwMPt0Ml0QGWksnqyo16kvMnOQynEvn"
-      - "HwIDAQAB"
-      - "-----END PUBLIC KEY-----"
-
 broadcasts:
   big-win:
     enabled: true

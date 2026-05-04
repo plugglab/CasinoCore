@@ -75,6 +75,4 @@ public interface CasinoPlugin {
     LocaleManager getLocaleManager();
 
     ProtectionManager getProtectionManager();
-
-    PluginVariant getVariant();
 }

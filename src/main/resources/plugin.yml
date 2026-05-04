@@ -1,5 +1,5 @@
 name: CasinoCore
-version: '${project.version}-${build.variant}'
+version: '${project.version}'
 main: ${build.main.class}
 api-version: '1.21'
 description: A production-ready casino plugin for Minecraft

@@ -40,12 +40,7 @@ import com.casinocore.utils.MessageManager;
 import com.casinocore.utils.ProtectionManager;
 import com.casinocore.utils.UxManager;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 
 public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
 
@@ -67,7 +62,6 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
     private HighLowGame highLowGame;
     private DoubleUpGame doubleUpGame;
     private TreasureGame treasureGame;
-    private PluginVariant variant;
 
     @Override
     public void onEnable() {
@@ -79,7 +73,7 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
 
         registerCommands();
         registerEvents();
-        getLogger().info("CasinoCore enabled. Variant=" + variant.name().toLowerCase() + ", games=" + gameManager.getEnabledCasinoGames().keySet());
+        getLogger().info("CasinoCore enabled. games=" + gameManager.getEnabledCasinoGames().keySet());
     }
 
     @Override
@@ -108,16 +102,12 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
         try {
             configManager = new ConfigManager(this);
             configManager.loadConfig();
-            variant = resolveBuildVariant();
             localeManager = new LocaleManager(this);
             localeManager.load();
 
             messageManager = new MessageManager(this);
             protectionManager = new ProtectionManager(this);
-            if (!protectionManager.initialize()) {
-                getLogger().severe("Protection checks failed for this protected build.");
-                return false;
-            }
+            protectionManager.initialize();
 
             economyManager = new EconomyManager(this);
             if (!economyManager.setupEconomy()) {
@@ -138,34 +128,10 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
         }
     }
 
-    private PluginVariant resolveBuildVariant() {
-        PluginVariant configuredVariant = PluginVariant.fromConfig(configManager.getConfig().getString("build.variant", "protected"));
-        try (InputStream stream = getResource("config.yml")) {
-            if (stream == null) {
-                getLogger().warning("Bundled config.yml is missing. Falling back to configured build variant: " + configuredVariant.name().toLowerCase());
-                return configuredVariant;
-            }
-
-            YamlConfiguration bundledConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(stream, StandardCharsets.UTF_8));
-            PluginVariant bundledVariant = PluginVariant.fromConfig(bundledConfig.getString("build.variant", configuredVariant.name()));
-            if (bundledVariant != configuredVariant) {
-                getLogger().warning("Config build.variant (" + configuredVariant.name().toLowerCase() + ") does not match bundled build variant (" + bundledVariant.name().toLowerCase() + "). Using bundled variant.");
-            }
-            return bundledVariant;
-        } catch (Exception exception) {
-            getLogger().warning("Failed to read bundled build variant. Falling back to configured variant: " + configuredVariant.name().toLowerCase());
-            return configuredVariant;
-        }
-    }
-
     private void registerCasinoGames() {
         coinFlipGame = new CoinFlipGame(this);
         gameManager.registerCasinoGame(coinFlipGame);
         gameManager.registerCasinoGame(new SlotMachineGame(this));
-        if (variant.isDemo()) {
-            return;
-        }
-
         gameManager.registerCasinoGame(new DiceRollGame(this));
         gameManager.registerCasinoGame(new LotteryGame(this));
         blackjackGame = new BlackjackGame(this);
@@ -190,9 +156,6 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
     }
 
     private void registerIntegrations() {
-        if (variant.isDemo()) {
-            return;
-        }
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new CasinoPlaceholderExpansion(this).register();
         }
@@ -202,11 +165,9 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
         getServer().getPluginManager().registerEvents(new CasinoHubListener(), this);
         getServer().getPluginManager().registerEvents(new CustomBetListener(this), this);
         getServer().getPluginManager().registerEvents(new SlotMachineListener(), this);
-        if (!variant.isDemo()) {
-            getServer().getPluginManager().registerEvents(new DiceRiskListener(), this);
-            getServer().getPluginManager().registerEvents(new LotteryPromptListener(this), this);
-            getServer().getPluginManager().registerEvents(new LotteryDrawListener(this), this);
-        }
+        getServer().getPluginManager().registerEvents(new DiceRiskListener(), this);
+        getServer().getPluginManager().registerEvents(new LotteryPromptListener(this), this);
+        getServer().getPluginManager().registerEvents(new LotteryDrawListener(this), this);
         if (coinFlipGame != null) {
             getServer().getPluginManager().registerEvents(new CoinFlipListener(coinFlipGame), this);
             getServer().getPluginManager().registerEvents(new CoinFlipGuiListener(), this);
@@ -293,10 +254,5 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
     @Override
     public GameManager getGameManager() {
         return gameManager;
-    }
-
-    @Override
-    public PluginVariant getVariant() {
-        return variant;
     }
 }
