@@ -2,6 +2,7 @@ package com.casinocore.utils;
 
 import com.casinocore.core.CasinoPlugin;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,8 +18,10 @@ import java.util.regex.Pattern;
 
 public class VersionChecker implements Listener {
 
-    private static final String VERSION_URL = "https://plugglab.github.io/stable.json";
+    private static final String DEFAULT_VERSION_URL = "https://plugglab.github.io/stable.json";
     private static final String ADMIN_PERMISSION = "casinocore.admin";
+    private static final String ENABLED_PATH = "version-checker.enabled";
+    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(10);
     private static final Pattern STRING_FIELD_PATTERN =
         Pattern.compile("\"(version|latestVersion|latest|name)\"\\s*:\\s*\"([^\"]+)\"");
     private static final Pattern URL_FIELD_PATTERN =
@@ -37,10 +40,15 @@ public class VersionChecker implements Listener {
     }
 
     public void checkAsync() {
+        if (!isEnabled()) {
+            status = VersionStatus.disabledStatus();
+            return;
+        }
+
         Bukkit.getScheduler().runTaskAsynchronously(plugin.getPlugin(), () -> {
             try {
-                HttpRequest request = HttpRequest.newBuilder(URI.create(VERSION_URL))
-                    .timeout(Duration.ofSeconds(10))
+                HttpRequest request = HttpRequest.newBuilder(URI.create(DEFAULT_VERSION_URL))
+                    .timeout(REQUEST_TIMEOUT)
                     .header("Accept", "application/json")
                     .GET()
                     .build();
@@ -58,17 +66,18 @@ public class VersionChecker implements Listener {
 
                 if (remoteVersion == null || remoteVersion.isBlank()) {
                     status = VersionStatus.error("Version feed did not contain a supported version field");
-                    plugin.getPlugin().getLogger().warning("Version check failed: no supported version field in " + VERSION_URL);
+                    plugin.getPlugin().getLogger().warning("Version check failed: no supported version field in " + DEFAULT_VERSION_URL);
                     return;
                 }
 
                 String currentVersion = plugin.getPlugin().getDescription().getVersion();
-                boolean updateAvailable = !currentVersion.equalsIgnoreCase(remoteVersion.trim());
-                status = new VersionStatus(currentVersion, remoteVersion.trim(), updateAvailable, downloadUrl, null);
+                String trimmedRemoteVersion = remoteVersion.trim();
+                boolean updateAvailable = compareVersions(currentVersion, trimmedRemoteVersion) < 0;
+                status = new VersionStatus(currentVersion, trimmedRemoteVersion, updateAvailable, downloadUrl, null, false);
 
                 if (updateAvailable) {
                     plugin.getPlugin().getLogger().warning(
-                        "Update available: current=" + currentVersion + ", latest=" + remoteVersion.trim()
+                        "Update available: current=" + currentVersion + ", latest=" + trimmedRemoteVersion
                     );
                 }
             } catch (Exception exception) {
@@ -86,6 +95,10 @@ public class VersionChecker implements Listener {
         }
 
         VersionStatus currentStatus = status;
+        if (currentStatus.disabled()) {
+            return;
+        }
+
         if (currentStatus.errorMessage() != null) {
             plugin.getMessageManager().sendPlayer(
                 player,
@@ -118,6 +131,61 @@ public class VersionChecker implements Listener {
         return matcher.group(2);
     }
 
+    private boolean isEnabled() {
+        return getConfig().getBoolean(ENABLED_PATH, true);
+    }
+
+    private FileConfiguration getConfig() {
+        return plugin.getConfigManager().getConfig();
+    }
+
+    private int compareVersions(String currentVersion, String latestVersion) {
+        int[] currentParts = numericVersionParts(currentVersion);
+        int[] latestParts = numericVersionParts(latestVersion);
+        int maxLength = Math.max(currentParts.length, latestParts.length);
+
+        for (int index = 0; index < maxLength; index++) {
+            int currentPart = index < currentParts.length ? currentParts[index] : 0;
+            int latestPart = index < latestParts.length ? latestParts[index] : 0;
+            if (currentPart != latestPart) {
+                return Integer.compare(currentPart, latestPart);
+            }
+        }
+
+        return 0;
+    }
+
+    private int[] numericVersionParts(String version) {
+        if (version == null || version.isBlank()) {
+            return new int[0];
+        }
+
+        String normalized = version.trim();
+        if (normalized.startsWith("v") || normalized.startsWith("V")) {
+            normalized = normalized.substring(1);
+        }
+
+        String numericSection = normalized.split("[-+\\s]", 2)[0];
+        String[] rawParts = numericSection.split("\\.");
+        int[] parts = new int[rawParts.length];
+
+        for (int index = 0; index < rawParts.length; index++) {
+            String digits = rawParts[index].replaceAll("[^0-9]", "");
+            if (digits.isEmpty()) {
+                parts[index] = 0;
+                continue;
+            }
+
+            try {
+                parts[index] = Integer.parseInt(digits);
+            } catch (NumberFormatException exception) {
+                parts[index] = Integer.MAX_VALUE;
+            }
+        }
+
+        return parts;
+    }
+
     private String escapeMiniMessage(String value) {
         return value.replace("<", "\\<").replace(">", "\\>");
     }
@@ -127,14 +195,19 @@ public class VersionChecker implements Listener {
         String latestVersion,
         boolean updateAvailable,
         String downloadUrl,
-        String errorMessage
+        String errorMessage,
+        boolean disabled
     ) {
         private static VersionStatus unknown() {
-            return new VersionStatus(null, null, false, null, null);
+            return new VersionStatus(null, null, false, null, null, false);
+        }
+
+        private static VersionStatus disabledStatus() {
+            return new VersionStatus(null, null, false, null, null, true);
         }
 
         private static VersionStatus error(String errorMessage) {
-            return new VersionStatus(null, null, false, null, errorMessage == null ? "unknown error" : errorMessage);
+            return new VersionStatus(null, null, false, null, errorMessage == null ? "unknown error" : errorMessage, false);
         }
     }
 }

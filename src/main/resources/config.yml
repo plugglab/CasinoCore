@@ -13,6 +13,10 @@ settings:
   # Default language file from lang.
   language: "en"
 
+version-checker:
+  # Enables the startup check for newer plugin versions.
+  enabled: true
+
 integrations:
   worldguard:
     # Restricts casino usage to allowed WorldGuard regions.
