@@ -165,10 +165,10 @@ public class BlackjackGUI implements InventoryHolder {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text(name));
+            meta.displayName(plugin.getMessageManager().parse(name));
             List<Component> loreLines = new ArrayList<>();
             for (String line : lore) {
-                loreLines.add(Component.text(line));
+                loreLines.add(plugin.getMessageManager().parse(line));
             }
             meta.lore(loreLines);
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
@@ -184,10 +184,10 @@ public class BlackjackGUI implements InventoryHolder {
             if (headOwner != null) {
                 meta.setOwningPlayer(headOwner);
             }
-            meta.displayName(Component.text(name));
+            meta.displayName(plugin.getMessageManager().parse(name));
             List<Component> loreLines = new ArrayList<>();
             for (String line : lore) {
-                loreLines.add(Component.text(line));
+                loreLines.add(plugin.getMessageManager().parse(line));
             }
             meta.lore(loreLines);
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);

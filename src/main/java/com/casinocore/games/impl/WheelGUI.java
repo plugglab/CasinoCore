@@ -2,7 +2,6 @@ package com.casinocore.games.impl;
 
 import com.casinocore.core.CasinoPlugin;
 import com.casinocore.gui.GuiNavigation;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -13,8 +12,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 public class WheelGUI implements InventoryHolder {
 
@@ -28,7 +26,7 @@ public class WheelGUI implements InventoryHolder {
         this.plugin = plugin;
         this.player = player;
         this.bet = bet;
-        this.inventory = Bukkit.createInventory(this, 27, Component.text("Lucky Wheel"));
+        this.inventory = Bukkit.createInventory(this, 27, plugin.getMessageManager().parse(t("wheel.gui.title-plain")));
         renderBase();
     }
 
@@ -42,10 +40,10 @@ public class WheelGUI implements InventoryHolder {
         for (int i = 0; i < inventory.getSize(); i++) {
             inventory.setItem(i, filler);
         }
-        inventory.setItem(4, item(Material.NAUTILUS_SHELL, "Lucky Wheel", "Bet: " + plugin.getEconomyManager().format(bet)));
-        inventory.setItem(13, item(Material.CLOCK, "Wheel Window", "Watch the slices move"));
-        inventory.setItem(22, item(Material.LIME_DYE, "Spin", "Start the lucky wheel"));
-        inventory.setItem(26, item(Material.BARRIER, "Back", spinning ? "Available after the spin" : "Return to the casino hub"));
+        inventory.setItem(4, item(Material.NAUTILUS_SHELL, t("wheel.gui.title"), f("wheel.gui.bet", "amount", plugin.getEconomyManager().format(bet))));
+        inventory.setItem(13, item(Material.CLOCK, t("wheel.gui.window"), t("wheel.gui.window-lore")));
+        inventory.setItem(22, item(Material.LIME_DYE, t("wheel.gui.spin"), t("wheel.gui.spin-lore")));
+        inventory.setItem(26, item(Material.BARRIER, t("wheel.gui.back"), spinning ? t("wheel.gui.after-spin") : t("wheel.gui.back-lore")));
     }
 
     public void setWindow(String left, String center, String right) {
@@ -56,12 +54,12 @@ public class WheelGUI implements InventoryHolder {
 
     public void showResult(boolean won, String label, double multiplier, double payout) {
         inventory.setItem(22, item(won ? Material.EMERALD_BLOCK : Material.REDSTONE_BLOCK,
-            won ? "Winner" : "Miss",
-            "Slice: " + label,
-            won ? "Paid: " + plugin.getEconomyManager().format(payout) : "Lost: " + plugin.getEconomyManager().format(bet),
-            won ? "Multiplier: " + multiplier + "x" : "Try again"
+            won ? t("wheel.gui.result-win") : t("wheel.gui.result-loss"),
+            f("wheel.gui.slice", "value", label),
+            won ? f("wheel.gui.paid", "amount", plugin.getEconomyManager().format(payout)) : f("wheel.gui.lost", "amount", plugin.getEconomyManager().format(bet)),
+            won ? f("wheel.gui.multiplier", "value", String.valueOf(multiplier)) : t("wheel.gui.try-again")
         ));
-        inventory.setItem(26, item(Material.BARRIER, "Back", "Return to the casino hub"));
+        inventory.setItem(26, item(Material.BARRIER, t("wheel.gui.back"), t("wheel.gui.back-lore")));
     }
 
     public void back() {
@@ -85,16 +83,20 @@ public class WheelGUI implements InventoryHolder {
         this.spinning = spinning;
     }
 
+    private String t(String key) {
+        return plugin.getLocaleManager().getText(key);
+    }
+
+    private String f(String key, String placeholder, String value) {
+        return plugin.getLocaleManager().formatText(key, Map.of(placeholder, value));
+    }
+
     private ItemStack item(Material material, String name, String... lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text(name));
-            List<Component> lines = new ArrayList<>();
-            for (String line : lore) {
-                lines.add(Component.text(line));
-            }
-            meta.lore(lines);
+            meta.displayName(plugin.getMessageManager().parse(name));
+            meta.lore(java.util.Arrays.stream(lore).map(plugin.getMessageManager()::parse).toList());
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             item.setItemMeta(meta);
         }

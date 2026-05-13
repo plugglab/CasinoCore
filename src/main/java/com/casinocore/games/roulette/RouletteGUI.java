@@ -190,10 +190,10 @@ public class RouletteGUI implements InventoryHolder {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text(name));
+            meta.displayName(plugin.getMessageManager().parse(name));
             List<Component> lines = new ArrayList<>();
             for (String line : lore) {
-                lines.add(Component.text(line));
+                lines.add(plugin.getMessageManager().parse(line));
             }
             meta.lore(lines);
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);

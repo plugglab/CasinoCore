@@ -112,6 +112,7 @@ public class CoinFlipGUI implements InventoryHolder {
 
             CoinFlipGame.CoinFlipOfferView offer = visibleOffers.get(i);
             inventory.setItem(OFFER_SLOTS[i], PlayerHeadFactory.createPlayerHead(
+                plugin,
                 offer.creatorId(),
                 offer.creatorName(),
                 offer.creatorName(),
@@ -150,10 +151,10 @@ public class CoinFlipGUI implements InventoryHolder {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text(name));
+            meta.displayName(plugin.getMessageManager().parse(name));
             List<Component> lines = new ArrayList<>();
             for (String line : lore) {
-                lines.add(Component.text(line));
+                lines.add(plugin.getMessageManager().parse(line));
             }
             meta.lore(lines);
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);

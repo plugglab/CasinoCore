@@ -3,7 +3,6 @@ package com.casinocore.games.diceroll;
 import com.casinocore.core.CasinoPlugin;
 import com.casinocore.gui.GuiNavigation;
 import com.casinocore.utils.PlayerHeadFactory;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -14,8 +13,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 public class DiceRiskGUI implements InventoryHolder {
 
@@ -32,7 +30,7 @@ public class DiceRiskGUI implements InventoryHolder {
         this.player = player;
         this.bet = bet;
         this.selectedRisk = RiskLevel.MEDIUM;
-        this.inventory = Bukkit.createInventory(this, 27, Component.text("Dice Risk"));
+        this.inventory = Bukkit.createInventory(this, 27, plugin.getMessageManager().parse(t("dice.gui.title-plain")));
         render();
     }
 
@@ -77,41 +75,45 @@ public class DiceRiskGUI implements InventoryHolder {
         }
 
         inventory.setItem(4, PlayerHeadFactory.createPlayerHead(
+            plugin,
             player.getUniqueId(),
             player.getName(),
-            "Dice Table",
-            "Bet: " + plugin.getEconomyManager().format(bet),
-            "Pick your risk before rolling"
+            t("dice.gui.header-title"),
+            f("dice.gui.bet", "amount", plugin.getEconomyManager().format(bet)),
+            t("dice.gui.header-lore")
         ));
         inventory.setItem(10, riskItem(RiskLevel.LOW, Material.LIME_WOOL));
         inventory.setItem(13, riskItem(RiskLevel.MEDIUM, Material.YELLOW_WOOL));
         inventory.setItem(16, riskItem(RiskLevel.HIGH, Material.RED_WOOL));
-        inventory.setItem(22, item(Material.LIME_DYE, "Start Roll", "Selected: " + selectedRisk.getDisplayName()));
-        inventory.setItem(26, item(Material.BARRIER, "Back", "Return to the casino hub"));
+        inventory.setItem(22, item(Material.LIME_DYE, t("dice.gui.start"), f("dice.gui.selected", "risk", selectedRisk.getDisplayName())));
+        inventory.setItem(26, item(Material.BARRIER, t("dice.gui.back"), t("dice.gui.back-lore")));
     }
 
     private ItemStack riskItem(RiskLevel riskLevel, Material base) {
         boolean selected = riskLevel == selectedRisk;
-        return PlayerHeadFactory.createPlayerHead(
-            player.getUniqueId(),
-            player.getName(),
+        return item(
+            selected ? Material.EMERALD_BLOCK : base,
             riskLevel.getDisplayName(),
-            "Threshold: " + game.getThresholdPreview(riskLevel),
-            "Payout: " + game.getMultiplierPreview(riskLevel) + "x",
-            selected ? "Selected risk" : "Click to select"
+            f("dice.gui.threshold", "value", String.valueOf(game.getThresholdPreview(riskLevel))),
+            f("dice.gui.payout", "value", String.valueOf(game.getMultiplierPreview(riskLevel))),
+            selected ? t("dice.gui.selected-risk") : t("dice.gui.click-select")
         );
+    }
+
+    private String t(String key) {
+        return plugin.getLocaleManager().getText(key);
+    }
+
+    private String f(String key, String placeholder, String value) {
+        return plugin.getLocaleManager().formatText(key, Map.of(placeholder, value));
     }
 
     private ItemStack item(Material material, String name, String... lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text(name));
-            List<Component> loreLines = new ArrayList<>();
-            for (String line : lore) {
-                loreLines.add(Component.text(line));
-            }
-            meta.lore(loreLines);
+            meta.displayName(plugin.getMessageManager().parse(name));
+            meta.lore(java.util.Arrays.stream(lore).map(plugin.getMessageManager()::parse).toList());
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             item.setItemMeta(meta);
         }
