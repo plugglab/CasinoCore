@@ -1,31 +1,51 @@
 # CasinoCore Configuration
+# This file is a documented copy of the active plugin config.
+# Booleans use true/false. Money values use decimals. Time values are noted in each section.
 
 settings:
+  # Enables extra console logging for troubleshooting.
   debug: false
+  # Currency symbol shown in messages and GUIs.
   currency-symbol: "$"
+  # Uses Vault economy if Vault and an economy plugin are installed.
   use-vault: true
+  # Default language file from the plugin lang folder.
   language: "en"
 
 build:
+  # Distribution/build label used by this packaged copy.
   variant: "protected"
+  # Enables internal protection-related features for this build.
   protection-enabled: true
+  # Enables demo/testing-only behavior if supported by the build.
   demo-enabled: false
 
 license:
+  # License key provided by your licensing system.
   key: "replace-with-license-key"
+  # Owner or customer name tied to the license.
   owner: ""
+  # Optional server identifier used during validation.
   server-id: ""
   instance:
+    # File used to persist the generated instance id for this installation.
     file: "instance-id.txt"
   api:
+    # Remote endpoint used to validate the license.
     validate-url: "https://your-domain.example/api/casinocore/validate"
+    # HTTP timeout for validation requests in milliseconds.
     timeout-ms: 10000
+    # How often to refresh license validation in minutes.
     refresh-interval-minutes: 15
+    # Grace period allowed without successful validation, in minutes.
     offline-grace-minutes: 1440
+    # User-Agent sent with validation requests.
     user-agent: "CasinoCore-License/1.0"
   cache:
+    # File used to cache the last known valid license response.
     file: "license-cache.yml"
   public-key:
+    # RSA public key used to verify signed license responses.
     lines:
       - "-----BEGIN PUBLIC KEY-----"
       - "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwCIIN+UWqyW1pWj77YbG"
@@ -39,21 +59,30 @@ license:
 
 broadcasts:
   big-win:
+    # Sends a server-wide message when a player wins at least min-payout.
     enabled: true
+    # Minimum payout required before the broadcast is sent.
     min-payout: 1000.0
+    # Available placeholders: {player}, {amount}, {game}
     message: "<gold><bold>{player}</bold></gold> won <green>{amount}</green> in <yellow>{game}</yellow>!"
 
 economy:
+  # Global fallback minimum bet for all games.
   min-bet: 10.0
+  # Global fallback maximum bet for all games.
   max-bet: 10000.0
+  # Starting balance used by systems that rely on the plugin's internal default value.
   default-balance: 1000.0
 
 daily-rewards:
+  # Value granted by the daily reward free spin feature.
   free-spin-value: 100.0
 
 cooldowns:
+  # Default delay in seconds between game actions if no game-specific cooldown exists.
   global: 5
   games:
+    # Per-game cooldowns in seconds.
     coinflip: 3
     dice: 5
     lottery: 10
@@ -64,8 +93,10 @@ cooldowns:
     wheel: 6
 
 house-edge:
+  # Master switch for documented house-edge configuration.
   enabled: true
   mode: "documented"
+  # Global fallback house edge percentage if a game-specific value is missing.
   global-percent: 3.0
   games:
     coinflip: 0.0
@@ -78,17 +109,23 @@ house-edge:
     wheel: 5.0
 
 anti-abuse:
+  # Master switch for safety checks against spam, session abuse, and risky betting patterns.
   enabled: true
   max-open-sessions-per-player: 1
   max-consecutive-losses-warning: 10
   max-bet-percent-of-balance: 50.0
   bet-window:
+    # Rolling time window used for total-bet checks.
     window-seconds: 60
+    # Maximum total amount a player can bet during the window.
     max-total-bet: 10000.0
   click-spam:
+    # Minimum allowed interval between GUI clicks in milliseconds.
     min-click-interval-ms: 150
   rate-limits:
+    # Maximum command executions per 10 seconds.
     commands-per-10-seconds: 20
+    # Maximum game starts allowed per minute.
     game-starts-per-minute: 30
   coinflip:
     prevent-self-join: true
@@ -115,6 +152,7 @@ games:
       joiner-win: 50.0
     multipliers:
       winner-payout: 1.9
+    # Seconds before an open coinflip offer expires.
     offer-expiry-seconds: 60
     house-edge-adjustment-percent: 0.0
 
@@ -240,6 +278,7 @@ games:
       single-number: 35.0
       red-black: 1.9
       even-odd: 1.9
+    # Visual/logic wheel order used for roulette spin resolution.
     wheel-order:
       - 0
       - 32
@@ -279,6 +318,7 @@ games:
       - 3
       - 26
     weights:
+      # Relative weight for each roulette number. Keep all at 1.0 for a fair table.
       0: 1.0
       1: 1.0
       2: 1.0
@@ -348,6 +388,7 @@ games:
         coal: 1.5
         apple: 1.5
     symbols:
+      # Lower weight means rarer symbol.
       diamond:
         weight: 1
       emerald:
@@ -378,6 +419,7 @@ games:
       min-bet: 25.0
       max-bet: 4000.0
     horses:
+      # Horse entries define display name, relative win weight, and payout multiplier.
       blaze:
         name: "Blaze"
         weight: 28.0
@@ -407,6 +449,7 @@ games:
       min-bet: 25.0
       max-bet: 3500.0
     segments:
+      # Wheel segment label shown to players, payout multiplier, and weight.
       bust:
         label: "Bust"
         multiplier: 0.0

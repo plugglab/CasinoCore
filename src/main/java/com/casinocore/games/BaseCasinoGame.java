@@ -90,6 +90,12 @@ public abstract class BaseCasinoGame implements CasinoGame {
                 return false;
             }
 
+            if (!plugin.getRegionAccessManager().canUseCasino(player)) {
+                plugin.getRegionAccessManager().sendBlockedMessage(player);
+                logDebug("Player " + player.getName() + " blocked outside allowed casino regions.");
+                return false;
+            }
+
             if (!plugin.getAntiAbuseManager().canStartGame(player, name, bet)) {
                 logDebug("Player " + player.getName() + " blocked by anti-abuse rules for game " + name);
                 return false;

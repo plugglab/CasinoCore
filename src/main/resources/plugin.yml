@@ -8,6 +8,7 @@ website: https://github.com/casinocore
 
 softdepend:
   - Vault
+  - WorldGuard
 
 commands:
   casino:
@@ -91,3 +92,6 @@ permissions:
   casinocore.game.treasure:
     description: Allows playing Treasure
     default: true
+  casinocore.region.bypass:
+    description: Bypass WorldGuard casino region restrictions
+    default: op

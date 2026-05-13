@@ -71,6 +71,10 @@ public class CasinoHubGUI implements InventoryHolder {
     }
 
     public void open() {
+        if (!plugin.getRegionAccessManager().canUseCasino(player)) {
+            plugin.getRegionAccessManager().sendBlockedMessage(player);
+            return;
+        }
         render();
         player.openInventory(inventory);
         player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 0.8f, 1.0f);
@@ -205,6 +209,11 @@ public class CasinoHubGUI implements InventoryHolder {
         double bet = getSelectedBet();
         player.closeInventory();
         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.7f, 1.0f);
+
+        if (!plugin.getRegionAccessManager().canUseCasino(player)) {
+            plugin.getRegionAccessManager().sendBlockedMessage(player);
+            return;
+        }
 
         if (game instanceof CoinFlipGame coinFlipGame) {
             coinFlipGame.play(player, bet);

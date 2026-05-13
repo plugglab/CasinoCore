@@ -33,6 +33,9 @@ texts:
     runtime-error: "<red>Une erreur est survenue pendant le jeu. Contacte un administrateur.</red>"
     bet-refunded: "<yellow>Ta mise a ete remboursee.</yellow>"
 
+  region:
+    denied: "<red>CasinoCore ne peut etre utilise que dans les regions WorldGuard autorisees.</red>"
+
   ux:
     win-streak-title: "SERIE x{streak}"
     win-title: "TU GAGNES"

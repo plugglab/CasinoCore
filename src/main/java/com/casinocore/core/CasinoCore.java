@@ -40,6 +40,7 @@ import com.casinocore.utils.CooldownManager;
 import com.casinocore.utils.LocaleManager;
 import com.casinocore.utils.MessageManager;
 import com.casinocore.utils.ProtectionManager;
+import com.casinocore.utils.RegionAccessManager;
 import com.casinocore.utils.UxManager;
 import com.casinocore.utils.VersionChecker;
 import org.bukkit.Bukkit;
@@ -58,6 +59,7 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
     private UxManager uxManager;
     private BetLogManager betLogManager;
     private VersionChecker versionChecker;
+    private RegionAccessManager regionAccessManager;
     private GameManager gameManager;
     private CoinFlipGame coinFlipGame;
     private BlackjackGame blackjackGame;
@@ -129,6 +131,7 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
             uxManager = new UxManager(this);
             betLogManager = new BetLogManager(this);
             versionChecker = new VersionChecker(this);
+            regionAccessManager = new RegionAccessManager(this);
             gameManager = new GameManager(this);
             registerCasinoGames();
             registerIntegrations();
@@ -277,5 +280,10 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
     @Override
     public VersionChecker getVersionChecker() {
         return versionChecker;
+    }
+
+    @Override
+    public RegionAccessManager getRegionAccessManager() {
+        return regionAccessManager;
     }
 }

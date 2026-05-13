@@ -35,6 +35,11 @@ public class PlayCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
+            if (!plugin.getRegionAccessManager().canUseCasino(player)) {
+                plugin.getRegionAccessManager().sendBlockedMessage(player);
+                return true;
+            }
+
             if (!plugin.getAntiAbuseManager().tryRecordCommand(player)) {
                 player.sendMessage(plugin.getLocaleManager().getText("command.too-fast"));
                 return true;

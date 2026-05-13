@@ -27,6 +27,10 @@ public class CasinoCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 0) {
                 if (sender instanceof Player player) {
+                    if (!plugin.getRegionAccessManager().canUseCasino(player)) {
+                        plugin.getRegionAccessManager().sendBlockedMessage(player);
+                        return true;
+                    }
                     if (!plugin.getAntiAbuseManager().tryRecordCommand(player)) {
                         player.sendMessage(plugin.getLocaleManager().getText("command.too-fast"));
                         return true;
@@ -46,6 +50,10 @@ public class CasinoCommand implements CommandExecutor, TabCompleter {
             case "menu", "hub" -> {
                 if (!(sender instanceof Player player)) {
                     plugin.getMessageManager().sendMessage(sender, "player-only");
+                    return true;
+                }
+                if (!plugin.getRegionAccessManager().canUseCasino(player)) {
+                    plugin.getRegionAccessManager().sendBlockedMessage(player);
                     return true;
                 }
                 if (!plugin.getAntiAbuseManager().tryRecordCommand(player)) {

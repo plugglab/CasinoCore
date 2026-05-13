@@ -33,6 +33,9 @@ texts:
     runtime-error: "<red>Wystapil blad podczas gry. Skontaktuj sie z administratorem.</red>"
     bet-refunded: "<yellow>Twoj zaklad zostal zwrocony.</yellow>"
 
+  region:
+    denied: "<red>CasinoCore moze byc uzywane tylko w dozwolonych regionach WorldGuard.</red>"
+
   ux:
     win-streak-title: "PASSA x{streak}"
     win-title: "WYGRYWASZ"
