@@ -12,7 +12,7 @@ softdepend:
 commands:
   casino:
     description: Main casino command
-    usage: /casino [help|reload|balance|daily]
+    usage: /casino [help|menu|balance|daily|admin|reload]
     permission: casinocore.use
     aliases: [cas, gamble]
   play:
@@ -55,6 +55,9 @@ permissions:
       casinocore.game.slots: true
       casinocore.game.horserace: true
       casinocore.game.wheel: true
+      casinocore.game.highlow: true
+      casinocore.game.doubleup: true
+      casinocore.game.treasure: true
   casinocore.game.coinflip:
     description: Allows playing Coin Flip
     default: true
@@ -78,4 +81,13 @@ permissions:
     default: true
   casinocore.game.wheel:
     description: Allows playing Lucky Wheel
+    default: true
+  casinocore.game.highlow:
+    description: Allows playing High Low
+    default: true
+  casinocore.game.doubleup:
+    description: Allows playing Double Up
+    default: true
+  casinocore.game.treasure:
+    description: Allows playing Treasure
     default: true

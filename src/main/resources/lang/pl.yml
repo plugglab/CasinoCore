@@ -7,7 +7,6 @@ messages:
   insufficient-funds: "<red>Nie masz wystarczajaco pieniedzy. Wymagane: {amount}</red>"
   cooldown-active: "<yellow>Poczekaj {time} sekund przed kolejna gra.</yellow>"
 
-
 texts:
   command:
     too-fast: "Wysylasz komendy zbyt szybko."
@@ -17,8 +16,10 @@ texts:
     usage-header: "Uzycie:"
     no-games: "Obecnie nie ma dostepnych gier."
     games-header: "Dostepne gry kasynowe:"
+
   demo:
     blocked-feature: "Ta funkcja nie jest dostepna w wersji demo."
+
   game:
     disabled: "<red>Ta gra jest obecnie wylaczona.</red>"
     try-again: "<red>Wystapil blad. Sprobuj ponownie pozniej.</red>"
@@ -31,6 +32,7 @@ texts:
     bet-processing-error: "<red>Wystapil blad podczas przetwarzania twojego zakladu.</red>"
     runtime-error: "<red>Wystapil blad podczas gry. Skontaktuj sie z administratorem.</red>"
     bet-refunded: "<yellow>Twoj zaklad zostal zwrocony.</yellow>"
+
   ux:
     win-streak-title: "PASSA x{streak}"
     win-title: "WYGRYWASZ"
@@ -42,6 +44,7 @@ texts:
     daily-ready: "<green>Dzienny darmowy spin jest gotowy.</green>"
     daily-next: "<yellow>Nastepny darmowy spin: {time}</yellow>"
     ready-now: "gotowe-teraz"
+
   custom-bet:
     title: "Wlasny zaklad"
     prompt: "<white>Wpisz swoj zaklad na czacie.</white>"
@@ -51,6 +54,7 @@ texts:
     invalid-number: "<red>To nie jest prawidlowa liczba.</red>"
     out-of-range: "<red>Wlasny zaklad musi byc pomiedzy {min} i {max}.</red>"
     selected: "<green>Wybrano wlasny zaklad: {amount}</green>"
+
   hub:
     title-plain: "Hub Kasyna"
     wallet-title: "<gold><bold>Hub Kasyna</bold></gold>"
@@ -81,7 +85,7 @@ texts:
     current-bet-title: "<gold><bold>Aktualny zaklad</bold></gold>"
     current-bet-lore: "<gray>Uzyj szybkich kontrolek lub wlasnego wpisu na czacie</gray>"
     set-max: "<green>Ustaw maksimum</green>"
-    raise-bet: "<gray>Zwieklsz wybrany zaklad</gray>"
+    raise-bet: "<gray>Zwieksz wybrany zaklad</gray>"
     refresh-title: "<aqua>Odswiez</aqua>"
     refresh-lore: "<gray>Odbuduj menu i zsynchronizuj saldo</gray>"
     min-bet: "<gray>Minimalny zaklad:</gray> <green>{amount}</green>"
@@ -102,11 +106,11 @@ texts:
       horserace: "Kliknij, aby otworzyc plansze wyscigu"
       wheel: "Kliknij, aby zakrecic kolem fortuny"
     game-title:
-      coinflip: "<yellow><bold>Rzut monetą</bold></yellow>"
+      coinflip: "<yellow><bold>Rzut Moneta</bold></yellow>"
       dice: "<gold><bold>Kosci</bold></gold>"
       blackjack: "<dark_green><bold>Blackjack</bold></dark_green>"
       highlow: "<red><bold>Wyzej Nizej</bold></red>"
-      doubleup: "<gold><bold>Podówj lub nic</bold></gold>"
+      doubleup: "<gold><bold>Podwoj albo nic</bold></gold>"
       treasure: "<aqua><bold>Wybor Skarbu</bold></aqua>"
       roulette: "<red><bold>Ruletka</bold></red>"
       slots: "<light_purple><bold>Automaty</bold></light_purple>"
@@ -137,6 +141,7 @@ texts:
       lottery: "<gray>Jak:</gray> <white>Wybierz swoj numer i sproboj trafic zwycieski los.</white>"
       horserace: "<gray>Jak:</gray> <white>Postaw na jednego konia przed koncem wspolnego odliczania.</white>"
       wheel: "<gray>Jak:</gray> <white>Zakrec wazonym kolem i licz na mocne pole.</white>"
+
   coinflip:
     already-active: "<yellow>Masz juz aktywna oferte coinflip.</yellow>"
     created: "<gold><bold>Coinflip utworzony</bold></gold>\n<gray>Zaklad:</gray> <white>{bet}</white>\n<gray>Dolacz:</gray> <white>/play coinflip join {creator}</white>"
@@ -154,16 +159,16 @@ texts:
     refunded-player-left: "<yellow>Coinflip zostal zwrocony, poniewaz gracz opuscil gre.</yellow>"
     refunded-opponent-unavailable: "<yellow>Coinflip zostal zwrocony, poniewaz przeciwnik byl niedostepny.</yellow>"
     payout-failed: "<red>Wyplata coinflipa nie powiodla sie. Oba zaklady zostaly zwrocone.</red>"
+    expired: "<yellow>Twoj coinflip wygasl i zostal zwrocony.</yellow>"
+    lost: "<red>Przegrales {amount}</red>"
+    broadcast-win: "<gold><bold>[CoinFlip]</bold></gold> <white>{winner}</white> wygral <green>{amount}</green> <gray>przeciwko</gray> <white>{loser}</white>"
+    summary: "<gold><bold>Wynik coinflipa</bold></gold>\n<gray>Tworca:</gray> <white>{creator}</white>\n<gray>Dolaczyl:</gray> <white>{joiner}</white>\n<gray>Rzut:</gray> <white>{flip}</white>\n<gray>Zwyciezca:</gray> <green>{winner}</green>\n<gray>Pula:</gray> <gold>{pot}</gold>"
     result:
       heads: "ORZEL"
       tails: "RESZKA"
-    summary: "<gold><bold>Wynik coinflipa</bold></gold>\n<gray>Tworca:</gray> <white>{creator}</white>\n<gray>Dolaczyl:</gray> <white>{joiner}</white>\n<gray>Rzut:</gray> <white>{flip}</white>\n<gray>Zwyciezca:</gray> <green>{winner}</green>\n<gray>Pula:</gray> <gold>{pot}</gold>"
-    lost: "<red>Przegrales {amount}</red>"
-    broadcast-win: "<gold><bold>[CoinFlip]</bold></gold> <white>{winner}</white> wygral <green>{amount}</green> <gray>przeciwko</gray> <white>{loser}</white>"
-    expired: "<yellow>Twoj coinflip wygasl i zostal zwrocony.</yellow>"
     gui:
-      title-plain: "Rzut monetą"
-      header-title: "&eRzut monetą"
+      title-plain: "Rzut Moneta"
+      header-title: "Rzut Moneta"
       header-subtitle: "Utworz lub dolacz do publicznego zakladu"
       open-offers: "Otwarte oferty: {count}"
       create: "Utworz oferte"
@@ -171,12 +176,13 @@ texts:
       lower-bet: "Zmniejsz wybrany zaklad"
       selected-bet: "Wybrany zaklad"
       balance: "Saldo: {amount}"
-      raise-bet: "Zwieklsz wybrany zaklad"
+      raise-bet: "Zwieksz wybrany zaklad"
       back: "Wstecz"
       back-lore: "Wroc do hubu kasyna"
       no-offer: "Brak oferty"
       waiting: "Oczekiwanie na graczy"
       click-join: "Kliknij, aby dolaczyc"
+
   slots:
     finish-session: "<yellow>Najpierw zakoncz aktualna sesje na automacie.</yellow>"
     spinning: "Bebny sie kreca..."
@@ -214,14 +220,15 @@ texts:
       another-shot: "<gray>Pociagnij ponownie, jesli chcesz kolejna probe</gray>"
       spin-another-round: "<gray>Zagraj kolejna runde</gray>"
       same-bet: "<gray>Zagraj ponownie z tym samym zakladem</gray>"
+
   doubleup:
     already-open: "<yellow>Masz juz otwarty stol Double Up.</yellow>"
     cashout: "<gold><bold>Wyplata Double Up</bold></gold>\n<gray>Przetrwane rundy:</gray> <white>{streak}</white>\n<gray>Wyplata:</gray> <green>{payout}</green>"
     cashout-failed: "<red>Nie udalo sie wyplacic twojego cashoutu Double Up.</red>"
     failed: "<red><bold>Double Up przegrane</bold></red>\n<gray>Stracona pula:</gray> <red>{amount}</red>"
     gui:
-      title-plain: "Podwój lub nic"
-      title: "<gold><bold>Podwój lub nic</bold></gold>"
+      title-plain: "Podwoj albo nic"
+      title: "<gold><bold>Podwoj albo nic</bold></gold>"
       help-1: "<gray>Jak grac:</gray> <white>Wyplac bezpiecznie albo sprobuj podwoic swoja pule.</white>"
       help-2: "<gray>Każde podwojenie to ryzyko 50/50.</gray>"
       current-pot: "<yellow>Aktualna pula</yellow>"
@@ -238,13 +245,14 @@ texts:
       play-again-lore: "<gray>Uruchom nowy stol z tym samym zakladem</gray>"
       after-round: "<gray>Dostepne po rundzie</gray>"
       round-finished: "<gray>Runda zakonczona</gray>"
+      rolling: "<yellow>Rozstrzyganie...</yellow>"
+      risk-meter: "<gold>Miernik ryzyka</gold>"
       status:
         choose: "<yellow>Wybierz wyplate albo podwojenie</yellow>"
         cashout: "<green>Wyplata zatwierdzona</green>"
         success: "<green>Sukces. Pula podwojona.</green>"
         bust: "<red>Przegrana. Pula stracona.</red>"
-      risk-meter: "<gold>Miernik ryzyka</gold>"
-      rolling: "<yellow>Rozstrzyganie...</yellow>"
+
   highlow:
     gui:
       title-plain: "Wyzej Nizej"
@@ -272,6 +280,7 @@ texts:
     result:
       win: "<gold><bold>Wyzej Nizej</bold></gold>\n<gray>Aktualna:</gray> <white>{current}</white>\n<gray>Nastepna:</gray> <white>{next}</white>\n<gray>Wyplata:</gray> <green>{payout}</green>"
       loss: "<gold><bold>Wyzej Nizej</bold></gold>\n<gray>Aktualna:</gray> <white>{current}</white>\n<gray>Nastepna:</gray> <white>{next}</white>\n<gray>Przegrane:</gray> <red>{amount}</red>"
+
   treasure:
     gui:
       title-plain: "Wybor Skarbu"
@@ -294,7 +303,11 @@ texts:
       result-loss: "<red><bold>Brak skarbu</bold></red>"
       payout: "<gray>Wyplata:</gray> <green>{amount}</green>"
       try-again: "<gray>Powodzenia nastepnym razem</gray>"
+
   horserace:
+    result:
+      win: "<green><bold>Wygrana na mecie</bold></green>\n<gray>Twoj kon:</gray> <white>{selected}</white>\n<gray>Zwyciezca:</gray> <gold>{winner}</gold>\n<gray>Kurs puli:</gray> <gold>{odds}x</gold>\n<gray>Wyplata:</gray> <green>{payout}</green>"
+      loss: "<red><bold>Przegrany wyscig</bold></red>\n<gray>Twoj kon:</gray> <white>{selected}</white>\n<gray>Zwyciezca:</gray> <gold>{winner}</gold>\n<gray>Przegrane:</gray> <red>{amount}</red>"
     gui:
       title-plain: "Wyscig Koni"
       title: "Wyscig Koni"
@@ -308,6 +321,14 @@ texts:
       live-payout: "Wyplata na zywo: {value}x"
       selected-runner: "Wybrany kon"
       click-horse: "Kliknij, aby postawic na tego konia"
+      finish: "Meta"
+      track: "Tor"
+      lane: "Tor {index}"
+      result-win: "Wygrana na mecie"
+      result-loss: "Przegrany wyscig"
+      result-winner: "Zwyciezca: {winner}"
+      result-payout: "Wyplata: {amount}"
+      result-lost: "Przegrane: {amount}"
       status:
         open: "Lobby wyscigu"
         countdown: "Odliczanie"
@@ -328,25 +349,15 @@ texts:
         countdown: "Dolacz, zanim odliczanie dojdzie do zera"
         racing: "Poczekaj na zakonczenie tego wyscigu"
         finished: "Otworz nowa plansze albo poczekaj na reset"
-      finish: "Meta"
-      track: "Tor"
-      lane: "Tor {index}"
-      result-win: "Wygrana na mecie"
-      result-loss: "Przegrany wyscig"
-      result-winner: "Zwyciezca: {winner}"
-      result-payout: "Wyplata: {amount}"
-      result-lost: "Przegrane: {amount}"
-    result:
-      win: "<green><bold>Wygrana na mecie</bold></green>\n<gray>Twoj kon:</gray> <white>{selected}</white>\n<gray>Zwyciezca:</gray> <gold>{winner}</gold>\n<gray>Kurs puli:</gray> <gold>{odds}x</gold>\n<gray>Wyplata:</gray> <green>{payout}</green>"
-      loss: "<red><bold>Przegrany wyscig</bold></red>\n<gray>Twoj kon:</gray> <white>{selected}</white>\n<gray>Zwyciezca:</gray> <gold>{winner}</gold>\n<gray>Przegrane:</gray> <red>{amount}</red>"
+
   blackjack:
-    result-title: "<yellow><bold>Wynik BlackJack</bold></yellow>"
+    already-open: "<yellow>Masz juz otwarty stol Blackjacka.</yellow>"
+    split-invalid: "<red>Nie mozesz podzielic tej reki.</red>"
+    result-title: "<yellow><bold>Wynik Blackjacka</bold></yellow>"
+    dealer-hand: "<gray>Reka krupiera:</gray> <white>{score}</white>"
+    total-bet: "<gray>Laczny zaklad:</gray> <gold>{amount}</gold>"
+    total-payout: "<gray>Laczna wyplata:</gray> <green>{amount}</green>"
     gui:
-      unavailable: "<red>Gra nie dostępna</red>"
-      stand-lore: "<gray>Zostań z twoją aktualną ręką</gray>"  lottery.win-message: "<gold><bold>Wygrana na Loterii!</bold></gold>\n<gray>Twoj numer:</gray> <white>{picked}</white>\n<gray>Numer wygrywajacy:</gray> <white>{winning}</white>\n<gray>Wynik:</gray> <green>{result}</green>\n<gray>Wyplata:</gray> <green>{payout}</green>"
-      cards: "<gray>Karty: {count}</gray>"
-      dealer-cards-hidden: "<gray>Krupier: {count} kart zakrytych</gray>"
-      visible-score: "<gray>Wynik: {value}</gray>"
       title-plain: "Blackjack"
       title: "<dark_green><bold>Blackjack</bold></dark_green>"
       subtitle: "<gray>Pokonaj krupiera nie przekraczajac 21</gray>"
@@ -354,8 +365,9 @@ texts:
       total-bet: "<gray>Laczny zaklad:</gray> <gold>{amount}</gold>"
       dealer: "<aqua>Krupier</aqua>"
       hit: "<green>Dobierz</green>"
-      hit-lore: "<gray>Dobiez kolejna karte</gray>"
+      hit-lore: "<gray>Dobierz kolejna karte</gray>"
       stand: "<yellow>Stoj</yellow>"
+      stand-lore: "<gray>Zostan z aktualna reka</gray>"
       split: "<aqua>Podziel</aqua>"
       split-lore: "<gray>Podziel reke na dwie</gray>"
       back: "<red>Wstecz</red>"
@@ -364,23 +376,23 @@ texts:
       play-again: "<aqua>Zagraj ponownie</aqua>"
       play-again-ready: "<gray>Rozpocznij nowa runde z tym samym zakladem</gray>"
       player-hand: "<white>Reka {index}</white>"
-      player-hand-active: "<green><bold>Reka {index} — Twoja kolej</bold></green>"
+      player-hand-active: "<green><bold>Reka {index} - Twoja kolej</bold></green>"
       bet: "<gray>Zaklad:</gray> <gold>{amount}</gold>"
+      cards: "<gray>Karty: {count}</gray>"
       score: "<gray>Wynik:</gray> <white>{score}</white>"
       card-name: "<white>{rank}</white>"
       card-value: "<gray>Wartosc:</gray> <white>{value}</white>"
       hidden-card: "<gray>Zakryta karta</gray>"
       hidden-card-lore: "<dark_gray>Odkryta gdy krupier gra</dark_gray>"
-    dealer-hand: "<gray>Reka krupiera:</gray> <white>{score}</white>"
-    total-bet: "<gray>Laczny zaklad:</gray> <gold>{amount}</gold>"
-    total-payout: "<gray>Laczna wyplata:</gray> <green>{amount}</green>"
-    already-open: "<yellow>Masz juz otwarty stol Blackjacka.</yellow>"
-    split-invalid: "<red>Nie mozesz podzielic tej reki.</red>"
+      dealer-cards-hidden: "<gray>Krupier: {count} kart zakrytych</gray>"
+      visible-score: "<gray>Wynik: {value}</gray>"
+      unavailable: "<red><bold>Gra niedostepna</bold></red>"
+
   lottery:
-    loss-message: "<red><bold>Przegrana Loteria</bold></red>\n<gray>Twoj numer:</gray> <white>{picked}</white>\n<gray>Numer wygrywajacy:</gray> <white>{winning}</white>\n<gray>Wynik:</gray> <red>{result}</red>\n<gray>Zaklad:</gray> <red>{bet}</red>"
-    win-message: "<gold><bold>Wygrana na Loterii!</bold></gold>\n<gray>Twoj numer:</gray> <white>{picked}</white>\n<gray>Numer wygrywajacy:</gray> <white>{winning}</white>\n<gray>Wynik:</gray> <green>{result}</green>\n<gray>Wyplata:</gray> <green>{payout}</green>"
     already-open: "<yellow>Masz juz otwarte losowanie Loterii.</yellow>"
     payout-failed: "<red>Wyplata Loterii nie powiodla sie. Skontaktuj sie z administratorem.</red>"
+    win-message: "<gold><bold>Wygrana na Loterii!</bold></gold>\n<gray>Twoj numer:</gray> <white>{picked}</white>\n<gray>Numer wygrywajacy:</gray> <white>{winning}</white>\n<gray>Wynik:</gray> <green>{result}</green>\n<gray>Wyplata:</gray> <green>{payout}</green>"
+    loss-message: "<red><bold>Przegrana Loteria</bold></red>\n<gray>Twoj numer:</gray> <white>{picked}</white>\n<gray>Numer wygrywajacy:</gray> <white>{winning}</white>\n<gray>Wynik:</gray> <red>{result}</red>\n<gray>Zaklad:</gray> <red>{bet}</red>"
     gui:
       title-plain: "Loteria"
       machine: "<green><bold>Maszyna Loteryjna</bold></green>"
@@ -400,7 +412,11 @@ texts:
       paid: "<green>Wyplacono:</green> <gold>{amount}</gold>"
       lost: "<red>Przegrane:</red> <red>{amount}</red>"
       difference: "<gray>Roznica:</gray> <white>{value}</white>"
+
   roulette:
+    already-open: "<yellow>Masz juz otwarty stol Ruletki.</yellow>"
+    payout-failed: "<red>Wyplata Ruletki nie powiodla sie. Skontaktuj sie z administratorem.</red>"
+    select-bet: "<red>Wybierz zaklad przed zakreceniem.</red>"
     win-message: "<gold><bold>Wygrana w Ruletce!</bold></gold>\n<gray>Zaklad:</gray> <white>{bet}</white>\n<gray>Wynik:</gray> <white>{result} {color}</white>\n<gray>Mnoznik:</gray> <gold>{multiplier}</gold>\n<gray>Wyplata:</gray> <green>{stake}</green>"
     loss-message: "<red><bold>Przegrana Ruletka</bold></red>\n<gray>Zaklad:</gray> <white>{bet}</white>\n<gray>Wynik:</gray> <white>{result} {color}</white>\n<gray>Zaklad utracony:</gray> <red>{stake}</red>"
     gui:
@@ -416,7 +432,7 @@ texts:
       spin-lore: "<gray>Zakrecic kolem ruletki</gray>"
       back: "<red>Wstecz</red>"
       back-lore: "<gray>Wroc do hubu kasyna</gray>"
-      after-spin: "<gray>Poczekaj na zakonczenie kreczenia</gray>"
+      after-spin: "<gray>Poczekaj na zakonczenie krecenia</gray>"
       odd: "<white>Nieparzyste</white>"
       even: "<white>Parzyste</white>"
       red: "<red>Czerwone</red>"
@@ -432,16 +448,16 @@ texts:
       payout: "<gray>Wyplata:</gray> <gold>{value}</gold>"
       win: "<green><bold>Wygrywasz!</bold></green>"
       loss: "<red><bold>Przegrywasz</bold></red>"
-      ball-landed: "<gray>Kulka wylądowala na:</gray> <white>{number}</white>"
+      ball-landed: "<gray>Kulka wyladowala na:</gray> <white>{number}</white>"
       bet-selection: "<gray>Twoj zaklad:</gray> <white>{bet}</white>"
       paid: "<green>Wyplacono:</green> <gold>{amount}</gold>"
       no-payout: "<red>Brak wyplaty</red>"
-      spin-complete: "<aqua>Kreczenie zakonczone</aqua>"
+      spin-complete: "<aqua>Krecenie zakonczone</aqua>"
       spin-complete-lore: "<gray>Kliknij Wstecz, aby wrocic lub otworz ponownie, aby zagrac jeszcze raz</gray>"
-    already-open: "<yellow>Masz juz otwarty stol Ruletki.</yellow>"
-    payout-failed: "<red>Wyplata Ruletki nie powiodla sie. Skontaktuj sie z administratorem.</red>"
-    select-bet: "<red>Wybierz zaklad przed zakreceniem.</red>"
-      title-plain: "Kolo Fortuny"
+
+  dice:
+    gui:
+      title-plain: "Ryzyko Kosci"
       header-title: "<gold><bold>Ryzyko Kosci</bold></gold>"
       header-lore: "<gray>Wybierz poziom ryzyka przed rzutem</gray>"
       bet: "<gray>Zaklad:</gray> <gold>{amount}</gold>"
@@ -453,11 +469,18 @@ texts:
       back-lore: "<gray>Wroc do hubu kasyna</gray>"
       selected-risk: "<green>Wybrano ryzyko</green>"
       click-select: "<yellow>Kliknij, aby wybrac</yellow>"
+
+  wheel:
+    gui:
+      title-plain: "Kolo Fortuny"
       title: "<aqua><bold>Kolo Fortuny</bold></aqua>"
+      bet: "<gray>Zaklad:</gray> <gold>{amount}</gold>"
       window: "<yellow>Okno kola</yellow>"
       window-lore: "<gray>Obserwuj przesuwajace sie pola</gray>"
       spin: "<green>Zakrec</green>"
       spin-lore: "<gray>Uruchom kolo fortuny</gray>"
+      back: "<red>Wstecz</red>"
+      back-lore: "<gray>Wroc do hubu kasyna</gray>"
       after-spin: "<gray>Dostepne po zakreceniu</gray>"
       result-win: "<green><bold>Wygrana</bold></green>"
       result-loss: "<red><bold>Pudlo</bold></red>"

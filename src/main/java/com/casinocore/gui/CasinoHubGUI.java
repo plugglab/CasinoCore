@@ -203,6 +203,9 @@ public class CasinoHubGUI implements InventoryHolder {
         }
 
         double bet = getSelectedBet();
+        player.closeInventory();
+        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.7f, 1.0f);
+
         if (game instanceof CoinFlipGame coinFlipGame) {
             coinFlipGame.play(player, bet);
         } else if (game instanceof DiceRollGame diceRollGame) {
@@ -210,9 +213,6 @@ public class CasinoHubGUI implements InventoryHolder {
         } else {
             game.play(player, bet);
         }
-
-        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.7f, 1.0f);
-        player.closeInventory();
     }
 
     private void adjustBet(double delta) {

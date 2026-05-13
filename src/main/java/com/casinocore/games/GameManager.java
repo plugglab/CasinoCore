@@ -288,7 +288,14 @@ public class GameManager {
                 return false;
             }
 
+            if (game.isEnabled()) {
+                return true;
+            }
+
             game.setEnabled(true);
+            plugin.getConfigManager().getConfig().set("games." + game.getName() + ".enabled", true);
+            plugin.getConfigManager().saveConfig();
+            game.onEnable();
             plugin.getPlugin().getLogger().info(
                 "Enabled casino game: " + game.getDisplayName());
             return true;
@@ -312,7 +319,14 @@ public class GameManager {
                 return false;
             }
 
+            if (!game.isEnabled()) {
+                return true;
+            }
+
             game.setEnabled(false);
+            plugin.getConfigManager().getConfig().set("games." + game.getName() + ".enabled", false);
+            plugin.getConfigManager().saveConfig();
+            game.onDisable();
             plugin.getPlugin().getLogger().info(
                 "Disabled casino game: " + game.getDisplayName());
             return true;

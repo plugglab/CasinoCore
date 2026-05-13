@@ -1,6 +1,7 @@
 package com.casinocore.core.commands;
 
 import com.casinocore.core.CasinoPlugin;
+import com.casinocore.gui.AdminGamesGUI;
 import com.casinocore.gui.CasinoHubGUI;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -64,6 +65,18 @@ public class CasinoCommand implements CommandExecutor, TabCompleter {
                 plugin.getMessageManager().sendMessage(sender, "reload-success");
                 return true;
             }
+            case "admin" -> {
+                if (!(sender instanceof Player player)) {
+                    plugin.getMessageManager().sendMessage(sender, "player-only");
+                    return true;
+                }
+                if (!sender.hasPermission("casinocore.admin")) {
+                    plugin.getMessageManager().sendMessage(sender, "no-permission");
+                    return true;
+                }
+                new AdminGamesGUI(plugin, player).open();
+                return true;
+            }
             case "balance", "bal" -> {
                 if (!(sender instanceof Player player)) {
                     plugin.getMessageManager().sendMessage(sender, "player-only");
@@ -117,6 +130,9 @@ public class CasinoCommand implements CommandExecutor, TabCompleter {
                 "<white>/casino</white> <gray>- open the casino hub</gray>",
                 "<white>/casino balance</white> <gray>- wallet, streak, and reward status</gray>",
                 "<white>/casino daily</white> <gray>- claim your free daily spin</gray>",
+                sender.hasPermission("casinocore.admin")
+                    ? "<white>/casino admin</white> <gray>- enable or disable games</gray>"
+                    : "<white>/play list</white> <gray>- browse game shortcuts</gray>",
                 sender.hasPermission("casinocore.reload")
                     ? "<white>/casino reload</white> <gray>- reload the plugin</gray>"
                     : "<white>/play list</white> <gray>- browse game shortcuts</gray>"
@@ -169,6 +185,10 @@ public class CasinoCommand implements CommandExecutor, TabCompleter {
             completions.add("menu");
             completions.add("balance");
             completions.add("daily");
+
+            if (sender.hasPermission("casinocore.admin")) {
+                completions.add("admin");
+            }
 
             if (sender.hasPermission("casinocore.reload")) {
                 completions.add("reload");

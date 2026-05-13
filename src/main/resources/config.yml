@@ -118,15 +118,15 @@ games:
       max-bet: 2500.0
     roll-range:
       min: 1
-      max: 100
+      max: 250
     chances:
-      exact-match-percent: 1.0
-      close-match-percent: 10.0
-      near-match-percent: 20.0
+      exact-match-percent: 0.5
+      close-match-percent: 5.0
+      near-match-percent: 10.0
     payouts:
-      exact-match: 32.0
-      close-match: 4.5
-      near-match: 2.2
+      exact-match: 16.0
+      close-match: 2.5
+      near-match: 1.6
     match-ranges:
       exact: 0
       close: 5

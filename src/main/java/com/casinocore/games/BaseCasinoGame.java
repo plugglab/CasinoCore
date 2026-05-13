@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -197,12 +198,20 @@ public abstract class BaseCasinoGame implements CasinoGame {
             boolean success = plugin.getEconomyManager().withdraw(player, amount);
 
             if (!success) {
+                logBetDetails(player, "Bet", orderedDetails(
+                    "amount", plugin.getEconomyManager().format(amount),
+                    "status", "withdraw_failed"
+                ));
                 sendLocaleMessage(player, "game.bet-process-failed");
                 plugin.getPlugin().getLogger().warning(
                     "Failed to withdraw bet from " + player.getName() + " (amount: " + amount + ")");
                 return false;
             }
 
+            logBetDetails(player, "Bet", orderedDetails(
+                "amount", plugin.getEconomyManager().format(amount),
+                "status", "accepted"
+            ));
             logDebug("Withdrew " + amount + " from " + player.getName());
             return true;
 
@@ -223,6 +232,10 @@ public abstract class BaseCasinoGame implements CasinoGame {
     protected boolean payWinnings(Player player, double amount) {
         try {
             if (amount <= 0) {
+                logBetDetails(player, "Payout", orderedDetails(
+                    "amount", plugin.getEconomyManager().format(amount),
+                    "status", "skipped"
+                ));
                 logDebug("Skipping payout for " + player.getName() + " (amount: " + amount + ")");
                 return true;
             }
@@ -230,6 +243,10 @@ public abstract class BaseCasinoGame implements CasinoGame {
             boolean success = plugin.getEconomyManager().deposit(player, amount);
 
             if (!success) {
+                logBetDetails(player, "Payout", orderedDetails(
+                    "amount", plugin.getEconomyManager().format(amount),
+                    "status", "failed"
+                ));
                 plugin.getPlugin().getLogger().severe(
                     "CRITICAL: Failed to deposit winnings to " + player.getName() +
                     " (amount: " + amount + ") - Player lost money!");
@@ -237,6 +254,10 @@ public abstract class BaseCasinoGame implements CasinoGame {
                 return false;
             }
 
+            logBetDetails(player, "Payout", orderedDetails(
+                "amount", plugin.getEconomyManager().format(amount),
+                "status", "paid"
+            ));
             logDebug("Paid " + amount + " to " + player.getName());
             return true;
 
@@ -325,10 +346,18 @@ public abstract class BaseCasinoGame implements CasinoGame {
         try {
             boolean refunded = plugin.getEconomyManager().deposit(player, bet);
             if (refunded) {
+                logBetDetails(player, "Refund", orderedDetails(
+                    "amount", plugin.getEconomyManager().format(bet),
+                    "status", "completed"
+                ));
                 sendLocaleMessage(player, "game.bet-refunded");
                 plugin.getPlugin().getLogger().info(
                     "Refunded bet to " + player.getName() + " (amount: " + bet + ")");
             } else {
+                logBetDetails(player, "Refund", orderedDetails(
+                    "amount", plugin.getEconomyManager().format(bet),
+                    "status", "failed"
+                ));
                 plugin.getPlugin().getLogger().severe(
                     "CRITICAL: Failed to refund bet to " + player.getName() +
                     " (amount: " + bet + ") after game error!");
@@ -347,6 +376,10 @@ public abstract class BaseCasinoGame implements CasinoGame {
      */
     protected void logGame(Player player, double bet, boolean success) {
         try {
+            logBetDetails(player, "Result", orderedDetails(
+                "bet", plugin.getEconomyManager().format(bet),
+                "executed", String.valueOf(success)
+            ));
             logDebug("Game " + name + " executed for " + player.getName() +
                 " (bet: " + bet + ", success: " + success + ")");
         } catch (Exception e) {
@@ -384,6 +417,22 @@ public abstract class BaseCasinoGame implements CasinoGame {
         if (plugin.getConfigManager().isDebugEnabled()) {
             plugin.getPlugin().getLogger().info("[DEBUG] [" + name + "] " + message);
         }
+    }
+
+    protected void logBetDetails(Player player, String section, Map<String, String> details) {
+        try {
+            plugin.getBetLogManager().log(player, displayName, section, details);
+        } catch (Exception ignored) {
+            // Ignore logging errors
+        }
+    }
+
+    protected Map<String, String> orderedDetails(String... keyValues) {
+        Map<String, String> details = new LinkedHashMap<>();
+        for (int i = 0; i < keyValues.length - 1; i += 2) {
+            details.put(keyValues[i], keyValues[i + 1]);
+        }
+        return details;
     }
 
     // CasinoGame interface implementation
@@ -435,6 +484,12 @@ public abstract class BaseCasinoGame implements CasinoGame {
     }
 
     protected void handleWin(Player player, double bet, double payout) {
+        logBetDetails(player, "Outcome", orderedDetails(
+            "bet", plugin.getEconomyManager().format(bet),
+            "result", "win",
+            "payout", plugin.getEconomyManager().format(payout),
+            "profit", plugin.getEconomyManager().format(payout - bet)
+        ));
         plugin.getPlayerStatsManager().recordWin(player.getUniqueId());
         int streak = plugin.getPlayerStatsManager().getWinStreak(player.getUniqueId());
         plugin.getUxManager().playWinPresentation(player, displayName, payout, payout - bet, streak);
@@ -457,6 +512,12 @@ public abstract class BaseCasinoGame implements CasinoGame {
     }
 
     protected void handleLoss(Player player, double bet) {
+        logBetDetails(player, "Outcome", orderedDetails(
+            "bet", plugin.getEconomyManager().format(bet),
+            "result", "loss",
+            "payout", plugin.getEconomyManager().format(0.0),
+            "profit", plugin.getEconomyManager().format(-bet)
+        ));
         plugin.getPlayerStatsManager().recordLoss(player.getUniqueId());
         plugin.getUxManager().playLossPresentation(player, displayName);
         Bukkit.getPluginManager().callEvent(new CasinoGameResultEvent(player, name, bet, 0.0, false));

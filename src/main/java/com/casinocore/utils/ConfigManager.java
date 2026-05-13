@@ -31,6 +31,10 @@ public class ConfigManager {
         this.config = plugin.getPlugin().getConfig();
     }
 
+    public void saveConfig() {
+        plugin.getPlugin().saveConfig();
+    }
+
     /**
      * Get the FileConfiguration instance
      * @return The config instance

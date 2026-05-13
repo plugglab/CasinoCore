@@ -24,6 +24,7 @@ import com.casinocore.games.impl.WheelGame;
 import com.casinocore.games.impl.WheelListener;
 import com.casinocore.games.treasure.TreasureGame;
 import com.casinocore.games.treasure.TreasureListener;
+import com.casinocore.gui.AdminGamesListener;
 import com.casinocore.gui.CasinoHubListener;
 import com.casinocore.gui.CustomBetListener;
 import com.casinocore.games.roulette.RouletteGame;
@@ -33,12 +34,14 @@ import com.casinocore.games.slots.SlotMachineListener;
 import com.casinocore.integrations.CasinoPlaceholderExpansion;
 import com.casinocore.stats.PlayerStatsManager;
 import com.casinocore.utils.AntiAbuseManager;
+import com.casinocore.utils.BetLogManager;
 import com.casinocore.utils.ConfigManager;
 import com.casinocore.utils.CooldownManager;
 import com.casinocore.utils.LocaleManager;
 import com.casinocore.utils.MessageManager;
 import com.casinocore.utils.ProtectionManager;
 import com.casinocore.utils.UxManager;
+import com.casinocore.utils.VersionChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -53,6 +56,8 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
     private ProtectionManager protectionManager;
     private PlayerStatsManager playerStatsManager;
     private UxManager uxManager;
+    private BetLogManager betLogManager;
+    private VersionChecker versionChecker;
     private GameManager gameManager;
     private CoinFlipGame coinFlipGame;
     private BlackjackGame blackjackGame;
@@ -73,6 +78,7 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
 
         registerCommands();
         registerEvents();
+        versionChecker.checkAsync();
         getLogger().info("CasinoCore enabled. games=" + gameManager.getEnabledCasinoGames().keySet());
     }
 
@@ -92,6 +98,9 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
         }
         if (economyManager != null) {
             economyManager.shutdown();
+        }
+        if (betLogManager != null) {
+            betLogManager.shutdown();
         }
 
         Bukkit.getScheduler().cancelTasks(this);
@@ -118,6 +127,8 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
             antiAbuseManager = new AntiAbuseManager(this);
             playerStatsManager = new PlayerStatsManager(this);
             uxManager = new UxManager(this);
+            betLogManager = new BetLogManager(this);
+            versionChecker = new VersionChecker(this);
             gameManager = new GameManager(this);
             registerCasinoGames();
             registerIntegrations();
@@ -163,7 +174,9 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
 
     private void registerEvents() {
         getServer().getPluginManager().registerEvents(new CasinoHubListener(), this);
+        getServer().getPluginManager().registerEvents(new AdminGamesListener(), this);
         getServer().getPluginManager().registerEvents(new CustomBetListener(this), this);
+        getServer().getPluginManager().registerEvents(versionChecker, this);
         getServer().getPluginManager().registerEvents(new SlotMachineListener(), this);
         getServer().getPluginManager().registerEvents(new DiceRiskListener(), this);
         getServer().getPluginManager().registerEvents(new LotteryPromptListener(this), this);
@@ -254,5 +267,15 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
     @Override
     public GameManager getGameManager() {
         return gameManager;
+    }
+
+    @Override
+    public BetLogManager getBetLogManager() {
+        return betLogManager;
+    }
+
+    @Override
+    public VersionChecker getVersionChecker() {
+        return versionChecker;
     }
 }
