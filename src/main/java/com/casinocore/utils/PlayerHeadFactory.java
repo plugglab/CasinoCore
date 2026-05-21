@@ -1,6 +1,8 @@
 package com.casinocore.utils;
 
 import com.casinocore.core.CasinoPlugin;
+import com.destroystokyo.paper.profile.PlayerProfile;
+import com.destroystokyo.paper.profile.ProfileProperty;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -42,7 +44,31 @@ public final class PlayerHeadFactory {
             lines.add(plugin.getMessageManager().parse(line));
         }
         meta.lore(lines);
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        hideTechnicalTooltip(meta);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    public static ItemStack createCustomHead(CasinoPlugin plugin, String textureValue, String name, String... lore) {
+        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
+        ItemMeta rawMeta = item.getItemMeta();
+        if (!(rawMeta instanceof SkullMeta meta)) {
+            return item;
+        }
+
+        if (textureValue != null && !textureValue.isBlank()) {
+            PlayerProfile profile = Bukkit.createProfile(UUID.nameUUIDFromBytes(textureValue.getBytes()), null);
+            profile.setProperty(new ProfileProperty("textures", textureValue));
+            meta.setPlayerProfile(profile);
+        }
+
+        meta.displayName(plugin.getMessageManager().parse(name));
+        List<Component> lines = new ArrayList<>();
+        for (String line : lore) {
+            lines.add(plugin.getMessageManager().parse(line));
+        }
+        meta.lore(lines);
+        hideTechnicalTooltip(meta);
         item.setItemMeta(meta);
         return item;
     }
@@ -70,8 +96,12 @@ public final class PlayerHeadFactory {
             lines.add(Component.text(line));
         }
         meta.lore(lines);
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        hideTechnicalTooltip(meta);
         item.setItemMeta(meta);
         return item;
+    }
+
+    public static void hideTechnicalTooltip(ItemMeta meta) {
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
     }
 }

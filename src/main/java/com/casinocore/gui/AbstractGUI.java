@@ -36,7 +36,7 @@ public abstract class AbstractGUI implements GUI {
      */
     protected void createInventory() {
         Component titleComponent = plugin.getMessageManager().parse(title);
-        this.inventory = Bukkit.createInventory(null, size, titleComponent);
+        this.inventory = Bukkit.createInventory(this, size, titleComponent);
     }
 
     @Override

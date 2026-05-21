@@ -3,12 +3,13 @@ package com.casinocore.gui;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 /**
  * Interface for GUI menus
  */
-public interface GUI {
+public interface GUI extends InventoryHolder {
 
     /**
      * Open the GUI for a player

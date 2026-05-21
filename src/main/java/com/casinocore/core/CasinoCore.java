@@ -1,5 +1,6 @@
 package com.casinocore.core;
 
+import com.casinocore.crash.ExceptionInterceptor;
 import com.casinocore.core.commands.CasinoCommand;
 import com.casinocore.economy.EconomyManager;
 import com.casinocore.games.blackjack.BlackjackGame;
@@ -69,6 +70,7 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
     private HighLowGame highLowGame;
     private DoubleUpGame doubleUpGame;
     private TreasureGame treasureGame;
+    private ExceptionInterceptor exceptionInterceptor;
 
     @Override
     public void onEnable() {
@@ -78,6 +80,8 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
             return;
         }
 
+        exceptionInterceptor = new ExceptionInterceptor(this);
+        exceptionInterceptor.initialize();
         registerCommands();
         registerEvents();
         versionChecker.checkAsync();
@@ -165,8 +169,10 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
     }
 
     private void registerCommands() {
-        getCommand("casino").setExecutor(new CasinoCommand(this));
-        getCommand("play").setExecutor(new PlayCommand(this));
+        CasinoCommand casinoCommand = new CasinoCommand(this);
+        PlayCommand playCommand = new PlayCommand(this);
+        exceptionInterceptor.bindCommand("casino", casinoCommand, casinoCommand);
+        exceptionInterceptor.bindCommand("play", playCommand, playCommand);
     }
 
     private void registerIntegrations() {

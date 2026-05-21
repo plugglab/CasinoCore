@@ -1,6 +1,7 @@
 package com.casinocore.games.blackjack;
 
 import com.casinocore.core.CasinoPlugin;
+import com.casinocore.utils.PlayerHeadFactory;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -18,6 +19,19 @@ import java.util.List;
 import java.util.Map;
 
 public class BlackjackGUI implements InventoryHolder {
+
+    private static final String DEALER_TEXTURE =
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmY1YzEwNzc5YjIxMTlhOWM3OTMyMDFiM2MwM2I4NjQxMjc3NTlkNWE4ZDc2OTQ0MmQ4MjViMjY0M2RiNzc3NSJ9fX0=";
+    private static final String HIDDEN_CARD_TEXTURE =
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmFjNDc0NDdhYzA4ZDNhODA1NjRmZWZjMGM4MTgzZDQ1YTZhZDkzMWZkM2I2YjIxZWRlMjk4N2YwNDgzMGVhNCJ9fX0=";
+    private static final String HEARTS_TEXTURE =
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDRhZTUwMmRhMzdjNzVkN2Q0MmQzNmU5MjUxMmQ4ZGI1NGNhODA1MzAyY2NiZTA0YjIyODY4ZTY4ZDA5ODhhNCJ9fX0=";
+    private static final String DIAMONDS_TEXTURE =
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2I4Y2U4MDA1NmYwMjI3NTQ4N2Q2OTBiYzQwZjE3N2VmN2Q0Y2QzZmQzZmNiYmQ0Yjc5ZDQxMThlY2FkMDI0YSJ9fX0=";
+    private static final String CLUBS_TEXTURE =
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzQxYzY4MzA4MTQxMDM5Mzg2OTZkZWFmNTM2ZGJlMjI2OWZjM2I0YWQyYjI5ZTkxYjgxODc2ZDY2MjViNTQzNCJ9fX0=";
+    private static final String SPADES_TEXTURE =
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTVkYjBiYmE1OWRiNWJjYjIxMWE1MTY1YzU2ZWYxNGNkYTI0YmJkNzM5ODI4NzY4MGFjZTM5MzEwZjRjYzU4In19fQ==";
 
     private static final int[] DEALER_SLOTS = {10, 11, 12, 13, 14, 15, 16};
     private static final int[] PLAYER_HAND_ONE_SLOTS = {28, 29, 30};
@@ -57,7 +71,7 @@ public class BlackjackGUI implements InventoryHolder {
 
         inventory.setItem(19, playerHeadItem(
             t("blackjack.gui.dealer"),
-            null,
+            DEALER_TEXTURE,
             handLine(state.getDealerHand(), state.isDealerHidden()),
             scoreLine(state.getDealerHand(), state.isDealerHidden())
         ));
@@ -135,11 +149,22 @@ public class BlackjackGUI implements InventoryHolder {
     }
 
     private ItemStack cardItem(BlackjackCard card) {
-        return playerHeadItem(f("blackjack.gui.card-name", "rank", card.rank().getDisplayName()), null, card.suit().getDisplayName(), f("blackjack.gui.card-value", "value", String.valueOf(card.value())));
+        return PlayerHeadFactory.createCustomHead(
+            plugin,
+            textureFor(card),
+            card.displayShort(),
+            card.display(),
+            f("blackjack.gui.card-value", "value", String.valueOf(card.value()))
+        );
     }
 
     private ItemStack hiddenCardItem() {
-        return playerHeadItem(t("blackjack.gui.hidden-card"), null, t("blackjack.gui.hidden-card-lore"));
+        return PlayerHeadFactory.createCustomHead(
+            plugin,
+            HIDDEN_CARD_TEXTURE,
+            t("blackjack.gui.hidden-card"),
+            t("blackjack.gui.hidden-card-lore")
+        );
     }
 
     private String handLine(BlackjackHand hand, boolean hidden) {
@@ -178,22 +203,24 @@ public class BlackjackGUI implements InventoryHolder {
     }
 
     private ItemStack playerHeadItem(String name, Player headOwner, String... lore) {
-        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
-        ItemMeta rawMeta = item.getItemMeta();
-        if (rawMeta instanceof SkullMeta meta) {
-            if (headOwner != null) {
-                meta.setOwningPlayer(headOwner);
-            }
-            meta.displayName(plugin.getMessageManager().parse(name));
-            List<Component> loreLines = new ArrayList<>();
-            for (String line : lore) {
-                loreLines.add(plugin.getMessageManager().parse(line));
-            }
-            meta.lore(loreLines);
-            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-            item.setItemMeta(meta);
+        if (headOwner != null) {
+            return PlayerHeadFactory.createPlayerHead(plugin, headOwner.getUniqueId(), headOwner.getName(), name, lore);
         }
-        return item;
+
+        return playerHeadItem(name, DEALER_TEXTURE, lore);
+    }
+
+    private ItemStack playerHeadItem(String name, String texture, String... lore) {
+        return PlayerHeadFactory.createCustomHead(plugin, texture, name, lore);
+    }
+
+    private String textureFor(BlackjackCard card) {
+        return switch (card.suit()) {
+            case HEARTS -> HEARTS_TEXTURE;
+            case DIAMONDS -> DIAMONDS_TEXTURE;
+            case CLUBS -> CLUBS_TEXTURE;
+            case SPADES -> SPADES_TEXTURE;
+        };
     }
 
     @Override
