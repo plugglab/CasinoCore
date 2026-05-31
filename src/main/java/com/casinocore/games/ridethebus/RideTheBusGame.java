@@ -1,4 +1,4 @@
-package com.casinocore.games.highlow;
+package com.casinocore.games.ridethebus;
 
 import com.casinocore.core.CasinoPlugin;
 import com.casinocore.games.BaseCasinoGame;
@@ -10,12 +10,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HighLowGame extends BaseCasinoGame {
+public class RideTheBusGame extends BaseCasinoGame {
 
-    private final Map<UUID, HighLowGUI> sessions;
+    private final Map<UUID, RideTheBusGUI> sessions;
 
-    public HighLowGame(CasinoPlugin plugin) {
-        super(plugin, "highlow", "High Low", "Guess if the next card is higher or lower.");
+    public RideTheBusGame(CasinoPlugin plugin) {
+        super(plugin, "ridethebus", "Ride the Bus", "Clear four card calls in a row to reach the final payout.");
         this.sessions = new ConcurrentHashMap<>();
     }
 
@@ -27,7 +27,7 @@ public class HighLowGame extends BaseCasinoGame {
                 return false;
             }
             if (sessions.containsKey(player.getUniqueId())) {
-                sendMessage(player, "<yellow>You already have a High Low table open.</yellow>");
+                sendMessage(player, t("ridethebus.already-open"));
                 return false;
             }
             if (!withdrawBet(player, bet)) {
@@ -36,7 +36,7 @@ public class HighLowGame extends BaseCasinoGame {
             betWithdrawn = true;
             setCooldown(player);
 
-            HighLowGUI gui = new HighLowGUI(plugin, this, player, bet);
+            RideTheBusGUI gui = new RideTheBusGUI(plugin, this, player, bet);
             sessions.put(player.getUniqueId(), gui);
             Bukkit.getScheduler().runTask(plugin.getPlugin(), gui::open);
             return true;
@@ -51,38 +51,40 @@ public class HighLowGame extends BaseCasinoGame {
         return false;
     }
 
-    public void handleClick(Player player, HighLowGUI gui, int slot) {
-        if (slot == 47) {
-            gui.reveal(false);
-        } else if (slot == 51) {
-            gui.reveal(true);
-        } else if (slot == 49 && gui.isRoundOver()) {
-            sessions.remove(player.getUniqueId());
-            player.closeInventory();
-            GuiNavigation.openHub(plugin, player);
-        } else if (slot == 53 && gui.isRoundOver()) {
-            sessions.remove(player.getUniqueId());
-            player.closeInventory();
-            play(player, gui.getBet());
-        }
+    public void handleClick(Player player, RideTheBusGUI gui, int slot) {
+        gui.handleClick(slot);
     }
 
-    public void resolveRound(Player player, double bet, boolean won, double payout, String message) {
+    public void resolve(Player player, double bet, boolean won, double payout, Map<String, String> placeholders) {
         sessions.remove(player.getUniqueId());
         if (won) {
             if (payWinnings(player, payout)) {
                 handleWin(player, bet, payout);
+                sendMessage(player, plugin.getLocaleManager().formatText("ridethebus.result.win", placeholders));
             } else {
-                sendMessage(player, "<red>High Low payout failed. Contact an administrator.</red>");
+                sendMessage(player, t("ridethebus.payout-failed"));
             }
-        } else {
-            handleLoss(player, bet);
+            return;
         }
-        sendMessage(player, message);
+
+        handleLoss(player, bet);
+        sendMessage(player, plugin.getLocaleManager().formatText("ridethebus.result.loss", placeholders));
     }
 
-    public void handleClose(HighLowGUI gui) {
-        if (gui.isRoundOver()) {
+    public void replay(Player player, double bet) {
+        sessions.remove(player.getUniqueId());
+        player.closeInventory();
+        play(player, bet);
+    }
+
+    public void backToHub(Player player) {
+        sessions.remove(player.getUniqueId());
+        player.closeInventory();
+        GuiNavigation.openHub(plugin, player);
+    }
+
+    public void handleClose(RideTheBusGUI gui) {
+        if (gui.isResolved()) {
             sessions.remove(gui.getPlayer().getUniqueId());
             return;
         }
@@ -93,7 +95,11 @@ public class HighLowGame extends BaseCasinoGame {
         }, 1L);
     }
 
-    public double getWinMultiplier() {
-        return plugin.getConfigManager().getConfig().getDouble("games.highlow.payouts.win", 1.95);
+    public double getStageMultiplier(String key, double fallback) {
+        return plugin.getConfigManager().getConfig().getDouble("games.ridethebus.payouts." + key, fallback);
+    }
+
+    private String t(String key) {
+        return plugin.getLocaleManager().getText(key);
     }
 }

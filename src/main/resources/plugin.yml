@@ -3,17 +3,18 @@ version: '${project.version}'
 main: ${build.main.class}
 api-version: '1.21'
 description: A production-ready casino plugin for Minecraft
-author: CasinoCore Team
+author: PluggLab Studio
 website: https://github.com/casinocore
 
 softdepend:
   - Vault
   - WorldGuard
+  - Citizens
 
 commands:
   casino:
     description: Main casino command
-    usage: /casino [help|menu|balance|daily|admin|reload]
+    usage: /casino [help|menu|balance|daily|admin|reload] or /casino admin npc <create|remove|list>
     permission: casinocore.use
     aliases: [cas, gamble]
   play:
@@ -59,6 +60,7 @@ permissions:
       casinocore.game.highlow: true
       casinocore.game.doubleup: true
       casinocore.game.treasure: true
+      casinocore.game.ridethebus: true
   casinocore.game.coinflip:
     description: Allows playing Coin Flip
     default: true
@@ -91,6 +93,9 @@ permissions:
     default: true
   casinocore.game.treasure:
     description: Allows playing Treasure
+    default: true
+  casinocore.game.ridethebus:
+    description: Allows playing Ride the Bus
     default: true
   casinocore.region.bypass:
     description: Bypass WorldGuard casino region restrictions

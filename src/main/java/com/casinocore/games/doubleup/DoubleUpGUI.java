@@ -118,8 +118,8 @@ public class DoubleUpGUI implements InventoryHolder {
         ));
         inventory.setItem(47, item(roundOver ? Material.GRAY_DYE : Material.LIME_DYE, t("doubleup.gui.cashout"),
             roundOver ? t("doubleup.gui.round-finished") : t("doubleup.gui.cashout-lore")));
-        inventory.setItem(49, item(roundOver ? Material.BARRIER : Material.GRAY_DYE, t("doubleup.gui.close"),
-            roundOver ? t("doubleup.gui.close-lore") : t("doubleup.gui.after-round")));
+        inventory.setItem(49, item(roundOver ? Material.BARRIER : Material.GRAY_DYE, t("doubleup.gui.back"),
+            roundOver ? t("doubleup.gui.back-lore") : t("doubleup.gui.after-round")));
         inventory.setItem(51, item(roundOver ? Material.GRAY_DYE : Material.RED_DYE, t("doubleup.gui.double"),
             roundOver ? t("doubleup.gui.round-finished") : t("doubleup.gui.double-lore")));
         inventory.setItem(53, item(roundOver ? Material.LIGHT_BLUE_DYE : Material.GRAY_DYE, t("doubleup.gui.play-again"),

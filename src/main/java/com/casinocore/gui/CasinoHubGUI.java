@@ -36,13 +36,14 @@ public class CasinoHubGUI implements InventoryHolder {
     private static final int SLOT_BET_MAX = 50;
     private static final int SLOT_BET_PLUS_10 = 51;
     private static final int SLOT_BET_PLUS_100 = 52;
-    private static final int SLOT_REFRESH = 53;
+    private static final int SLOT_CLOSE = 53;
     private static final int[] GAME_SLOTS = {10, 11, 12, 13, 14, 15, 16, 28, 29, 30, 31, 32, 33, 34};
     private static final Map<String, Material> GAME_MATERIALS = Map.ofEntries(
         Map.entry("coinflip", Material.SUNFLOWER),
         Map.entry("dice", Material.TARGET),
         Map.entry("blackjack", Material.PAPER),
         Map.entry("highlow", Material.REDSTONE_TORCH),
+        Map.entry("ridethebus", Material.MINECART),
         Map.entry("doubleup", Material.BLAZE_POWDER),
         Map.entry("treasure", Material.CHEST),
         Map.entry("roulette", Material.CLOCK),
@@ -94,7 +95,7 @@ public class CasinoHubGUI implements InventoryHolder {
                 case SLOT_BET_MAX -> setBet(plugin.getConfigManager().getMaxBet());
                 case SLOT_BET_PLUS_10 -> adjustBet(10.0);
                 case SLOT_BET_PLUS_100 -> adjustBet(100.0);
-                case SLOT_REFRESH -> render();
+                case SLOT_CLOSE -> player.closeInventory();
                 default -> {
                     String gameName = getGameForSlot(slot);
                     if (gameName != null) {
@@ -162,7 +163,9 @@ public class CasinoHubGUI implements InventoryHolder {
         }
 
         inventory.setItem(SLOT_HELP, item(Material.BOOK, t("hub.help-title"), t("hub.help-1"), t("hub.help-2"), t("hub.help-3")));
-        inventory.setItem(SLOT_FOOTER, item(Material.AMETHYST_SHARD, t("hub.tips-title"), t("hub.tips-1"), t("hub.tips-2")));
+        inventory.setItem(SLOT_FOOTER, player.hasPermission("casinocore.admin")
+            ? item(Material.COMPARATOR, t("hub.admin-title"), t("hub.admin-lore-1"), t("hub.admin-lore-2"))
+            : item(Material.AMETHYST_SHARD, t("hub.tips-title"), t("hub.tips-1"), t("hub.tips-2")));
     }
 
     private void renderBetControls() {
@@ -174,7 +177,7 @@ public class CasinoHubGUI implements InventoryHolder {
         inventory.setItem(SLOT_BET_MAX, item(Material.EMERALD_BLOCK, t("hub.set-max"), "<white>" + plugin.getEconomyManager().format(plugin.getConfigManager().getMaxBet()) + "</white>"));
         inventory.setItem(SLOT_BET_PLUS_10, item(Material.LIME_DYE, "<green>+10</green>", t("hub.fine-tune-bet")));
         inventory.setItem(SLOT_BET_PLUS_100, item(Material.EMERALD, "<green>+100</green>", t("hub.raise-bet")));
-        inventory.setItem(SLOT_REFRESH, item(Material.COMPASS, t("hub.refresh-title"), t("hub.refresh-lore")));
+        inventory.setItem(SLOT_CLOSE, item(Material.BARRIER, t("hub.close-title"), t("hub.close-lore")));
     }
 
     private void setGameItem(int slot, CasinoGame game, Material material, String clickLine) {

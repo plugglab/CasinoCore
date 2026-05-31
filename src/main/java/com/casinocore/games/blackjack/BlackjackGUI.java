@@ -20,18 +20,18 @@ import java.util.Map;
 
 public class BlackjackGUI implements InventoryHolder {
 
-    private static final String DEALER_TEXTURE =
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmY1YzEwNzc5YjIxMTlhOWM3OTMyMDFiM2MwM2I4NjQxMjc3NTlkNWE4ZDc2OTQ0MmQ4MjViMjY0M2RiNzc3NSJ9fX0=";
-    private static final String HIDDEN_CARD_TEXTURE =
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmFjNDc0NDdhYzA4ZDNhODA1NjRmZWZjMGM4MTgzZDQ1YTZhZDkzMWZkM2I2YjIxZWRlMjk4N2YwNDgzMGVhNCJ9fX0=";
-    private static final String HEARTS_TEXTURE =
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDRhZTUwMmRhMzdjNzVkN2Q0MmQzNmU5MjUxMmQ4ZGI1NGNhODA1MzAyY2NiZTA0YjIyODY4ZTY4ZDA5ODhhNCJ9fX0=";
-    private static final String DIAMONDS_TEXTURE =
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2I4Y2U4MDA1NmYwMjI3NTQ4N2Q2OTBiYzQwZjE3N2VmN2Q0Y2QzZmQzZmNiYmQ0Yjc5ZDQxMThlY2FkMDI0YSJ9fX0=";
-    private static final String CLUBS_TEXTURE =
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzQxYzY4MzA4MTQxMDM5Mzg2OTZkZWFmNTM2ZGJlMjI2OWZjM2I0YWQyYjI5ZTkxYjgxODc2ZDY2MjViNTQzNCJ9fX0=";
-    private static final String SPADES_TEXTURE =
-        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTVkYjBiYmE1OWRiNWJjYjIxMWE1MTY1YzU2ZWYxNGNkYTI0YmJkNzM5ODI4NzY4MGFjZTM5MzEwZjRjYzU4In19fQ==";
+    private static final String DEFAULT_DEALER_TEXTURE =
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGFkNTdiMmEyZGE2OTVhZGZiZTYxZGNhNjhlYmMzODcwYzA2NzJjODVjZGIzMWFjYzI0OTExYTA0ZWVmZDUwMiJ9fX0=";
+    private static final String DEFAULT_HIDDEN_CARD_TEXTURE =
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjZlNjY0NWE0NDBmNzNiZmI4ZDI3NGY0YTFiMGNkMDI3MWY1MjIzM2FiZDA3YTQ3N2IxZTdkZDdlODRiNGJkIn19fQ==";
+    private static final String DEFAULT_HEARTS_TEXTURE =
+        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU0MzE1OWZhN2ZmOGI1M2MyY2I4ZjMzYzQxYTM3N2FlZDZhY2U4MjY0NWM5Mzg1NjgzMDRkZDFjMzQifX19";
+    private static final String DEFAULT_DIAMONDS_TEXTURE =
+        "ewogICJ0aW1lc3RhbXAiIDogMTc4MDI0MzI1MTMzNiwKICAicHJvZmlsZUlkIiA6ICI3MDYwMDk0OTgyZDc0MTczYTNjZjg1Zjc1NjQ3MGE5YiIsCiAgInByb2ZpbGVOYW1lIiA6ICJpbmV4YWN0b3N0ZW50YXQiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTJiMDljZTRiMWY0YzU2Nzg4NTUxYjNmOTBmZWY3N2QzOTI4NjVjYmY0MDNkYWE3ZjAzOWRkOTI2ODViNWE3OSIKICAgIH0KICB9Cn0=";
+    private static final String DEFAULT_CLUBS_TEXTURE =
+        "ewogICJ0aW1lc3RhbXAiIDogMTc4MDI0MzQyMzE0MCwKICAicHJvZmlsZUlkIiA6ICIzN2VhNTQ5MTE3MTU0NDgzYmY0N2VmNGM3MzMwMWIzYiIsCiAgInByb2ZpbGVOYW1lIiA6ICJSeXV6bG4iLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTNiNTY0OTE4YmYwODZjZmMzOWQxZGZlZjQxZjIyZDBhZGI2ZGM2NzM2OWM5NzVmOGY5MGEzYzM5NjM2YmY5ZSIKICAgIH0KICB9Cn0=";
+    private static final String DEFAULT_SPADES_TEXTURE =
+        "ewogICJ0aW1lc3RhbXAiIDogMTc4MDI0MzUxNTU3NSwKICAicHJvZmlsZUlkIiA6ICI0YWU5MTM5MzZhOGU0MWU0YWNlMTYyYjI4YmM0MzMwMyIsCiAgInByb2ZpbGVOYW1lIiA6ICJ6ZXJ2YXRpb24iLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWExZDViYTA3MzI1MDA5NjJmOTkzYzFlNGVmYjhiNWNmN2M3ZTVlMWZhMjlkNTFlNWU0ZTkwM2E3ZTZlOWUwNCIKICAgIH0KICB9Cn0=";
 
     private static final int[] DEALER_SLOTS = {10, 11, 12, 13, 14, 15, 16};
     private static final int[] PLAYER_HAND_ONE_SLOTS = {28, 29, 30};
@@ -71,7 +71,7 @@ public class BlackjackGUI implements InventoryHolder {
 
         inventory.setItem(19, playerHeadItem(
             t("blackjack.gui.dealer"),
-            DEALER_TEXTURE,
+            dealerTexture(),
             handLine(state.getDealerHand(), state.isDealerHidden()),
             scoreLine(state.getDealerHand(), state.isDealerHidden())
         ));
@@ -161,7 +161,7 @@ public class BlackjackGUI implements InventoryHolder {
     private ItemStack hiddenCardItem() {
         return PlayerHeadFactory.createCustomHead(
             plugin,
-            HIDDEN_CARD_TEXTURE,
+            texture("games.blackjack.heads.hidden-card", DEFAULT_HIDDEN_CARD_TEXTURE),
             t("blackjack.gui.hidden-card"),
             t("blackjack.gui.hidden-card-lore")
         );
@@ -207,7 +207,7 @@ public class BlackjackGUI implements InventoryHolder {
             return PlayerHeadFactory.createPlayerHead(plugin, headOwner.getUniqueId(), headOwner.getName(), name, lore);
         }
 
-        return playerHeadItem(name, DEALER_TEXTURE, lore);
+        return playerHeadItem(name, dealerTexture(), lore);
     }
 
     private ItemStack playerHeadItem(String name, String texture, String... lore) {
@@ -216,11 +216,19 @@ public class BlackjackGUI implements InventoryHolder {
 
     private String textureFor(BlackjackCard card) {
         return switch (card.suit()) {
-            case HEARTS -> HEARTS_TEXTURE;
-            case DIAMONDS -> DIAMONDS_TEXTURE;
-            case CLUBS -> CLUBS_TEXTURE;
-            case SPADES -> SPADES_TEXTURE;
+            case HEARTS -> texture("games.blackjack.heads.cards.hearts", DEFAULT_HEARTS_TEXTURE);
+            case DIAMONDS -> texture("games.blackjack.heads.cards.diamonds", DEFAULT_DIAMONDS_TEXTURE);
+            case CLUBS -> texture("games.blackjack.heads.cards.clubs", DEFAULT_CLUBS_TEXTURE);
+            case SPADES -> texture("games.blackjack.heads.cards.spades", DEFAULT_SPADES_TEXTURE);
         };
+    }
+
+    private String dealerTexture() {
+        return texture("games.blackjack.heads.dealer", DEFAULT_DEALER_TEXTURE);
+    }
+
+    private String texture(String path, String fallback) {
+        return plugin.getConfigManager().getConfig().getString(path, fallback);
     }
 
     @Override

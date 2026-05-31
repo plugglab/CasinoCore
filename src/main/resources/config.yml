@@ -59,6 +59,7 @@ cooldowns:
     slots: 15
     horserace: 8
     wheel: 6
+    ridethebus: 6
 
 house-edge:
   # Master switch for documented house-edge configuration.
@@ -77,6 +78,7 @@ house-edge:
     slots: 6.0
     horserace: 7.0
     wheel: 5.0
+    ridethebus: 4.5
 
 anti-abuse:
   # Master switch for safety checks against spam, session abuse, and risky betting patterns.
@@ -204,6 +206,16 @@ games:
     limits:
       min-bet: 25.0
       max-bet: 5000.0
+    heads:
+      # Custom head textures used by the blackjack GUI.
+      # Paste base64 texture values here.
+      dealer: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGFkNTdiMmEyZGE2OTVhZGZiZTYxZGNhNjhlYmMzODcwYzA2NzJjODVjZGIzMWFjYzI0OTExYTA0ZWVmZDUwMiJ9fX0="
+      hidden-card: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjZlNjY0NWE0NDBmNzNiZmI4ZDI3NGY0YTFiMGNkMDI3MWY1MjIzM2FiZDA3YTQ3N2IxZTdkZDdlODRiNGJkIn19fQ=="
+      cards:
+        hearts: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU0MzE1OWZhN2ZmOGI1M2MyY2I4ZjMzYzQxYTM3N2FlZDZhY2U4MjY0NWM5Mzg1NjgzMDRkZDFjMzQifX19"
+        diamonds: "ewogICJ0aW1lc3RhbXAiIDogMTc4MDI0MzI1MTMzNiwKICAicHJvZmlsZUlkIiA6ICI3MDYwMDk0OTgyZDc0MTczYTNjZjg1Zjc1NjQ3MGE5YiIsCiAgInByb2ZpbGVOYW1lIiA6ICJpbmV4YWN0b3N0ZW50YXQiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTJiMDljZTRiMWY0YzU2Nzg4NTUxYjNmOTBmZWY3N2QzOTI4NjVjYmY0MDNkYWE3ZjAzOWRkOTI2ODViNWE3OSIKICAgIH0KICB9Cn0="
+        clubs: "ewogICJ0aW1lc3RhbXAiIDogMTc4MDI0MzQyMzE0MCwKICAicHJvZmlsZUlkIiA6ICIzN2VhNTQ5MTE3MTU0NDgzYmY0N2VmNGM3MzMwMWIzYiIsCiAgInByb2ZpbGVOYW1lIiA6ICJSeXV6bG4iLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTNiNTY0OTE4YmYwODZjZmMzOWQxZGZlZjQxZjIyZDBhZGI2ZGM2NzM2OWM5NzVmOGY5MGEzYzM5NjM2YmY5ZSIKICAgIH0KICB9Cn0="
+        spades: "ewogICJ0aW1lc3RhbXAiIDogMTc4MDI0MzUxNTU3NSwKICAicHJvZmlsZUlkIiA6ICI0YWU5MTM5MzZhOGU0MWU0YWNlMTYyYjI4YmM0MzMwMyIsCiAgInByb2ZpbGVOYW1lIiA6ICJ6ZXJ2YXRpb24iLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWExZDViYTA3MzI1MDA5NjJmOTkzYzFlNGVmYjhiNWNmN2M3ZTVlMWZhMjlkNTFlNWU0ZTkwM2E3ZTZlOWUwNCIKICAgIH0KICB9Cn0="
     payouts:
       # Multipliers for each round outcome.
       blackjack: 2.2
@@ -254,6 +266,20 @@ games:
     # Multiplier applied when the double-up session starts.
     starting-multiplier: 1.6
     house-edge-adjustment-percent: 4.0
+
+  ridethebus:
+    enabled: true
+    description: "Clear four card calls in a row for the final payout."
+    limits:
+      min-bet: 25.0
+      max-bet: 3000.0
+    payouts:
+      color-preview: 1.3
+      highlow-preview: 2.2
+      inside-outside-preview: 4.0
+      suit-preview: 7.5
+      final: 7.5
+    house-edge-adjustment-percent: 4.5
 
   treasure:
     enabled: true

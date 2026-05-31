@@ -21,6 +21,10 @@ import com.casinocore.games.impl.CoinFlipGuiListener;
 import com.casinocore.games.impl.LotteryDrawListener;
 import com.casinocore.games.impl.LotteryGame;
 import com.casinocore.games.impl.LotteryPromptListener;
+import com.casinocore.integrations.citizens.CasinoGameTrait;
+import com.casinocore.integrations.citizens.CitizensCasinoListener;
+import com.casinocore.games.ridethebus.RideTheBusGame;
+import com.casinocore.games.ridethebus.RideTheBusListener;
 import com.casinocore.games.impl.WheelGame;
 import com.casinocore.games.impl.WheelListener;
 import com.casinocore.games.treasure.TreasureGame;
@@ -28,6 +32,8 @@ import com.casinocore.games.treasure.TreasureListener;
 import com.casinocore.gui.AdminGamesListener;
 import com.casinocore.gui.CasinoHubListener;
 import com.casinocore.gui.CustomBetListener;
+import com.casinocore.utils.CasinoNpcManager;
+import com.casinocore.utils.CasinoNpcListener;
 import com.casinocore.games.roulette.RouletteGame;
 import com.casinocore.games.roulette.RouletteListener;
 import com.casinocore.games.slots.SlotMachineGame;
@@ -44,6 +50,8 @@ import com.casinocore.utils.ProtectionManager;
 import com.casinocore.utils.RegionAccessManager;
 import com.casinocore.utils.UxManager;
 import com.casinocore.utils.VersionChecker;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.trait.TraitInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -61,6 +69,7 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
     private BetLogManager betLogManager;
     private VersionChecker versionChecker;
     private RegionAccessManager regionAccessManager;
+    private CasinoNpcManager casinoNpcManager;
     private GameManager gameManager;
     private CoinFlipGame coinFlipGame;
     private BlackjackGame blackjackGame;
@@ -70,6 +79,7 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
     private HighLowGame highLowGame;
     private DoubleUpGame doubleUpGame;
     private TreasureGame treasureGame;
+    private RideTheBusGame rideTheBusGame;
     private ExceptionInterceptor exceptionInterceptor;
 
     @Override
@@ -84,6 +94,7 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
         exceptionInterceptor.initialize();
         registerCommands();
         registerEvents();
+        registerCitizensIntegration();
         versionChecker.checkAsync();
         getLogger().info("CasinoCore enabled. games=" + gameManager.getEnabledCasinoGames().keySet());
     }
@@ -136,6 +147,7 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
             betLogManager = new BetLogManager(this);
             versionChecker = new VersionChecker(this);
             regionAccessManager = new RegionAccessManager(this);
+            casinoNpcManager = new CasinoNpcManager(this);
             gameManager = new GameManager(this);
             registerCasinoGames();
             registerIntegrations();
@@ -166,6 +178,8 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
         gameManager.registerCasinoGame(doubleUpGame);
         treasureGame = new TreasureGame(this);
         gameManager.registerCasinoGame(treasureGame);
+        rideTheBusGame = new RideTheBusGame(this);
+        gameManager.registerCasinoGame(rideTheBusGame);
     }
 
     private void registerCommands() {
@@ -185,6 +199,7 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
         getServer().getPluginManager().registerEvents(new CasinoHubListener(), this);
         getServer().getPluginManager().registerEvents(new AdminGamesListener(), this);
         getServer().getPluginManager().registerEvents(new CustomBetListener(this), this);
+        getServer().getPluginManager().registerEvents(new CasinoNpcListener(casinoNpcManager), this);
         getServer().getPluginManager().registerEvents(versionChecker, this);
         getServer().getPluginManager().registerEvents(new SlotMachineListener(), this);
         getServer().getPluginManager().registerEvents(new DiceRiskListener(), this);
@@ -215,6 +230,19 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
         if (treasureGame != null) {
             getServer().getPluginManager().registerEvents(new TreasureListener(treasureGame), this);
         }
+        if (rideTheBusGame != null) {
+            getServer().getPluginManager().registerEvents(new RideTheBusListener(rideTheBusGame), this);
+        }
+    }
+
+    private void registerCitizensIntegration() {
+        if (!getServer().getPluginManager().isPluginEnabled("Citizens")) {
+            return;
+        }
+
+        CitizensAPI.getTraitFactory().registerTrait(TraitInfo.create(CasinoGameTrait.class));
+        getServer().getPluginManager().registerEvents(new CitizensCasinoListener(this), this);
+        getLogger().info("Citizens integration enabled.");
     }
 
     public void reloadPlugin() {
@@ -291,5 +319,10 @@ public final class CasinoCore extends JavaPlugin implements CasinoPlugin {
     @Override
     public RegionAccessManager getRegionAccessManager() {
         return regionAccessManager;
+    }
+
+    @Override
+    public CasinoNpcManager getCasinoNpcManager() {
+        return casinoNpcManager;
     }
 }

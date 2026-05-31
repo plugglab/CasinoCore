@@ -22,13 +22,17 @@ public class AdminGamesGUI implements InventoryHolder {
 
     private static final int INVENTORY_SIZE = 54;
     private static final int[] GAME_SLOTS = {10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34};
-    private static final int SLOT_BACK = 49;
+    private static final int SLOT_ENABLE_ALL = 46;
+    private static final int SLOT_RELOAD = 49;
+    private static final int SLOT_DISABLE_ALL = 52;
+    private static final int SLOT_BACK = 45;
 
     private static final Map<String, Material> GAME_MATERIALS = Map.ofEntries(
         Map.entry("coinflip", Material.SUNFLOWER),
         Map.entry("dice", Material.TARGET),
         Map.entry("blackjack", Material.PAPER),
         Map.entry("highlow", Material.REDSTONE_TORCH),
+        Map.entry("ridethebus", Material.MINECART),
         Map.entry("doubleup", Material.BLAZE_POWDER),
         Map.entry("treasure", Material.CHEST),
         Map.entry("roulette", Material.CLOCK),
@@ -59,6 +63,21 @@ public class AdminGamesGUI implements InventoryHolder {
         if (slot == SLOT_BACK) {
             new CasinoHubGUI(plugin, player).open();
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.7f, 1.0f);
+            return;
+        }
+        if (slot == SLOT_ENABLE_ALL) {
+            updateAllGames(true);
+            return;
+        }
+        if (slot == SLOT_RELOAD) {
+            plugin.reloadPlugin();
+            render();
+            plugin.getMessageManager().send(player, "<green>CasinoCore configuration reloaded.</green>");
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 1.15f);
+            return;
+        }
+        if (slot == SLOT_DISABLE_ALL) {
+            updateAllGames(false);
             return;
         }
 
@@ -109,7 +128,8 @@ public class AdminGamesGUI implements InventoryHolder {
             Material.COMPARATOR,
             "<gold><bold>Game Controls</bold></gold>",
             "<gray>Click any game to enable or disable it.</gray>",
-            "<gray>Changes are saved to config immediately.</gray>"
+            "<gray>Changes are saved to config immediately.</gray>",
+            "<gray>Use the bottom row for bulk actions.</gray>"
         ));
 
         List<CasinoGame> games = getSortedGames();
@@ -124,6 +144,35 @@ public class AdminGamesGUI implements InventoryHolder {
         }
 
         inventory.setItem(SLOT_BACK, item(Material.BARRIER, "<red>Back</red>", "<gray>Return to the casino hub.</gray>"));
+        inventory.setItem(SLOT_ENABLE_ALL, item(Material.EMERALD_BLOCK, "<green>Enable All</green>", "<gray>Turn every game on.</gray>"));
+        inventory.setItem(47, item(Material.BOOK, "<gold>Enabled Summary</gold>",
+            "<gray>Enabled:</gray> <white>" + plugin.getGameManager().getEnabledCasinoGames().size() + "</white>",
+            "<gray>Total:</gray> <white>" + plugin.getGameManager().getAllCasinoGames().size() + "</white>"
+        ));
+        inventory.setItem(SLOT_RELOAD, item(Material.COMPASS, "<aqua>Reload</aqua>", "<gray>Reload config and locale data.</gray>"));
+        inventory.setItem(51, item(Material.REDSTONE_TORCH, "<yellow>Debug</yellow>",
+            "<gray>Current:</gray> " + (plugin.getConfigManager().isDebugEnabled() ? "<green>On</green>" : "<red>Off</red>"),
+            "<gray>Toggle in config.yml and reload.</gray>"
+        ));
+        inventory.setItem(SLOT_DISABLE_ALL, item(Material.REDSTONE_BLOCK, "<red>Disable All</red>", "<gray>Turn every game off.</gray>"));
+    }
+
+    private void updateAllGames(boolean enabled) {
+        int changed = 0;
+        for (CasinoGame game : getSortedGames()) {
+            boolean updated = enabled
+                ? plugin.getGameManager().enableCasinoGame(game.getName())
+                : plugin.getGameManager().disableCasinoGame(game.getName());
+            if (updated) {
+                changed++;
+            }
+        }
+
+        render();
+        player.playSound(player.getLocation(), enabled ? Sound.BLOCK_BEACON_ACTIVATE : Sound.BLOCK_REDSTONE_TORCH_BURNOUT, 0.8f, enabled ? 1.1f : 0.9f);
+        plugin.getMessageManager().send(player,
+            (enabled ? "<green>Enabled </green>" : "<red>Disabled </red>") +
+                "<gold>" + changed + "</gold><gray> game entries.</gray>");
     }
 
     private ItemStack createGameItem(CasinoGame game) {

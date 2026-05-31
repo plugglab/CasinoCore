@@ -82,6 +82,9 @@ public class CasinoCommand implements CommandExecutor, TabCompleter {
                     plugin.getMessageManager().sendMessage(sender, "no-permission");
                     return true;
                 }
+                if (args.length > 1 && args[1].equalsIgnoreCase("npc")) {
+                    return handleNpcCommand(player, args);
+                }
                 new AdminGamesGUI(plugin, player).open();
                 return true;
             }
@@ -146,6 +149,59 @@ public class CasinoCommand implements CommandExecutor, TabCompleter {
                     : "<white>/play list</white> <gray>- browse game shortcuts</gray>"
             )
         );
+        if (sender.hasPermission("casinocore.admin")) {
+            plugin.getMessageManager().send(sender, "<white>/casino admin npc create <game></white> <gray>- spawn a game NPC</gray>");
+            plugin.getMessageManager().send(sender, "<white>/casino admin npc remove</white> <gray>- remove the NPC you are looking at</gray>");
+            plugin.getMessageManager().send(sender, "<white>/casino admin npc list</white> <gray>- list supported NPC games</gray>");
+            plugin.getMessageManager().send(sender, "<white>/casino admin npc bind <game></white> <gray>- bind selected Citizens NPC</gray>");
+            plugin.getMessageManager().send(sender, "<white>/casino admin npc unbind</white> <gray>- remove game binding from selected Citizens NPC</gray>");
+        }
+    }
+
+    private boolean handleNpcCommand(Player player, String[] args) {
+        if (args.length < 3) {
+            plugin.getMessageManager().send(player,
+                "<yellow>NPC usage:</yellow> <white>/casino admin npc <create|remove|list|bind|unbind> [game]</white>");
+            return true;
+        }
+
+        switch (args[2].toLowerCase()) {
+            case "create" -> {
+                if (args.length < 4) {
+                    plugin.getMessageManager().send(player, "<red>Usage: /casino admin npc create <game></red>");
+                    return true;
+                }
+                plugin.getCasinoNpcManager().createNpc(player, args[3]);
+                return true;
+            }
+            case "remove" -> {
+                plugin.getCasinoNpcManager().removeTargetedNpc(player);
+                return true;
+            }
+            case "list" -> {
+                plugin.getMessageManager().send(player,
+                    "<gold><bold>NPC Games</bold></gold> <gray>" +
+                        String.join(", ", plugin.getCasinoNpcManager().getSupportedGames()) + "</gray>");
+                return true;
+            }
+            case "bind" -> {
+                if (args.length < 4) {
+                    plugin.getMessageManager().send(player, "<red>Usage: /casino admin npc bind <game></red>");
+                    return true;
+                }
+                plugin.getCasinoNpcManager().bindSelectedCitizensNpc(player, args[3]);
+                return true;
+            }
+            case "unbind" -> {
+                plugin.getCasinoNpcManager().unbindSelectedCitizensNpc(player);
+                return true;
+            }
+            default -> {
+                plugin.getMessageManager().send(player,
+                    "<yellow>NPC usage:</yellow> <white>/casino admin npc <create|remove|list|bind|unbind> [game]</white>");
+                return true;
+            }
+        }
     }
 
     private void claimDailyReward(Player player) {
@@ -201,6 +257,17 @@ public class CasinoCommand implements CommandExecutor, TabCompleter {
             if (sender.hasPermission("casinocore.reload")) {
                 completions.add("reload");
             }
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("admin")) {
+            completions.add("npc");
+        } else if (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("npc")) {
+            completions.add("create");
+            completions.add("remove");
+            completions.add("list");
+            completions.add("bind");
+            completions.add("unbind");
+        } else if (args.length == 4 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("npc")
+            && (args[2].equalsIgnoreCase("create") || args[2].equalsIgnoreCase("bind"))) {
+            completions.addAll(plugin.getCasinoNpcManager().getSupportedGames());
         }
 
         return completions;

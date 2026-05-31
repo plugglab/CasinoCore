@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "me.casinocore"
-version = "1.0"
+version = "2.0"
 
 data class BuildVariant(
     val mainClass: String,
@@ -36,6 +36,7 @@ repositories {
     maven("https://jitpack.io")
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven("https://maven.enginehub.org/repo/")
+    maven("https://maven.citizensnpcs.co/repo")
 }
 
 dependencies {
@@ -43,6 +44,10 @@ dependencies {
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.10")
+    compileOnly("net.citizensnpcs:citizensapi:2.0.42-SNAPSHOT")
+    compileOnly("net.citizensnpcs:citizens-main:2.0.42-SNAPSHOT") {
+        isTransitive = false
+    }
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

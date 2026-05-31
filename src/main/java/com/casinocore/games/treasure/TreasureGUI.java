@@ -58,6 +58,7 @@ public class TreasureGUI implements InventoryHolder {
             if (slot == 40) {
                 game.finishSession(player);
                 player.closeInventory();
+                com.casinocore.gui.GuiNavigation.openHub(plugin, player);
             }
             return;
         }
@@ -83,7 +84,7 @@ public class TreasureGUI implements InventoryHolder {
         for (int slot : CHEST_SLOTS) {
             inventory.setItem(slot, item(Material.CHEST, t("treasure.gui.pick"), t("treasure.gui.pick-lore")));
         }
-        inventory.setItem(40, item(Material.BARRIER, t("treasure.gui.close"), resolved ? t("treasure.gui.close-lore") : t("treasure.gui.after-reveal")));
+        inventory.setItem(40, item(Material.BARRIER, t("treasure.gui.back"), resolved ? t("treasure.gui.back-lore") : t("treasure.gui.after-reveal")));
     }
 
     private void revealChoice(int selectedIndex) {
@@ -118,7 +119,7 @@ public class TreasureGUI implements InventoryHolder {
                     won ? f("treasure.gui.payout", "amount", plugin.getEconomyManager().format(payout))
                         : t("treasure.gui.try-again")
                 ));
-                inventory.setItem(40, item(Material.BARRIER, t("treasure.gui.close"), t("treasure.gui.close-lore")));
+                inventory.setItem(40, item(Material.BARRIER, t("treasure.gui.back"), t("treasure.gui.back-lore")));
                 player.playSound(player.getLocation(), won ? Sound.ENTITY_PLAYER_LEVELUP : Sound.ENTITY_VILLAGER_NO, 1.0f, won ? 1.1f : 0.8f);
                 game.resolve(player, bet, won, payout);
             }

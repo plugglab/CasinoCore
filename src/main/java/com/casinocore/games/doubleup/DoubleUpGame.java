@@ -2,6 +2,7 @@ package com.casinocore.games.doubleup;
 
 import com.casinocore.core.CasinoPlugin;
 import com.casinocore.games.BaseCasinoGame;
+import com.casinocore.gui.GuiNavigation;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -58,6 +59,7 @@ public class DoubleUpGame extends BaseCasinoGame {
         } else if (slot == 49 && gui.isRoundOver()) {
             sessions.remove(player.getUniqueId());
             player.closeInventory();
+            GuiNavigation.openHub(plugin, player);
         } else if (slot == 53 && gui.isRoundOver()) {
             sessions.remove(player.getUniqueId());
             player.closeInventory();

@@ -9,6 +9,7 @@ import com.casinocore.utils.CooldownManager;
 import com.casinocore.utils.LocaleManager;
 import com.casinocore.utils.MessageManager;
 import com.casinocore.utils.BetLogManager;
+import com.casinocore.utils.CasinoNpcManager;
 import com.casinocore.utils.ProtectionManager;
 import com.casinocore.utils.RegionAccessManager;
 import com.casinocore.utils.UxManager;
@@ -84,4 +85,8 @@ public interface CasinoPlugin {
     VersionChecker getVersionChecker();
 
     RegionAccessManager getRegionAccessManager();
+
+    void reloadPlugin();
+
+    CasinoNpcManager getCasinoNpcManager();
 }

@@ -107,7 +107,7 @@ public class HighLowGUI implements InventoryHolder {
         inventory.setItem(22, cardItem(currentCard, t("highlow.gui.current-card")));
         inventory.setItem(31, roundOver ? cardItem(nextCard, t("highlow.gui.next-card")) : item(Material.BLACK_STAINED_GLASS_PANE, t("highlow.gui.hidden"), t("highlow.gui.hidden-lore")));
         inventory.setItem(47, item(roundOver ? Material.GRAY_DYE : Material.BLUE_DYE, t("highlow.gui.lower"), roundOver ? t("highlow.gui.round-finished") : t("highlow.gui.lower-lore")));
-        inventory.setItem(49, item(roundOver ? Material.BARRIER : Material.GRAY_DYE, t("highlow.gui.close"), roundOver ? t("highlow.gui.close-lore") : t("highlow.gui.after-result")));
+        inventory.setItem(49, item(roundOver ? Material.BARRIER : Material.GRAY_DYE, t("highlow.gui.back"), roundOver ? t("highlow.gui.back-lore") : t("highlow.gui.after-result")));
         inventory.setItem(51, item(roundOver ? Material.GRAY_DYE : Material.RED_DYE, t("highlow.gui.higher"), roundOver ? t("highlow.gui.round-finished") : t("highlow.gui.higher-lore")));
         inventory.setItem(53, item(roundOver ? Material.LIME_DYE : Material.GRAY_DYE, t("highlow.gui.play-again"), roundOver ? t("highlow.gui.play-again-lore") : t("highlow.gui.after-result")));
     }
